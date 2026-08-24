@@ -32,6 +32,7 @@ from src.services.devices import device_registry
 from src.services.language import detect_language, fallback_language
 from src.services.llm import openai_chat
 from src.services.mqtt_service import mqtt_service
+from src.services.telehealth import handle_activity_log_telehealth
 
 logger = logging.getLogger(__name__)
 
@@ -180,10 +181,10 @@ class RemoteChatBrain:
         mqtt_service.send_proto_subscribe(device_id)
 
     async def handle_modules_query(self, device_id: str, request: dict) -> None:
-        # A modules query means the robot is (re)starting its remote-chat stack,
-        # i.e. a fresh session. Re-push config here so cloud_tts survives a
-        # reboot even on brokers that don't expose connect events.
-        device_registry.forget_bootstrap(device_id)
+        # Bootstrap only if this device has not been configured yet. Re-pushing
+        # the full config on every modules query (they can repeat) was thrashing
+        # the robot mid-session and contributing to native crashes on mode
+        # transitions. Reconnects are already handled by the broker-log watcher.
         await self.ensure_device_bootstrapped(device_id)
 
         req_id = request.get("event_id", "")
@@ -384,7 +385,13 @@ class RemoteChatBrain:
             logger.exception("invalid activity-log JSON from %s", device_id)
             return
 
-        if request.get("subtopic") != "query":
+        subtopic = request.get("subtopic")
+        if subtopic == "telehealth":
+            # Robot reports READY / IN_SESSION / EXITING here. Required so
+            # /tts/speak can wait for READY between lines.
+            handle_activity_log_telehealth(device_id, request)
+            return
+        if subtopic != "query":
             return
         query = request.get("query")
         if query == "schedule":

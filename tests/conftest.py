@@ -19,6 +19,7 @@ from src.services import openai_client
 from src.services.device_state import device_state
 from src.services.devices import device_registry
 from src.services.mqtt_service import mqtt_service
+from src.services.telehealth import clear_puppet_state
 
 TEST_DEVICE_ID = "test-device-1"
 
@@ -118,7 +119,19 @@ def known_device() -> str:
 
 @pytest.fixture(autouse=True)
 def clean_device_state() -> None:
-    """Reset the shared config so cloud_tts/moxie_mode don't leak across tests."""
+    """Reset shared config / telehealth state so they don't leak across tests."""
+    clear_puppet_state()
+    # Keep speak tests fast: no real robot to wait on.
+    prev_pause = settings.SPEAK_INTERRUPT_PAUSE_S
+    prev_settle = settings.SPEAK_SETTLE_S
+    prev_ready = settings.SPEAK_READY_TIMEOUT_S
+    settings.SPEAK_INTERRUPT_PAUSE_S = 0.0
+    settings.SPEAK_SETTLE_S = 0.0
+    settings.SPEAK_READY_TIMEOUT_S = 0.05
     yield
+    settings.SPEAK_INTERRUPT_PAUSE_S = prev_pause
+    settings.SPEAK_SETTLE_S = prev_settle
+    settings.SPEAK_READY_TIMEOUT_S = prev_ready
+    clear_puppet_state()
     device_state._config["settings"]["props"]["cloud_tts"] = "0"  # noqa: SLF001
     device_state._config.pop("moxie_mode", None)  # noqa: SLF001

@@ -25,6 +25,7 @@ import pathlib
 import ssl
 import sys
 import time
+import uuid
 
 from paho.mqtt.client import CallbackAPIVersion, Client
 
@@ -81,15 +82,9 @@ class FakeMoxie:
         )
         logger.info("announced state as %s", self.device_id)
 
-    def send_cloud_tts_request(self, markup: str, event_id: str = "") -> str:
-        """Ask the cloud to voice `markup`, exactly as the robot would.
-
-        `event_id` defaults to "" to match the REAL robot: a telehealth
-        PLAY_OUTPUT makes the firmware raise its request with an *empty*
-        event_id (confirmed live). The old code minted a fresh uuid here, which
-        made the simulator look correlated and HID the empty-id collision that
-        breaks repeated `/tts/speak` on the real robot. Keep this faithful.
-        """
+    def send_cloud_tts_request(self, markup: str) -> str:
+        """Ask the cloud to voice `markup`, exactly as the robot would."""
+        event_id = str(uuid.uuid4())
         req = CloudTTSRequest(
             markup=markup,
             event_id=event_id,
@@ -185,9 +180,6 @@ class FakeMoxie:
             return
         output = body.get("output", {})
         speech = output.get("markup") or output.get("text") or ""
-        # Echo the id the server stamped into the output, exactly as the robot
-        # firmware does. Empty when the server sent none (the bug condition).
-        event_id = output.get("event_id", "")
         if self.cloud_tts != "1":
             logger.warning(
                 "cloud_tts is %r — a real robot would speak this with its own "
@@ -196,7 +188,7 @@ class FakeMoxie:
             )
             return
         # This is what the firmware does with cloud_tts enabled.
-        self.send_cloud_tts_request(speech, event_id=event_id)
+        self.send_cloud_tts_request(speech)
 
 
 def main() -> int:

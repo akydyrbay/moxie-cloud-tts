@@ -48,7 +48,26 @@ async def apply_toggle(enabled: bool) -> None:
 
 
 async def set_puppet_mode(enabled: bool) -> dict:
-    """Enable/disable TELEHEALTH mode and push the config to the robot(s)."""
+    """Enable/disable TELEHEALTH mode and push the config to the robot(s).
+
+    Idempotent: if the mode is already the requested value, do not re-push.
+    Mid-session moxie_mode flips are a known native crash trigger on this
+    firmware, so avoid no-op pushes.
+    """
+    current = await device_state.get_puppet_mode()
+    if current == enabled:
+        config = await device_state.get_config()
+        logger.info(
+            "puppet mode already %s; skipping config push",
+            enabled,
+        )
+        return {
+            "enabled": enabled,
+            "devices": [],
+            "config": config,
+            "unchanged": True,
+        }
+
     config = await device_state.set_puppet_mode(enabled)
     pushed = push_config(config)
     logger.info("puppet mode=%s pushed to %s", enabled, pushed or "no devices")

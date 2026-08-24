@@ -116,16 +116,16 @@ class Settings(BaseSettings):
     # Set false to run the conversational remote-chat brain instead.
     PUPPET_MODE_AUTO_ENABLE: bool = False
 
-    # Wake the robot at the start of every /tts/speak. After a cloud-TTS line the
-    # robot tends to idle and doze off, so a *second* /tts/speak lands on a
-    # sleeping robot and plays nothing. A wakeup first (OpenMoxie's own primitive,
-    # a no-op when it is already awake) makes repeated speech reliable.
-    SPEAK_AUTO_WAKEUP: bool = True
-
-    # Seconds to wait after the wakeup before pushing PLAY_OUTPUT, so a robot that
-    # was asleep is listening again before the speech arrives. Kept short so an
-    # already-awake robot barely notices.
-    SPEAK_WAKEUP_DELAY_S: float = 1.5
+    # --- /tts/speak sequencing (puppet + cloud_tts) -------------------------
+    # After INTERRUPT, pause briefly so the robot can leave its previous output
+    # state before we wait for READY / send PLAY_OUTPUT.
+    SPEAK_INTERRUPT_PAUSE_S: float = 0.35
+    # How long to wait for a telehealth READY report before sending PLAY_OUTPUT
+    # anyway. Covers the gap after a prior cloud line finishes (or is interrupted).
+    SPEAK_READY_TIMEOUT_S: float = 4.0
+    # When the robot has never reported a telehealth state (first speak / quiet
+    # firmware), settle this long instead of blocking on READY.
+    SPEAK_SETTLE_S: float = 0.5
 
 
 settings = Settings()

@@ -14,7 +14,6 @@ Bench-only (no robot required):
     POST /tts/speak-direct text        -> OpenAI TTS  -> published immediately
 """
 
-import asyncio
 import logging
 from typing import Annotated
 
@@ -165,33 +164,18 @@ async def set_puppet_status(body: PuppetToggleRequest) -> dict:
 async def speak(body: SpeakRequest) -> dict:
     """Make Moxie speak `text` out loud (Russian or Kazakh).
 
-    Sends a telehealth PLAY_OUTPUT so the robot itself decides to speak. With
-    cloud_tts enabled it then issues a CloudTTSRequest carrying a real event_id,
-    which this service answers with OpenAI audio — that correlation is what
-    makes playback actually happen.
+    Sequence (required for the 2nd+ line to play under puppet + cloud_tts):
+      1. INTERRUPT — clear leftover telehealth / MarkingUp state
+      2. wait until the robot reports READY (or settle / timeout)
+      3. PLAY_OUTPUT — robot emits CloudTTSRequest, we answer with OpenAI audio
 
-    Returns as soon as the request is pushed; the audio follows on MQTT a moment
-    later. Watch the logs for `inbound CloudTTSRequest` then `spoke event_id=...`.
+    Do not spam this while a previous line is still synthesizing; calls for the
+    same device are serialized. Prefer leaving puppet mode enabled for the whole
+    session — flipping it mid-session can crash the native stack.
     """
     target = _require_device(body.device_id)
     logger.info("received /tts/speak for %s: chars=%d", target, len(body.text))
-    # After a cloud-TTS line the robot dozes off, so a second /tts/speak would
-    # otherwise hit a sleeping robot and play nothing. Wake it first (no-op when
-    # already awake), then give it a moment to start listening before speaking.
-    if settings.SPEAK_AUTO_WAKEUP:
-        telehealth.wakeup(target)
-        if settings.SPEAK_WAKEUP_DELAY_S > 0:
-            await asyncio.sleep(settings.SPEAK_WAKEUP_DELAY_S)
-    telehealth.play_output(target, body.text)
-    return {
-        "status": "requested",
-        "device_id": target,
-        "chars": len(body.text),
-        "detail": (
-            "PLAY_OUTPUT sent. Moxie should emit a CloudTTSRequest which this "
-            "service answers with OpenAI audio."
-        ),
-    }
+    return await telehealth.speak_line(target, body.text)
 
 
 @router.post("/interrupt")

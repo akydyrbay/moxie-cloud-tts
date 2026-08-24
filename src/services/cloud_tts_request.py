@@ -54,29 +54,27 @@ async def handle_cloud_tts_request(
     device_id: str, request: CloudTTSRequest,
 ) -> dict:
     """Synthesize the request's markup and publish the response back to `device_id`."""
-    # Full field dump: the robot's correlation ids for a telehealth line come out
-    # empty, and this is the ground truth for diagnosing why a repeated
-    # /tts/speak goes silent (e.g. does the 2nd request differ from the 1st?).
-    logger.info(
-        "CloudTTSRequest fields from %s: event_id=%r chunk_num=%d user_id=%r "
-        "timestamp=%d markup=%r",
-        device_id,
-        request.event_id,
-        request.chunk_num,
-        request.user_id,
-        request.timestamp,
-        request.markup[:120],
-    )
-
     text = strip_markup(request.markup or "")
 
     # Echo the id verbatim: substituting a random one guarantees the robot
-    # discards the audio.
+    # discards the audio. Telehealth PLAY_OUTPUT lines often arrive with an
+    # empty event_id — that is expected; still echo it exactly.
     event_id = request.event_id
+
+    logger.info(
+        "CloudTTSRequest fields device=%s event_id=%r chunk_num=%s "
+        "timestamp=%s user_id=%r markup[:80]=%r",
+        device_id,
+        event_id,
+        request.chunk_num,
+        request.timestamp,
+        request.user_id,
+        (request.markup or "")[:80],
+    )
 
     if not text:
         logger.warning(
-            "CloudTTSRequest from %s has no speakable text (event_id=%s markup=%r); "
+            "CloudTTSRequest from %s has no speakable text (event_id=%r markup=%r); "
             "publishing silence",
             device_id,
             event_id,
@@ -88,7 +86,7 @@ async def handle_cloud_tts_request(
 
     language = detect_language(text)
     logger.info(
-        "handling CloudTTSRequest from %s event_id=%s chunk=%d chars=%d language=%s",
+        "handling CloudTTSRequest from %s event_id=%r chunk=%d chars=%d language=%s",
         device_id,
         event_id,
         request.chunk_num,
@@ -108,7 +106,7 @@ async def handle_cloud_tts_request(
         # speak() already published silence; swallow so the MQTT dispatcher logs
         # a single clear error rather than an unhandled task exception.
         logger.exception(
-            "synthesis failed for event_id=%s (silence already sent)", event_id,
+            "synthesis failed for event_id=%r (silence already sent)", event_id,
         )
         return {
             "status": "failed",

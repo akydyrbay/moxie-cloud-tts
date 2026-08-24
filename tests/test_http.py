@@ -10,8 +10,8 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.config import settings
 from src.router.tts import router
+from src.services.telehealth import note_puppet_state
 from tests.conftest import make_wav
 
 DEVICE = "test-device-1"
@@ -24,51 +24,44 @@ def client() -> TestClient:
     return TestClient(app)
 
 
-@pytest.fixture
-def no_wakeup_delay(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Keep the auto-wakeup behaviour but drop its sleep so tests stay fast."""
-    monkeypatch.setattr(settings, "SPEAK_WAKEUP_DELAY_S", 0.0)
+def _telehealth_actions(captured_publish: list) -> list[dict]:
+    actions = []
+    for topic, payload in captured_publish:
+        if not topic.endswith("/commands/telehealth"):
+            continue
+        actions.append(json.loads(payload)["message"])
+    return actions
 
 
-def _play_output_messages(captured_publish) -> list[dict]:
-    return [
-        json.loads(payload)
-        for topic, payload in captured_publish
-        if topic == f"/devices/{DEVICE}/commands/telehealth"
-        and json.loads(payload)["message"].get("action") == "PLAY_OUTPUT"
-    ]
-
-
-def test_speak_sends_telehealth_play_output(
-    client, known_device, captured_publish, no_wakeup_delay,
-) -> None:
-    """/tts/speak must push PLAY_OUTPUT so the robot raises a real CloudTTSRequest."""
+def test_speak_interrupts_then_play_output(client, known_device, captured_publish) -> None:
+    """Repeated /tts/speak must INTERRUPT then PLAY_OUTPUT (OpenMoxie shape)."""
     resp = client.post("/tts/speak", json={"text": "Привет, как дела?"})
     assert resp.status_code == 200
     body = resp.json()
     assert body["status"] == "requested"
     assert body["device_id"] == DEVICE
 
-    plays = _play_output_messages(captured_publish)
-    assert len(plays) == 1
-    output = plays[0]["message"]["output"]
+    actions = _telehealth_actions(captured_publish)
+    assert [a["action"] for a in actions] == ["INTERRUPT", "PLAY_OUTPUT"]
+    output = actions[1]["output"]
     assert output["text"] == "Привет, как дела?"
-    # Sending markup would risk tags being read aloud; text-only is deliberate.
-    assert "markup" not in output
+    # OpenMoxie always sends markup; text alone is the fallback path.
+    assert output["markup"] == "Привет, как дела?"
 
 
-def test_speak_wakes_the_robot_before_speaking(
-    client, known_device, captured_publish, no_wakeup_delay,
-) -> None:
-    """The robot dozes after a line, so /tts/speak wakes it (before PLAY_OUTPUT)."""
-    resp = client.post("/tts/speak", json={"text": "Привет"})
-    assert resp.status_code == 200
+def test_second_speak_also_resets(client, known_device, captured_publish) -> None:
+    """The Nth speak must still INTERRUPT — that is what clears leftover state."""
+    note_puppet_state(DEVICE, "READY")
+    client.post("/tts/speak", json={"text": "один"})
+    note_puppet_state(DEVICE, "READY")
+    client.post("/tts/speak", json={"text": "два"})
 
-    topics = [t for t, _ in captured_publish]
-    assert f"/devices/{DEVICE}/commands/wakeup" in topics
-    # Wakeup must come first, so the robot is listening when the speech arrives.
-    play_topic = f"/devices/{DEVICE}/commands/telehealth"
-    assert topics.index(f"/devices/{DEVICE}/commands/wakeup") < topics.index(play_topic)
+    actions = _telehealth_actions(captured_publish)
+    assert [a["action"] for a in actions] == [
+        "INTERRUPT", "PLAY_OUTPUT", "INTERRUPT", "PLAY_OUTPUT",
+    ]
+    assert actions[1]["output"]["text"] == "один"
+    assert actions[3]["output"]["text"] == "два"
 
 
 def test_speak_without_a_robot_is_a_clear_error(client, captured_publish) -> None:
@@ -103,6 +96,12 @@ def test_puppet_toggle_pushes_config(client, known_device, captured_publish) -> 
     topic, payload = captured_publish[0]
     assert topic == f"/devices/{DEVICE}/config"
     assert json.loads(payload)["moxie_mode"] == "TELEHEALTH"
+
+    # Idempotent: second enable must not re-push (mode flips crash the robot).
+    before = len(captured_publish)
+    again = client.post("/tts/puppet", json={"enabled": True})
+    assert again.json().get("unchanged") is True
+    assert len(captured_publish) == before
 
     client.post("/tts/puppet", json={"enabled": False})
     assert "moxie_mode" not in json.loads(captured_publish[-1][1])

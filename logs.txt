@@ -1,0 +1,201 @@
+      INFO   Started server process [10943]
+2026-08-24 16:49:26 | Started server process [10943]
+      INFO   Waiting for application startup.
+2026-08-24 16:49:26 | Waiting for application startup.
+2026-08-24 16:49:26 | Binding ZMQ PUB socket to tcp://127.0.0.1:5560
+2026-08-24 16:49:26 | registered inbound CloudTTSRequest handler (prefix=b'embodied.unity.CloudTTSRequest:')
+2026-08-24 16:49:26 | registered remote-chat + activity-log MQTT handlers
+2026-08-24 16:49:26 | CLOUD_TTS_AUTO_ENABLE: cloud_tts set to 1 (will push when the robot connects)
+2026-08-24 16:49:26 | connecting to mqtt localhost:8883
+      INFO   Application startup complete.
+2026-08-24 16:49:26 | Application startup complete.
+2026-08-24 16:49:26 | mqtt connected (reason_code=Success)
+2026-08-24 16:49:43 | robot d_d05e3c66-dd29-4fe2-9758-7223e31511dc connected to broker
+2026-08-24 16:49:43 | discovered device d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-24 16:49:44 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=None)
+2026-08-24 16:49:44 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-08-24 16:49:44 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest']
+2026-08-24 16:49:44 | unanswered query 'license' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=LicenseUpdate)
+2026-08-24 16:49:46 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1358499034.975","level":"I","tag":"BO-LIZZERFACE",' (243 bytes)
+2026-08-24 16:50:00 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572200.568","level":"I","tag":"Unity   ","pid"' (236 bytes)
+2026-08-24 16:50:02 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572203.136","level":"I","tag":"Unity   ","pid"' (1109 bytes)
+2026-08-24 16:50:03 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572203.379","level":"I","tag":"Unity   ","pid"' (192 bytes)
+2026-08-24 16:50:17 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572217.382","level":"W","tag":"Unity   ","pid"' (232 bytes)
+2026-08-24 16:50:17 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572217.941","level":"W","tag":"Unity   ","pid"' (314 bytes)
+2026-08-24 16:52:35 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572355.318","level":"W","tag":"Unity   ","pid"' (321 bytes)
+2026-08-24 16:52:35 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572355.319","level":"W","tag":"Unity   ","pid"' (319 bytes)
+2026-08-24 16:52:35 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572355.320","level":"W","tag":"Unity   ","pid"' (322 bytes)
+2026-08-24 16:52:52 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572372.497","level":"W","tag":"Unity   ","pid"' (316 bytes)
+2026-08-24 16:52:57 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572377.780","level":"W","tag":"Unity   ","pid"' (230 bytes)
+2026-08-24 16:53:01 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572381.285","level":"I","tag":"Unity   ","pid"' (191 bytes)
+2026-08-24 16:53:01 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572381.285","level":"I","tag":"Unity   ","pid"' (195 bytes)
+2026-08-24 16:53:01 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572381.287","level":"I","tag":"Unity   ","pid"' (333 bytes)
+2026-08-24 16:53:01 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572381.343","level":"I","tag":"BO-LIZZERFACE",' (243 bytes)
+2026-08-24 16:53:01 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572381.366","level":"I","tag":"Unity   ","pid"' (222 bytes)
+2026-08-24 16:53:51 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572431.505","level":"I","tag":"Unity   ","pid"' (196 bytes)
+2026-08-24 16:53:51 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572431.508","level":"I","tag":"Unity   ","pid"' (191 bytes)
+2026-08-24 16:53:51 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (3554 bytes)
+2026-08-24 16:53:51 | handling CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=CereprocWarmup-ignore-me chunk=0 chars=65 language=ru
+2026-08-24 16:53:52 | unanswered query 'remote_lines' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=13198961-c365-45c5-a0c8-29b9e21ca023)
+2026-08-24 16:53:53 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=61063b71-d5a0-4ce8-b8d2-66e2edeb95f1
+2026-08-24 16:53:53 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (271 bytes)
+2026-08-24 16:53:53 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=147d3692-918d-4bd2-a5e4-7bc8e6721928
+2026-08-24 16:53:53 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-08-24 16:53:53 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=None)
+2026-08-24 16:53:53 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-08-24 16:53:53 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest']
+2026-08-24 16:53:53 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=b2423be7-8df6-4bfc-8ea4-57d7e2329f8c (1 modules)
+2026-08-24 16:53:53 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-08-24 16:53:55 | constructed OpenAI client (timeout=8.0s)
+2026-08-24 16:53:58 | Request options: {'method': 'post', 'url': '/audio/speech', 'headers': {'Accept': 'application/octet-stream'}, 'files': None, 'idempotency_key': 'stainless-python-retry-c4c4aef1-01a4-4eb1-af6b-66f54a1c8bbc', 'security': {'bearer_auth': True}, 'content': None, 'json_data': {'input': "I'm so excited. I had no idea the human world would belike this !", 'model': 'gpt-4o-mini-tts', 'voice': 'alloy', 'response_format': 'wav'}}
+2026-08-24 16:53:58 | Sending HTTP Request: POST https://api.openai.com/v1/audio/speech
+2026-08-24 16:53:58 | connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=8.0 socket_options=None
+2026-08-24 16:53:58 | connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10fccfc20>
+2026-08-24 16:53:58 | start_tls.started ssl_context=<truststore._api.SSLContext object at 0x10d6d0d50> server_hostname='api.openai.com' timeout=8.0
+2026-08-24 16:53:58 | start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10f9a32c0>
+2026-08-24 16:53:58 | send_request_headers.started request=<Request [b'POST']>
+2026-08-24 16:53:58 | send_request_headers.complete
+2026-08-24 16:53:58 | send_request_body.started request=<Request [b'POST']>
+2026-08-24 16:53:58 | send_request_body.complete
+2026-08-24 16:53:58 | receive_response_headers.started request=<Request [b'POST']>
+2026-08-24 16:54:00 | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Mon, 24 Aug 2026 11:54:00 GMT'), (b'Content-Type', b'audio/wav'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'access-control-expose-headers', b'X-Request-ID'), (b'Access-Control-Expose-Headers', b'CF-Ray'), (b'openai-organization', b'user-xuwjbox3heapqqquxhll29jo'), (b'openai-processing-ms', b'875'), (b'openai-project', b'proj_2TQIIFQgc5JPmCT7DW93sN4B'), (b'openai-version', b'2020-10-01'), (b'Server', b'cloudflare'), (b'x-ratelimit-limit-requests', b'10000'), (b'x-ratelimit-limit-tokens', b'200000'), (b'x-ratelimit-remaining-requests', b'9999'), (b'x-ratelimit-remaining-tokens', b'199984'), (b'x-ratelimit-reset-requests', b'8.64s'), (b'x-ratelimit-reset-tokens', b'4ms'), (b'x-request-id', b'req_9a4577ff8eba408ebc624790b2bc9e2e'), (b'x-openai-proxy-wasm', b'v0.1'), (b'cf-cache-status', b'DYNAMIC'), (b'set-cookie', b'__cf_bm=SbwMNi65Jb4n6d2z9QEQ.1RedwF0w.3FtoGbuJvSqhU-1787572439.02514-1.0.1.1-alokWqkEw5ADRDXlYZMrSSXqMmRYW6z7eCRn4TP_jj5AjxLTTtOw8ocmHOfwPMU5kKsepq_vDorqvuNfppIgrUQGJqMZruyNLQBrfRu6PQMQ6z..ySg27xi2HjillZ79; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Mon, 24 Aug 2026 12:24:00 GMT'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'X-Content-Type-Options', b'nosniff'), (b'CF-RAY', b'a30228dfee82e4c2-AKX'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2026-08-24 16:54:00 | HTTP Request: POST https://api.openai.com/v1/audio/speech "HTTP/1.1 200 OK"
+2026-08-24 16:54:00 | receive_response_body.started request=<Request [b'POST']>
+2026-08-24 16:54:01 | receive_response_body.complete
+2026-08-24 16:54:01 | response_closed.started
+2026-08-24 16:54:01 | response_closed.complete
+2026-08-24 16:54:01 | HTTP Response: POST https://api.openai.com/v1/audio/speech "200 OK" Headers([('date', 'Mon, 24 Aug 2026 11:54:00 GMT'), ('content-type', 'audio/wav'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('access-control-expose-headers', 'X-Request-ID'), ('access-control-expose-headers', 'CF-Ray'), ('openai-organization', 'user-xuwjbox3heapqqquxhll29jo'), ('openai-processing-ms', '875'), ('openai-project', 'proj_2TQIIFQgc5JPmCT7DW93sN4B'), ('openai-version', '2020-10-01'), ('server', 'cloudflare'), ('x-ratelimit-limit-requests', '10000'), ('x-ratelimit-limit-tokens', '200000'), ('x-ratelimit-remaining-requests', '9999'), ('x-ratelimit-remaining-tokens', '199984'), ('x-ratelimit-reset-requests', '8.64s'), ('x-ratelimit-reset-tokens', '4ms'), ('x-request-id', 'req_9a4577ff8eba408ebc624790b2bc9e2e'), ('x-openai-proxy-wasm', 'v0.1'), ('cf-cache-status', 'DYNAMIC'), ('set-cookie', '__cf_bm=SbwMNi65Jb4n6d2z9QEQ.1RedwF0w.3FtoGbuJvSqhU-1787572439.02514-1.0.1.1-alokWqkEw5ADRDXlYZMrSSXqMmRYW6z7eCRn4TP_jj5AjxLTTtOw8ocmHOfwPMU5kKsepq_vDorqvuNfppIgrUQGJqMZruyNLQBrfRu6PQMQ6z..ySg27xi2HjillZ79; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Mon, 24 Aug 2026 12:24:00 GMT'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('x-content-type-options', 'nosniff'), ('cf-ray', 'a30228dfee82e4c2-AKX'), ('alt-svc', 'h3=":443"; ma=86400')])
+2026-08-24 16:54:01 | request_id: req_9a4577ff8eba408ebc624790b2bc9e2e
+2026-08-24 16:54:01 | openai tts synthesized 65 chars (ru) -> 259244 bytes in 5960 ms (format=wav)
+2026-08-24 16:54:01 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id=CereprocWarmup-ignore-me chunk=0, 259244 audio bytes)
+2026-08-24 16:54:01 | spoke event_id=CereprocWarmup-ignore-me chunk=0 language=ru audio_bytes=259244 total_ms=10308 device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-24 16:54:15 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (159 bytes)
+2026-08-24 16:54:15 | CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc has no speakable text (event_id=0501c686-0727-41f9-a012-98456a084908 markup='<break time="0.5s"/>'); publishing silence
+2026-08-24 16:54:15 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id=0501c686-0727-41f9-a012-98456a084908 chunk=0, 9644 audio bytes)
+2026-08-24 16:54:15 | published SILENT fallback to d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=0501c686-0727-41f9-a012-98456a084908 chunk=0 (9644 bytes)
+2026-08-24 16:54:49 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572489.329","level":"I","tag":"Unity   ","pid"' (196 bytes)
+2026-08-24 16:55:04 | received puppet mode request: enabled=True
+2026-08-24 16:55:04 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-08-24 16:55:04 | puppet mode=True pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+      INFO   127.0.0.1:50855 - "POST /tts/puppet HTTP/1.1" 200
+2026-08-24 16:55:05 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572505.748","level":"I","tag":"Unity   ","pid"' (197 bytes)
+2026-08-24 16:55:05 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572505.801","level":"I","tag":"Unity   ","pid"' (195 bytes)
+2026-08-24 16:55:07 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572508.195","level":"I","tag":"Unity   ","pid"' (151 bytes)
+2026-08-24 16:58:37 | received /tts/speak for d_d05e3c66-dd29-4fe2-9758-7223e31511dc: chars=31
+2026-08-24 16:58:37 | telehealth PLAY_OUTPUT to d_d05e3c66-dd29-4fe2-9758-7223e31511dc (31 chars): 'Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-24 16:58:37 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/telehealth (243 bytes)
+      INFO   127.0.0.1:50867 - "POST /tts/speak HTTP/1.1" 200
+2026-08-24 16:58:37 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (157 bytes)
+2026-08-24 16:58:37 | handling CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id= chunk=0 chars=31 language=kk
+2026-08-24 16:58:37 | Request options: {'method': 'post', 'url': '/audio/speech', 'headers': {'Accept': 'application/octet-stream'}, 'files': None, 'idempotency_key': 'stainless-python-retry-21185266-f82f-4852-9db8-cf26c0bb1356', 'security': {'bearer_auth': True}, 'content': None, 'json_data': {'input': 'Сәлем! Бүгін көңіл-күйің қалай?', 'model': 'gpt-4o-mini-tts', 'voice': 'alloy', 'response_format': 'wav'}}
+2026-08-24 16:58:37 | Sending HTTP Request: POST https://api.openai.com/v1/audio/speech
+2026-08-24 16:58:37 | close.started
+2026-08-24 16:58:37 | close.complete
+2026-08-24 16:58:37 | connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=8.0 socket_options=None
+2026-08-24 16:58:38 | connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x110268c80>
+2026-08-24 16:58:38 | start_tls.started ssl_context=<truststore._api.SSLContext object at 0x10d6d0d50> server_hostname='api.openai.com' timeout=8.0
+2026-08-24 16:58:38 | start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x110269220>
+2026-08-24 16:58:38 | send_request_headers.started request=<Request [b'POST']>
+2026-08-24 16:58:38 | send_request_headers.complete
+2026-08-24 16:58:38 | send_request_body.started request=<Request [b'POST']>
+2026-08-24 16:58:38 | send_request_body.complete
+2026-08-24 16:58:38 | receive_response_headers.started request=<Request [b'POST']>
+2026-08-24 16:58:40 | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Mon, 24 Aug 2026 11:58:40 GMT'), (b'Content-Type', b'audio/wav'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'access-control-expose-headers', b'X-Request-ID'), (b'Access-Control-Expose-Headers', b'CF-Ray'), (b'openai-organization', b'user-xuwjbox3heapqqquxhll29jo'), (b'openai-processing-ms', b'903'), (b'openai-project', b'proj_2TQIIFQgc5JPmCT7DW93sN4B'), (b'openai-version', b'2020-10-01'), (b'Server', b'cloudflare'), (b'x-ratelimit-limit-requests', b'10000'), (b'x-ratelimit-limit-tokens', b'200000'), (b'x-ratelimit-remaining-requests', b'9999'), (b'x-ratelimit-remaining-tokens', b'199986'), (b'x-ratelimit-reset-requests', b'8.64s'), (b'x-ratelimit-reset-tokens', b'4ms'), (b'x-request-id', b'req_31a34578f65742c89bb541d79732e882'), (b'x-openai-proxy-wasm', b'v0.1'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Content-Type-Options', b'nosniff'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'CF-RAY', b'a3022fb37fc2b17e-AKX'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2026-08-24 16:58:40 | HTTP Request: POST https://api.openai.com/v1/audio/speech "HTTP/1.1 200 OK"
+2026-08-24 16:58:40 | receive_response_body.started request=<Request [b'POST']>
+2026-08-24 16:58:41 | receive_response_body.complete
+2026-08-24 16:58:41 | response_closed.started
+2026-08-24 16:58:41 | response_closed.complete
+2026-08-24 16:58:41 | HTTP Response: POST https://api.openai.com/v1/audio/speech "200 OK" Headers([('date', 'Mon, 24 Aug 2026 11:58:40 GMT'), ('content-type', 'audio/wav'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('access-control-expose-headers', 'X-Request-ID'), ('access-control-expose-headers', 'CF-Ray'), ('openai-organization', 'user-xuwjbox3heapqqquxhll29jo'), ('openai-processing-ms', '903'), ('openai-project', 'proj_2TQIIFQgc5JPmCT7DW93sN4B'), ('openai-version', '2020-10-01'), ('server', 'cloudflare'), ('x-ratelimit-limit-requests', '10000'), ('x-ratelimit-limit-tokens', '200000'), ('x-ratelimit-remaining-requests', '9999'), ('x-ratelimit-remaining-tokens', '199986'), ('x-ratelimit-reset-requests', '8.64s'), ('x-ratelimit-reset-tokens', '4ms'), ('x-request-id', 'req_31a34578f65742c89bb541d79732e882'), ('x-openai-proxy-wasm', 'v0.1'), ('cf-cache-status', 'DYNAMIC'), ('x-content-type-options', 'nosniff'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('cf-ray', 'a3022fb37fc2b17e-AKX'), ('alt-svc', 'h3=":443"; ma=86400')])
+2026-08-24 16:58:41 | request_id: req_31a34578f65742c89bb541d79732e882
+2026-08-24 16:58:41 | openai tts synthesized 31 chars (kk) -> 160844 bytes in 3478 ms (format=wav)
+2026-08-24 16:58:41 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id= chunk=0, 160844 audio bytes)
+2026-08-24 16:58:41 | spoke event_id= chunk=0 language=kk audio_bytes=160844 total_ms=3479 device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-24 16:59:29 | received puppet mode request: enabled=False
+2026-08-24 16:59:29 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-08-24 16:59:29 | puppet mode=False pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+      INFO   127.0.0.1:50874 - "POST /tts/puppet HTTP/1.1" 200
+2026-08-24 16:59:30 | unanswered query 'remote_lines' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=3958f08a-7bdf-48e9-bcfe-d281aafb30bb)
+2026-08-24 16:59:31 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=2b547cf5-63da-4396-bdaf-357feaed52c5
+2026-08-24 16:59:31 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (271 bytes)
+2026-08-24 16:59:31 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=369fc31c-f432-489d-bfb2-8bc512a8fe4f
+2026-08-24 16:59:31 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-08-24 16:59:31 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=None)
+2026-08-24 16:59:31 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-08-24 16:59:31 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest']
+2026-08-24 16:59:31 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=0c0b2de2-ee6a-4568-ba00-53f816fbc0ba (1 modules)
+2026-08-24 16:59:31 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-08-24 16:59:36 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572776.376","level":"I","tag":"Unity   ","pid"' (196 bytes)
+2026-08-24 16:59:41 | received puppet mode request: enabled=True
+2026-08-24 16:59:41 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-08-24 16:59:41 | puppet mode=True pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+      INFO   127.0.0.1:50877 - "POST /tts/puppet HTTP/1.1" 200
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572781.884","level":"F","tag":"libc    ","pid"' (212 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.021","level":"F","tag":"DEBUG   ","pid"' (157 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.021","level":"F","tag":"DEBUG   ","pid"' (187 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.021","level":"F","tag":"DEBUG   ","pid"' (107 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.022","level":"F","tag":"DEBUG   ","pid"' (104 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.022","level":"F","tag":"DEBUG   ","pid"' (199 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.022","level":"F","tag":"DEBUG   ","pid"' (155 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.022","level":"F","tag":"DEBUG   ","pid"' (152 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.022","level":"F","tag":"DEBUG   ","pid"' (152 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.022","level":"F","tag":"DEBUG   ","pid"' (152 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.022","level":"F","tag":"DEBUG   ","pid"' (152 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (81 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (104 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (222 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (208 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (231 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (256 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (172 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (164 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (235 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (275 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (301 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (161 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (161 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (227 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (258 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (257 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (170 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (173 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (172 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.075","level":"F","tag":"DEBUG   ","pid"' (164 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.076","level":"F","tag":"DEBUG   ","pid"' (235 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.076","level":"F","tag":"DEBUG   ","pid"' (318 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.076","level":"F","tag":"DEBUG   ","pid"' (263 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.076","level":"F","tag":"DEBUG   ","pid"' (177 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.076","level":"F","tag":"DEBUG   ","pid"' (162 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.076","level":"F","tag":"DEBUG   ","pid"' (154 bytes)
+2026-08-24 16:59:41 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.268","level":"I","tag":"Unity   ","pid"' (197 bytes)
+2026-08-24 16:59:42 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572782.294","level":"I","tag":"Unity   ","pid"' (195 bytes)
+2026-08-24 16:59:44 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/device-logs payload[:64]: b'{"timestamp":"1787572784.573","level":"I","tag":"Unity   ","pid"' (151 bytes)
+2026-08-24 17:00:08 | received /tts/speak for d_d05e3c66-dd29-4fe2-9758-7223e31511dc: chars=31
+2026-08-24 17:00:08 | telehealth PLAY_OUTPUT to d_d05e3c66-dd29-4fe2-9758-7223e31511dc (31 chars): 'Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-24 17:00:08 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/telehealth (243 bytes)
+      INFO   127.0.0.1:50880 - "POST /tts/speak HTTP/1.1" 200
+2026-08-24 17:00:08 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (157 bytes)
+2026-08-24 17:00:08 | handling CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id= chunk=0 chars=31 language=kk
+2026-08-24 17:00:08 | Request options: {'method': 'post', 'url': '/audio/speech', 'headers': {'Accept': 'application/octet-stream'}, 'files': None, 'idempotency_key': 'stainless-python-retry-58725738-1736-4c93-bed3-1be2d91d9db3', 'security': {'bearer_auth': True}, 'content': None, 'json_data': {'input': 'Сәлем! Бүгін көңіл-күйің қалай?', 'model': 'gpt-4o-mini-tts', 'voice': 'alloy', 'response_format': 'wav'}}
+2026-08-24 17:00:08 | Sending HTTP Request: POST https://api.openai.com/v1/audio/speech
+2026-08-24 17:00:08 | close.started
+2026-08-24 17:00:08 | close.complete
+2026-08-24 17:00:08 | connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=8.0 socket_options=None
+2026-08-24 17:00:08 | connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x11024e1b0>
+2026-08-24 17:00:08 | start_tls.started ssl_context=<truststore._api.SSLContext object at 0x10d6d0d50> server_hostname='api.openai.com' timeout=8.0
+2026-08-24 17:00:09 | start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x11024d850>
+2026-08-24 17:00:09 | send_request_headers.started request=<Request [b'POST']>
+2026-08-24 17:00:09 | send_request_headers.complete
+2026-08-24 17:00:09 | send_request_body.started request=<Request [b'POST']>
+2026-08-24 17:00:09 | send_request_body.complete
+2026-08-24 17:00:09 | receive_response_headers.started request=<Request [b'POST']>
+2026-08-24 17:00:10 | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Mon, 24 Aug 2026 12:00:10 GMT'), (b'Content-Type', b'audio/wav'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'access-control-expose-headers', b'X-Request-ID'), (b'Access-Control-Expose-Headers', b'CF-Ray'), (b'openai-organization', b'user-xuwjbox3heapqqquxhll29jo'), (b'openai-processing-ms', b'830'), (b'openai-project', b'proj_2TQIIFQgc5JPmCT7DW93sN4B'), (b'openai-version', b'2020-10-01'), (b'Server', b'cloudflare'), (b'x-ratelimit-limit-requests', b'10000'), (b'x-ratelimit-limit-tokens', b'200000'), (b'x-ratelimit-remaining-requests', b'9999'), (b'x-ratelimit-remaining-tokens', b'199986'), (b'x-ratelimit-reset-requests', b'8.64s'), (b'x-ratelimit-reset-tokens', b'4ms'), (b'x-request-id', b'req_28312539a50c4f248da0d7db42def6df'), (b'x-openai-proxy-wasm', b'v0.1'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Content-Type-Options', b'nosniff'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'CF-RAY', b'a30231eabfa0e4c2-AKX'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2026-08-24 17:00:10 | HTTP Request: POST https://api.openai.com/v1/audio/speech "HTTP/1.1 200 OK"
+2026-08-24 17:00:10 | receive_response_body.started request=<Request [b'POST']>
+2026-08-24 17:00:11 | receive_response_body.complete
+2026-08-24 17:00:11 | response_closed.started
+2026-08-24 17:00:11 | response_closed.complete
+2026-08-24 17:00:11 | HTTP Response: POST https://api.openai.com/v1/audio/speech "200 OK" Headers([('date', 'Mon, 24 Aug 2026 12:00:10 GMT'), ('content-type', 'audio/wav'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('access-control-expose-headers', 'X-Request-ID'), ('access-control-expose-headers', 'CF-Ray'), ('openai-organization', 'user-xuwjbox3heapqqquxhll29jo'), ('openai-processing-ms', '830'), ('openai-project', 'proj_2TQIIFQgc5JPmCT7DW93sN4B'), ('openai-version', '2020-10-01'), ('server', 'cloudflare'), ('x-ratelimit-limit-requests', '10000'), ('x-ratelimit-limit-tokens', '200000'), ('x-ratelimit-remaining-requests', '9999'), ('x-ratelimit-remaining-tokens', '199986'), ('x-ratelimit-reset-requests', '8.64s'), ('x-ratelimit-reset-tokens', '4ms'), ('x-request-id', 'req_28312539a50c4f248da0d7db42def6df'), ('x-openai-proxy-wasm', 'v0.1'), ('cf-cache-status', 'DYNAMIC'), ('x-content-type-options', 'nosniff'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('cf-ray', 'a30231eabfa0e4c2-AKX'), ('alt-svc', 'h3=":443"; ma=86400')])
+2026-08-24 17:00:11 | request_id: req_28312539a50c4f248da0d7db42def6df
+2026-08-24 17:00:11 | openai tts synthesized 31 chars (kk) -> 127244 bytes in 2680 ms (format=wav)
+2026-08-24 17:00:11 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id= chunk=0, 127244 audio bytes)
