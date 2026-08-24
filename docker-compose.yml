@@ -1,0 +1,28 @@
+
+services:
+
+  mqtt:
+    build:
+      context: ./
+      dockerfile: ./mqtt.Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    ports:
+      - "8883:8883"
+    volumes:
+      - ./local/work:/mosquitto/log
+
+  # server:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./Dockerfile
+  #     platforms:
+  #         - linux/amd64
+  #         - linux/arm64
+  #   ports:
+  #     - "8001:8000"
+  #   volumes:
+  #     - ./local/work:/app/site/work
+  #   depends_on:
+  #     - mqtt

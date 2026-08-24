@@ -1,0 +1,50 @@
+[project]
+name = "moxie-tts-service"
+version = "0.1.0"
+description = "Live cloud_tts toggle service for Moxie/OpenMoxie"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.138.0",
+    "paho-mqtt>=2.1.0",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.2",
+    "pyzmq>=26.0.0",
+    "protobuf>=4.25.0",
+    "openai>=1.55.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+exclude = [
+    ".venv",
+    "src/protos",  # vendored, protoc-generated ("DO NOT EDIT") — not our code to lint
+]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D417",     # Missing argument description in the docstring
+    "D100",     # Missing docstring in public module
+    "D101",     # Missing docstring in public class
+    "D103",     # Missing docstring in public function
+    "D104",     # Missing docstring in public package
+    "D105",     # Missing docstring in magic method
+    "D107",     # Missing docstring in __init__
+    "ANN002",   # Missing type annotation for *{name}
+    "ANN003",   # Missing type annotation for **{name}
+    "ANN401",   # Dynamically typed expressions (typing.Any) are disallowed in {name}
+    "FBT001",   # Boolean positional arg — this whole service is a bool-toggle
+                # pipeline (`enabled: bool` threaded through zmq -> state ->
+                # mqtt); forcing keyword-only here would just add noise at
+                # every call site for no real ambiguity reduction.
+]

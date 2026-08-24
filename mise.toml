@@ -1,0 +1,18 @@
+[tools]
+python = "3.12"
+
+[tasks]
+# Service only — use when the MQTT broker is already running.
+dev = "uv run fastapi dev src/main.py --reload-dir src"
+
+# Full stack: MQTT broker + service (cloud_tts auto-enables when a key is set).
+start = "bash scripts/start.sh"
+
+# Broker only.
+mqtt = "docker compose up mqtt -d --build"
+
+# Fake Moxie for verifying the loop without the robot. Run in a second terminal,
+# then POST /tts/speak and check local/work/ for the received audio.
+sim = "uv run python scripts/simulate_robot.py"
+
+test = "uv run pytest tests/ -q"

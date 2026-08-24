@@ -1,0 +1,55 @@
+"""In-memory device configuration state.
+
+Holds the hardcoded device config plus the two dynamic fields:
+
+- `settings.props.cloud_tts` — "0"/"1", routes the robot's speech through this
+  service instead of its onboard TTS.
+- `moxie_mode` — "TELEHEALTH" puts the robot into puppet mode: awake, ignoring
+  the schedule, speaking only what we push. Absent means normal operation.
+
+Both start disabled; `main.py` may enable them at startup. An asyncio.Lock
+guards mutation since HTTP handlers and MQTT callbacks both touch this.
+"""
+
+import asyncio
+from copy import deepcopy
+
+from src.config import HARDCODED_DEVICE_CONFIG, MOXIE_MODE_TELEHEALTH
+
+
+class DeviceState:
+    def __init__(self) -> None:
+        self._lock = asyncio.Lock()
+        self._config: dict = deepcopy(HARDCODED_DEVICE_CONFIG)
+        self._config["settings"]["props"]["cloud_tts"] = "0"
+
+    async def get_config(self) -> dict:
+        """Return a copy of the full current device config."""
+        async with self._lock:
+            return deepcopy(self._config)
+
+    async def get_cloud_tts(self) -> bool:
+        async with self._lock:
+            return self._config["settings"]["props"]["cloud_tts"] == "1"
+
+    async def set_cloud_tts(self, enabled: bool) -> dict:
+        """Update cloud_tts and return the full resulting config."""
+        async with self._lock:
+            self._config["settings"]["props"]["cloud_tts"] = "1" if enabled else "0"
+            return deepcopy(self._config)
+
+    async def get_puppet_mode(self) -> bool:
+        async with self._lock:
+            return self._config.get("moxie_mode") == MOXIE_MODE_TELEHEALTH
+
+    async def set_puppet_mode(self, enabled: bool) -> dict:
+        """Enable/disable TELEHEALTH mode and return the full resulting config."""
+        async with self._lock:
+            if enabled:
+                self._config["moxie_mode"] = MOXIE_MODE_TELEHEALTH
+            else:
+                self._config.pop("moxie_mode", None)
+            return deepcopy(self._config)
+
+
+device_state = DeviceState()
