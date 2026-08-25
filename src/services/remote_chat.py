@@ -202,15 +202,27 @@ class RemoteChatBrain:
         )
         mqtt_service.publish_command_json(device_id, "remote_chat", payload)
 
-    def handle_schedule_query(self, device_id: str, request: dict) -> None:
+    async def handle_schedule_query(self, device_id: str, request: dict) -> None:
         req_id = request.get("request_id", "")
+        puppet = await device_state.get_puppet_mode()
+        # TELEHEALTH already parks the robot. Handing it DEFAULT_SCHEDULE still
+        # launches OPENMOXIE_CHAT, which with cloud_tts=1 enters MarkingUp and
+        # can steal the speech-output slot from later PLAY_OUTPUT lines.
+        schedule: dict = (
+            {"provided_schedule": []} if puppet else self.get_schedule()
+        )
         payload = {
             "command": "query_result",
             "query": "schedule",
             "request_id": req_id,
-            "schedule": self.get_schedule(),
+            "schedule": schedule,
         }
-        logger.info("answering schedule query for %s request_id=%s", device_id, req_id)
+        logger.info(
+            "answering schedule query for %s request_id=%s puppet=%s",
+            device_id,
+            req_id,
+            puppet,
+        )
         mqtt_service.publish_command_json(device_id, "query_result", payload)
 
     def handle_mentor_behaviors_query(self, device_id: str, request: dict) -> None:
@@ -386,16 +398,24 @@ class RemoteChatBrain:
             return
 
         subtopic = request.get("subtopic")
+        # Always print the envelope. Previously anything that was not
+        # `telehealth` or `query` was dropped, which hid speech/output FSM
+        # reports if the firmware used another subtopic.
+        logger.info(
+            "activity-log %s subtopic=%s: %s",
+            device_id,
+            subtopic,
+            request.get("message") or request,
+        )
         if subtopic == "telehealth":
-            # Robot reports READY / IN_SESSION / EXITING here. Required so
-            # /tts/speak can wait for READY between lines.
+            # Robot reports READY / IN_SESSION / EXITING here.
             handle_activity_log_telehealth(device_id, request)
             return
         if subtopic != "query":
             return
         query = request.get("query")
         if query == "schedule":
-            self.handle_schedule_query(device_id, request)
+            await self.handle_schedule_query(device_id, request)
         elif query == "mentor_behaviors":
             self.handle_mentor_behaviors_query(device_id, request)
         else:

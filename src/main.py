@@ -26,6 +26,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.concurrency import run_in_threadpool
 
 from src.config import settings
 from src.logging_conf import configure_logging
@@ -37,6 +38,7 @@ from src.services.cloud_tts_request import (
 )
 from src.services.device_state import device_state
 from src.services.mqtt_service import mqtt_service
+from src.services.openai_client import get_client
 from src.services.remote_chat import (
     handle_activity_log_payload,
     handle_remote_chat_payload,
@@ -92,6 +94,15 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
             "CLOUD_TTS_AUTO_ENABLE: cloud_tts set to 1 "
             "(will push when the robot connects)",
         )
+
+    # 4b. Build the OpenAI client now rather than inside the first
+    # CloudTTSRequest. Constructing it costs ~2 s (import + TLS setup), and the
+    # robot is already waiting for audio by then.
+    if settings.OPENAI_API_KEY:
+        try:
+            await run_in_threadpool(get_client)
+        except Exception:
+            logger.exception("could not pre-warm the OpenAI client")
 
     if settings.PUPPET_MODE_AUTO_ENABLE:
         await device_state.set_puppet_mode(True)

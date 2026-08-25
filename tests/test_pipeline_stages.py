@@ -11,6 +11,7 @@ from src.services.llm import openai_chat
 from src.services.stt import openai_stt
 from src.services.synthesis import openai_tts
 from src.services.synthesis.base import UnsupportedLanguageError
+from tests.conftest import FAKE_PCM
 
 
 def test_stt_stage(fake_openai) -> None:
@@ -43,7 +44,8 @@ def test_tts_stage(fake_openai) -> None:
     assert result.channels == settings.AUDIO_CHANNELS
 
 
-def test_tts_requests_wav_by_default(fake_openai) -> None:
-    """AudioBuffer must carry a real WAV container, not raw samples."""
+def test_tts_requests_pcm_by_default(fake_openai) -> None:
+    """AudioBuffer.buffer is raw PCM; channels+sample_rate describe it."""
     result = openai_tts.openai_tts_engine.synthesize("Сәлем", "kk")
-    assert result.audio.startswith(b"RIFF")
+    assert not result.audio.startswith(b"RIFF")
+    assert result.audio == FAKE_PCM

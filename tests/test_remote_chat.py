@@ -4,6 +4,7 @@ import json
 
 import pytest
 
+from src.services.device_state import device_state
 from src.services.mqtt_service import mqtt_service
 from src.services.remote_chat import RemoteChatBrain, fallback_line, remote_chat_brain
 from tests.conftest import TEST_DEVICE_ID
@@ -69,6 +70,21 @@ async def test_schedule_query(brain: RemoteChatBrain) -> None:
     assert payload["query"] == "schedule"
     assert payload["request_id"] == "sched-1"
     assert payload["schedule"]["provided_schedule"][0]["module_id"] == "OPENMOXIE_CHAT"
+
+
+async def test_schedule_query_is_empty_in_puppet_mode(brain: RemoteChatBrain) -> None:
+    """A chat-launching schedule in TELEHEALTH steals the speech-output slot."""
+    await device_state.set_puppet_mode(True)
+    await brain.handle_activity_log_event(
+        TEST_DEVICE_ID,
+        json.dumps({
+            "subtopic": "query",
+            "query": "schedule",
+            "request_id": "sched-puppet",
+        }),
+    )
+    payload = brain._published[0][1]  # type: ignore[attr-defined]
+    assert payload["schedule"] == {"provided_schedule": []}
 
 
 async def test_onboard_module_gets_fallback(brain: RemoteChatBrain) -> None:

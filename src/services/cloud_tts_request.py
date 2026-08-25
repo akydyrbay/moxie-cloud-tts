@@ -78,7 +78,7 @@ async def handle_cloud_tts_request(
             "publishing silence",
             device_id,
             event_id,
-            request.markup[:80],
+            (request.markup or "")[:80],
         )
         return speak_service.publish_silence(
             device_id, event_id, request.chunk_num,

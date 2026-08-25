@@ -46,8 +46,20 @@ DeviceEventHandler = Callable[[str, bytes], Awaitable[Any]]
 
 # Payload bytes logged for unrecognized traffic. Full payloads must never be
 # logged: a single CloudTTSResponse is tens of KB of audio and produced ~190 KB
-# of log output per reply.
-_MAX_LOGGED_PAYLOAD = 64
+# of log output per reply. 512 bytes is enough to see a JSON envelope or proto
+# type name; 64 bytes used to cut off inside `events/device-logs` envelopes.
+_MAX_LOGGED_PAYLOAD = 512
+
+# `events/device-logs` carries the robot's own log stream as a JSON envelope:
+# {"timestamp": "...", "level": "I", "tag": "Unity   ", "pid": ..., <message>}.
+# It is the only window into what the firmware actually does with what we
+# publish — whether it plays a CloudTTSResponse, drops it, or is still busy from
+# a previous line. It used to fall through to the generic dump above, which cut
+# every entry off at 64 bytes, i.e. inside the envelope and before the message.
+_ROBOT_LOG_SUFFIX = "events/device-logs"
+
+# Envelope keys that are metadata rather than the log text itself.
+_ROBOT_LOG_META_KEYS = frozenset({"timestamp", "level", "tag", "pid", "tid"})
 
 # mosquitto publishes its log to `$SYS/broker/log/#` (enabled by `log_dest topic`
 # in mosquitto.conf). Parsing it is how OpenMoxie notices a robot connecting —
@@ -57,6 +69,29 @@ _CONNECT_RE = re.compile(r"connected from (.*) as (d_[a-f0-9-]+)")
 _DISCONNECT_RE = re.compile(
     r"Client (d_[a-f0-9-]+) (?:closed its connection|disconnected)",
 )
+
+
+def _parse_robot_log_entries(raw: str) -> list[object]:
+    """Split a device-logs payload into one or more log records."""
+    stripped = raw.strip()
+    if not stripped:
+        return [raw]
+    try:
+        parsed = json.loads(stripped)
+    except ValueError:
+        entries = []
+        for line in stripped.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entries.append(json.loads(line))
+            except ValueError:
+                entries.append(line)
+        return entries or [raw]
+    if isinstance(parsed, list):
+        return parsed
+    return [parsed]
 
 
 class MqttService:
@@ -80,6 +115,9 @@ class MqttService:
         self._remote_chat_handler: DeviceEventHandler | None = None
         self._activity_log_handler: DeviceEventHandler | None = None
         self._device_state_handler: DeviceEventHandler | None = None
+        # Last `client-service-robot-status` JSON per device, so heartbeats
+        # that did not change are not logged every few hundred ms.
+        self._last_robot_status: dict[str, str] = {}
 
     # --- registration -------------------------------------------------------
 
@@ -176,10 +214,16 @@ class MqttService:
         if self._dispatch_device_state(device_id, msg):
             return
 
-        # Muted high-volume traffic.
-        if msg.payload.startswith(b"embodied.power"):
+        if msg.topic.endswith(_ROBOT_LOG_SUFFIX):
+            self._on_device_log(device_id, msg)
             return
+
         if msg.topic.endswith("client-service-robot-status"):
+            self._on_robot_status(device_id, msg)
+            return
+
+        # High-volume battery/thermal protobuf; nothing about speech.
+        if msg.payload.startswith(b"embodied.power"):
             return
         if msg.topic.endswith("events/zmq"):
             if msg.payload.startswith(b"embodied.perception.audio.zmqSTTRequest"):
@@ -200,6 +244,65 @@ class MqttService:
             msg.payload[:_MAX_LOGGED_PAYLOAD],
             len(msg.payload),
         )
+
+    def _on_device_log(self, device_id: str | None, msg: MQTTMessage) -> None:
+        """Re-emit the robot's own log stream, in full.
+
+        The firmware filters before sending (`default_loglevel`). What it does
+        send is re-logged at INFO so a DEBUG/VERBOSE robot line cannot be
+        swallowed by Python's logger even if a handler is set to INFO.
+
+        Payloads may be a single JSON object, a JSON array, or NDJSON.
+        """
+        if not settings.ROBOT_LOG_CAPTURE:
+            return
+
+        raw = msg.payload.decode("utf-8", errors="replace")
+        for entry in _parse_robot_log_entries(raw):
+            self._emit_robot_log(device_id, entry)
+
+    def _emit_robot_log(self, device_id: str | None, entry: object) -> None:
+        if not isinstance(entry, dict):
+            logger.info("robot-log %s: %s", device_id, entry)
+            return
+
+        level = str(entry.get("level", "I")).upper()[:1]
+        tag = str(entry.get("tag", "")).strip()
+        text = entry.get("message")
+        if text is None:
+            body = {k: v for k, v in entry.items() if k not in _ROBOT_LOG_META_KEYS}
+            text = next(iter(body.values())) if len(body) == 1 else body
+
+        extra = []
+        for key in ("module", "logger", "file", "func"):
+            value = entry.get(key)
+            if value:
+                extra.append(f"{key}={value}")
+        suffix = f" ({', '.join(extra)})" if extra else ""
+
+        # Always INFO: the original robot level is in the line (`[D]`, `[W]`).
+        logger.info(
+            "robot-log [%s] %s: %s%s",
+            level,
+            tag or "-",
+            text,
+            suffix,
+        )
+
+    def _on_robot_status(self, device_id: str | None, msg: MQTTMessage) -> None:
+        """Log `client-service-robot-status` when the payload actually changes.
+
+        This topic was previously dropped as heartbeat noise. It is the closest
+        thing to a live FSM dump (output slot, MarkingUp, power). Identical
+        repeats are skipped so a 2 Hz heartbeat does not drown speech logs.
+        """
+        raw = msg.payload.decode("utf-8", errors="replace")
+        key = device_id or ""
+        if self._last_robot_status.get(key) == raw:
+            return
+        self._last_robot_status[key] = raw
+        preview = raw if len(raw) <= 800 else raw[:800] + "…"
+        logger.info("robot-status %s: %s", device_id, preview)
 
     def _on_broker_log(self, msg: MQTTMessage) -> None:
         """Track robot connects/disconnects from the mosquitto log topic.
@@ -320,7 +423,17 @@ class MqttService:
 
     def publish_proto(self, topic: str, message: Message) -> None:
         """Publish a protobuf message using the robot's framing convention."""
-        self.client.publish(topic, self._frame_proto(message))
+        payload = self._frame_proto(message)
+        info = self.client.publish(topic, payload)
+        rc = getattr(info, "rc", 0)
+        if rc not in (0, None):
+            logger.error(
+                "mqtt publish failed rc=%s topic=%s type=%s bytes=%d",
+                rc,
+                topic,
+                message.DESCRIPTOR.full_name,
+                len(payload),
+            )
 
     def send_proto_subscribe(self, device_id: str) -> None:
         """Tell the robot which proto message types to forward to this service."""

@@ -35,13 +35,42 @@ def make_wav(sample_rate: int = 24000, channels: int = 1, frames: int = 2400) ->
     return buf.getvalue()
 
 
+def make_streaming_wav(pcm: bytes, sample_rate: int = 24000) -> bytes:
+    """A WAV shaped exactly like OpenAI's streamed `response_format="wav"`.
+
+    Both the RIFF and data chunk sizes carry the 0xFFFFFFFF "length unknown"
+    placeholder — the header that silences Moxie for the rest of a session.
+    """
+    header = (
+        b"RIFF" + b"\xff\xff\xff\xff" + b"WAVEfmt "
+        + (16).to_bytes(4, "little")
+        + (1).to_bytes(2, "little")          # PCM
+        + (1).to_bytes(2, "little")          # mono
+        + sample_rate.to_bytes(4, "little")
+        + (sample_rate * 2).to_bytes(4, "little")
+        + (2).to_bytes(2, "little")          # block align
+        + (16).to_bytes(2, "little")         # bits per sample
+        + b"data" + b"\xff\xff\xff\xff"
+    )
+    return header + pcm
+
+
+# 1200 frames of non-silent PCM16, i.e. what `response_format="pcm"` returns.
+FAKE_PCM = b"\x00\x01" * 1200
+
+
 class _FakeSpeech:
-    def __init__(self, audio: bytes) -> None:
-        self._audio = audio
+    """Stands in for `client.audio.speech`, honouring `response_format`."""
+
+    def __init__(self, pcm: bytes) -> None:
+        self._pcm = pcm
+        self.calls: list[dict] = []
 
     def create(self, **kwargs):  # noqa: ANN003, ANN201
+        self.calls.append(kwargs)
         fmt = kwargs.get("response_format", "wav")
-        content = self._audio if fmt == "wav" else b"\x00\x01" * 1200
+        # Mirror the real API: "wav" streams a placeholder-size RIFF header.
+        content = self._pcm if fmt == "pcm" else make_streaming_wav(self._pcm)
         return type("Resp", (), {"content": content})()
 
 
@@ -66,9 +95,9 @@ class _FakeCompletions:
 class FakeOpenAI:
     """Minimal stand-in for the OpenAI client used across the pipeline."""
 
-    def __init__(self, audio: bytes, transcript: str, reply: str) -> None:
+    def __init__(self, pcm: bytes, transcript: str, reply: str) -> None:
         self.audio = type("Audio", (), {})()
-        self.audio.speech = _FakeSpeech(audio)
+        self.audio.speech = _FakeSpeech(pcm)
         self.audio.transcriptions = _FakeTranscriptions(transcript)
         self.chat = type("Chat", (), {})()
         self.chat.completions = _FakeCompletions(reply)
@@ -78,7 +107,7 @@ class FakeOpenAI:
 def fake_openai() -> FakeOpenAI:
     """Install a fake OpenAI client and a test API key; restore afterwards."""
     client = FakeOpenAI(
-        audio=make_wav(),
+        pcm=FAKE_PCM,
         transcript="Привет, меня зовут Мокси",
         reply="Привет! Рад тебя видеть!",
     )

@@ -164,14 +164,14 @@ async def set_puppet_status(body: PuppetToggleRequest) -> dict:
 async def speak(body: SpeakRequest) -> dict:
     """Make Moxie speak `text` out loud (Russian or Kazakh).
 
-    Sequence (required for the 2nd+ line to play under puppet + cloud_tts):
-      1. INTERRUPT — clear leftover telehealth / MarkingUp state
-      2. wait until the robot reports READY (or settle / timeout)
-      3. PLAY_OUTPUT — robot emits CloudTTSRequest, we answer with OpenAI audio
+    Waits until the robot has reported telehealth READY (or a short settle),
+    then sends PLAY_OUTPUT. The robot emits a CloudTTSRequest; this service
+    answers with OpenAI audio. Matches OpenMoxie's puppet speak path — do not
+    INTERRUPT before every line; that is `POST /tts/interrupt`.
 
-    Do not spam this while a previous line is still synthesizing; calls for the
-    same device are serialized. Prefer leaving puppet mode enabled for the whole
-    session — flipping it mid-session can crash the native stack.
+    Calls for the same device are serialized. Prefer leaving puppet mode
+    enabled for the whole session — flipping it mid-session can crash the
+    native stack.
     """
     target = _require_device(body.device_id)
     logger.info("received /tts/speak for %s: chars=%d", target, len(body.text))

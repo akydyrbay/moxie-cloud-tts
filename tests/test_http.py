@@ -33,8 +33,8 @@ def _telehealth_actions(captured_publish: list) -> list[dict]:
     return actions
 
 
-def test_speak_interrupts_then_play_output(client, known_device, captured_publish) -> None:
-    """Repeated /tts/speak must INTERRUPT then PLAY_OUTPUT (OpenMoxie shape)."""
+def test_speak_sends_play_output(client, known_device, captured_publish) -> None:
+    """OpenMoxie's puppet speak path is PLAY_OUTPUT, not INTERRUPT+PLAY."""
     resp = client.post("/tts/speak", json={"text": "Привет, как дела?"})
     assert resp.status_code == 200
     body = resp.json()
@@ -42,26 +42,24 @@ def test_speak_interrupts_then_play_output(client, known_device, captured_publis
     assert body["device_id"] == DEVICE
 
     actions = _telehealth_actions(captured_publish)
-    assert [a["action"] for a in actions] == ["INTERRUPT", "PLAY_OUTPUT"]
-    output = actions[1]["output"]
+    assert [a["action"] for a in actions] == ["PLAY_OUTPUT"]
+    output = actions[0]["output"]
     assert output["text"] == "Привет, как дела?"
     # OpenMoxie always sends markup; text alone is the fallback path.
     assert output["markup"] == "Привет, как дела?"
 
 
-def test_second_speak_also_resets(client, known_device, captured_publish) -> None:
-    """The Nth speak must still INTERRUPT — that is what clears leftover state."""
+def test_second_speak_is_also_just_play_output(client, known_device, captured_publish) -> None:
+    """The Nth speak must not INTERRUPT — that cancelled the cloud output path."""
     note_puppet_state(DEVICE, "READY")
     client.post("/tts/speak", json={"text": "один"})
     note_puppet_state(DEVICE, "READY")
     client.post("/tts/speak", json={"text": "два"})
 
     actions = _telehealth_actions(captured_publish)
-    assert [a["action"] for a in actions] == [
-        "INTERRUPT", "PLAY_OUTPUT", "INTERRUPT", "PLAY_OUTPUT",
-    ]
-    assert actions[1]["output"]["text"] == "один"
-    assert actions[3]["output"]["text"] == "два"
+    assert [a["action"] for a in actions] == ["PLAY_OUTPUT", "PLAY_OUTPUT"]
+    assert actions[0]["output"]["text"] == "один"
+    assert actions[1]["output"]["text"] == "два"
 
 
 def test_speak_without_a_robot_is_a_clear_error(client, captured_publish) -> None:

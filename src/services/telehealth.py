@@ -12,11 +12,19 @@ whose `event_id` matches a request it is currently waiting on. Pushing
 PLAY_OUTPUT makes the robot itself decide to speak, and — with `cloud_tts=1` —
 issue a `CloudTTSRequest` that we answer with OpenAI audio.
 
-Sequential speaks need an explicit reset. After a cloud line the robot may stay
-out of READY (or keep an empty-`event_id` output slot) even though it still
-emits a fresh CloudTTSRequest. OpenMoxie's puppet UI exposes Interrupt for this;
-we INTERRUPT and wait for READY before every PLAY_OUTPUT so the Nth line is as
-clean as the first.
+OpenMoxie's puppet page sends PLAY_OUTPUT and nothing else; Interrupt is a
+separate button (`POST /tts/interrupt` here). Prepending INTERRUPT to every
+line was a speculative fix for leftover output state. It did not help, and
+after a cloud-TTS utterance it can cancel the output path while leaving
+markup intact — the robot still emits a CloudTTSRequest, we still answer, and
+nothing is voiced.
+
+On telehealth state: the robot reports it on
+`events/client-service-activity-log` only at *session* boundaries — READY when
+it enters TELEHEALTH, EXITING when it leaves. It does not report per-utterance
+transitions, so there is no post-line READY to wait for. `wait_until_ready()`
+therefore returns immediately whenever the robot's last reported state is READY,
+and only blocks while the session is still coming up.
 
 Per OpenMoxie, `Output.markup` is the default speak path and `text` is only used
 when markup is empty. We therefore send both (markup == text when no mood markup
@@ -115,11 +123,15 @@ def play_output(device_id: str, text: str, markup: str | None = None) -> None:
 
 
 def interrupt(device_id: str) -> None:
-    """Interrupt whatever the robot is currently saying / marking up."""
+    """Interrupt whatever the robot is currently saying / marking up.
+
+    `_puppet_state` deliberately holds only states the ROBOT reported. An
+    earlier version optimistically wrote a synthetic "INTERRUPTING" here, but
+    the robot never reports a per-utterance state to contradict it, so the
+    cached value stayed wrong for the whole session and made every subsequent
+    `speak_line` block for the full `SPEAK_READY_TIMEOUT_S` before giving up.
+    """
     logger.info("telehealth INTERRUPT to %s", device_id)
-    # After interrupt the robot is no longer READY until it says so.
-    if _puppet_state.get(device_id) == STATE_READY:
-        _puppet_state[device_id] = "INTERRUPTING"
     _send(device_id, {"action": "INTERRUPT"})
 
 
@@ -183,18 +195,15 @@ async def wait_until_ready(
 
 
 async def speak_line(device_id: str, text: str) -> dict:
-    """INTERRUPT → wait READY → PLAY_OUTPUT. Safe for repeated /tts/speak.
+    """PLAY_OUTPUT, matching OpenMoxie's puppet speak path.
 
-    One speak at a time per device. This is the fix for "first line plays, later
-    lines are silent": leftover telehealth/cloud-TTS output state is cleared
-    before each new line, and we do not fire PLAY_OUTPUT until the robot says
-    it is READY (or a settle/timeout fires).
+    One speak at a time per device so concurrent calls cannot interleave. Once
+    the robot has reported READY (on entering TELEHEALTH) this returns as soon
+    as PLAY_OUTPUT is on the wire; it only blocks while the session is still
+    coming up. To cut a line that is already playing, use `interrupt()`.
     """
     async with _speak_lock(device_id):
         started = time.monotonic()
-        interrupt(device_id)
-        # Brief pause so the INTERRUPT is processed before we wait/poll READY.
-        await asyncio.sleep(settings.SPEAK_INTERRUPT_PAUSE_S)
         ready = await wait_until_ready(device_id)
         play_output(device_id, text)
         return {
@@ -205,8 +214,8 @@ async def speak_line(device_id: str, text: str) -> dict:
             "puppet_state": get_puppet_state(device_id),
             "waited_ms": int((time.monotonic() - started) * 1000),
             "detail": (
-                "INTERRUPT + PLAY_OUTPUT sent. Moxie should emit a "
-                "CloudTTSRequest which this service answers with OpenAI audio."
+                "PLAY_OUTPUT sent. Moxie should emit a CloudTTSRequest which "
+                "this service answers with OpenAI audio."
             ),
         }
 

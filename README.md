@@ -89,7 +89,7 @@ POST /tts/speak {"text": "Привет!"}
    │                                              │  the cloud for the voice
    ◄── CloudTTSRequest{markup, event_id=E} ───────┘
    │
-   ├─ strip markup → OpenAI TTS → WAV 24 kHz mono
+   ├─ strip markup → OpenAI TTS → raw PCM 24 kHz mono
    │
    └─ CloudTTSResponse{event_id=E, audio} ─────► Moxie plays it
 ```
@@ -121,7 +121,7 @@ Everything is environment variables or `.env`; see `src/config.py`.
 | `OPENAI_API_KEY` | — | Required. Never hardcode it. |
 | `CLOUD_TTS_AUTO_ENABLE` | `true` | Enable cloud TTS at startup. Skipped without a key. |
 | `PUPPET_MODE_AUTO_ENABLE` | `false` | Start the robot in TELEHEALTH mode. |
-| `CLOUD_TTS_AUDIO_RAW_PCM` | `false` | `false` sends WAV; `true` sends raw PCM16. |
+| `CLOUD_TTS_AUDIO_RAW_PCM` | `true` | `true` sends raw PCM16 (what `AudioBuffer` is); `false` wraps WAV. |
 | `DEVICE_ID` | — | Optional override. Normally the device is auto-discovered. |
 | `MQTT_HOST` / `MQTT_PORT` | `localhost` / `8883` | Broker address. |
 | `OPENAI_REQUEST_TIMEOUT_S` | `8.0` | Must stay under the robot's wait timeout. |

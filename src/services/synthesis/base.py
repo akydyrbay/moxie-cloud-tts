@@ -21,12 +21,18 @@ class SynthesisResult:
     `audio` is the bytes that go straight into `AudioBuffer.buffer` — either a
     full WAV container or raw PCM16, depending on the engine/config. `channels`
     and `sample_rate` describe how to interpret those bytes.
+
+    `text` is what was actually voiced, carried back so the pipeline can derive
+    speech marks (`CloudTTSResponse.marks`) against this audio. It defaults to
+    empty for synthetic results such as the silence fallback, which have no
+    speech to mark up.
     """
 
     audio: bytes
     sample_rate: int
     channels: int
     synthesis_time_ms: int
+    text: str = ""
 
 
 class TTSEngine(Protocol):

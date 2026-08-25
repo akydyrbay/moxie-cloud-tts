@@ -19,6 +19,9 @@ from tests.conftest import TEST_DEVICE_ID
 OTHER_DEVICE = "some-other-robot"
 
 
+RESPONSE_PREFIX = b"embodied.unity.CloudTTSResponse:"
+
+
 def _frame_request(**kwargs) -> bytes:  # noqa: ANN003
     req = CloudTTSRequest(**kwargs)
     return (
@@ -29,10 +32,9 @@ def _frame_request(**kwargs) -> bytes:  # noqa: ANN003
 
 
 def _decode_response(payload: bytes) -> CloudTTSResponse:
-    prefix = b"embodied.unity.CloudTTSResponse:"
-    assert payload.startswith(prefix)
+    assert payload.startswith(RESPONSE_PREFIX)
     resp = CloudTTSResponse()
-    resp.ParseFromString(payload[len(prefix):])
+    resp.ParseFromString(payload[len(RESPONSE_PREFIX):])
     return resp
 
 
@@ -86,8 +88,8 @@ async def test_handle_payload_replies_to_requesting_device(
     assert resp.event_id == "evt-9"
     assert resp.chunk_num == 3
     assert len(resp.audio.buffer) > 0
-    # WAV is the default container.
-    assert resp.audio.buffer.startswith(b"RIFF")
+    # WAV is never the default: AudioBuffer is a raw-PCM payload.
+    assert not resp.audio.buffer.startswith(b"RIFF")
 
 
 async def test_markup_tags_are_not_spoken(fake_openai, captured_publish) -> None:

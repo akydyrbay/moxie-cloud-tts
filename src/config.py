@@ -92,11 +92,18 @@ class Settings(BaseSettings):
     AUDIO_CHANNELS: int = 1
 
     # AudioBuffer.buffer content selector.
-    #   False (default) -> full WAV bytes (RIFF container)   <- what Moxie gets
-    #   True            -> raw little-endian PCM16 samples   <- fallback
-    # OpenAI produces either directly via `response_format` (wav vs pcm), so no
-    # header surgery is needed. Flip to True only if WAV turns out to be wrong.
-    CLOUD_TTS_AUDIO_RAW_PCM: bool = False
+    #   True  (default) -> raw little-endian PCM16 samples
+    #   False           -> locally built WAV (truthful RIFF sizes; never OpenAI's
+    #                      streamed `response_format=wav`, which writes 0xFFFFFFFF)
+    # Tried both on the robot: neither makes the 2nd puppet line play. The proto
+    # carries `channels` and `sample_rate` beside `buffer`, so PCM is the
+    # default; False is for bench/debug.
+    CLOUD_TTS_AUDIO_RAW_PCM: bool = True
+
+    # Populate CloudTTSResponse.marks with derived Polly-style viseme/word
+    # timings. These drive lip movement on the first (heard) line. They do not
+    # make later lines play. Set false to publish an empty marks list.
+    CLOUD_TTS_EMIT_MARKS: bool = True
 
     # CloudTTSResponse.request_source. "robot" = ROBOT_TTS_REQUEST (0),
     # "remotechat" = REMOTECHAT_TTS_REQUEST (1). Note proto3 omits 0 from the
@@ -118,14 +125,28 @@ class Settings(BaseSettings):
 
     # --- /tts/speak sequencing (puppet + cloud_tts) -------------------------
     # After INTERRUPT, pause briefly so the robot can leave its previous output
-    # state before we wait for READY / send PLAY_OUTPUT.
+    # state before we send PLAY_OUTPUT.
     SPEAK_INTERRUPT_PAUSE_S: float = 0.35
     # How long to wait for a telehealth READY report before sending PLAY_OUTPUT
-    # anyway. Covers the gap after a prior cloud line finishes (or is interrupted).
+    # anyway. Only applies while the TELEHEALTH session is still coming up: the
+    # robot reports READY on entering the session and does not report anything
+    # per line, so once it is READY every speak proceeds immediately.
     SPEAK_READY_TIMEOUT_S: float = 4.0
     # When the robot has never reported a telehealth state (first speak / quiet
     # firmware), settle this long instead of blocking on READY.
     SPEAK_SETTLE_S: float = 0.5
+
+    # --- Robot-side logging -------------------------------------------------
+    # The robot streams its own log to `events/device-logs`. Re-emitting it is
+    # the only way to see what the firmware does with a CloudTTSResponse, since
+    # nothing else it publishes reports playback.
+    ROBOT_LOG_CAPTURE: bool = True
+    # Pushed as the `default_loglevel` device prop, i.e. the level the ROBOT
+    # filters at before sending. OpenMoxie documents {info, warning, error,
+    # fatal}; "warning" hides most of the speech pipeline. "info" is the most
+    # verbose value that set lists. "debug"/"verbose" are not documented and
+    # may be ignored by the firmware.
+    ROBOT_LOG_LEVEL: str = "info"
 
 
 settings = Settings()
@@ -217,7 +238,7 @@ HARDCODED_DEVICE_CONFIG: dict = {
             "brain_entrances_available": "1",
             "mqtt_files": "0",
             "file_sync_wait": "0",
-            "default_loglevel": "warning",
+            "default_loglevel": settings.ROBOT_LOG_LEVEL,
         },
     },
 }
