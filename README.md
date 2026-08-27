@@ -42,6 +42,13 @@ discovered device d_xxxxxxxx-...
 bootstrapping device d_xxxxxxxx-... (cloud_tts=1 moxie_mode=None)
 ```
 
+Put it in puppet mode so it stays awake and only says what you send:
+
+```bash
+curl -X POST localhost:8000/tts/puppet \
+  -H 'content-type: application/json' -d '{"enabled": true}'
+```
+
 Then make it talk:
 
 ```bash
@@ -52,14 +59,6 @@ curl -X POST localhost:8000/tts/speak \
 curl -X POST localhost:8000/tts/speak \
   -H 'content-type: application/json' \
   -d '{"text": "Сәлем! Бүгін көңіл-күйің қалай?"}'
-```
-
-If Moxie keeps drifting off into its own activities, put it in puppet mode so it
-stays awake and only says what you send:
-
-```bash
-curl -X POST localhost:8000/tts/puppet \
-  -H 'content-type: application/json' -d '{"enabled": true}'
 ```
 
 ## No robot handy?
