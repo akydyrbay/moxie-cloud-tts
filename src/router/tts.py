@@ -136,8 +136,7 @@ async def get_cloud_tts_status() -> dict:
 async def set_cloud_tts_status(body: CloudTtsToggleRequest) -> dict:
     """Toggle cloud_tts live, without rebooting the robot.
 
-    Publishes onto the ZMQ bus, which is consumed in the background and applied
-    via `tts_service._apply_toggle` (state update + MQTT config push).
+    Updates in-memory state and pushes the config to connected robots over MQTT.
     """
     logger.info("received cloud_tts toggle request: enabled=%s", body.enabled)
     return await tts_service.request_toggle(body.enabled)

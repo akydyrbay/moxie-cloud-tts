@@ -2,9 +2,8 @@
 
 Origin: the `lifespan` pattern (connect MQTT on startup, disconnect on
 shutdown, `loop_start()`/`loop_stop()`) is the same shape as your existing
-`main.py` / `moxie/src/main.py`. Extended here to also start the ZMQ consumer
-task, and to mount the new `router/tts.py` routes so they show up in Swagger
-at /docs.
+`main.py` / `moxie/src/main.py`. Extended here to mount the `router/tts.py`
+routes so they show up in Swagger at /docs.
 
 Also registers the remote-chat brain so the robot's modules/schedule handshake
 and conversation turns are answered (required before cloud TTS can work).
@@ -31,7 +30,6 @@ from fastapi.concurrency import run_in_threadpool
 from src.config import settings
 from src.logging_conf import configure_logging
 from src.router.tts import router as tts_router
-from src.services import tts_service
 from src.services.cloud_tts_request import (
     CLOUD_TTS_REQUEST_PREFIX,
     handle_payload,
@@ -44,7 +42,6 @@ from src.services.remote_chat import (
     handle_remote_chat_payload,
     remote_chat_brain,
 )
-from src.services.zmq_service import zmq_service
 
 configure_logging()
 logger = logging.getLogger(__name__)
@@ -57,12 +54,9 @@ async def _on_device_state(device_id: str, _payload: bytes) -> None:
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    # 1. Bind the ZMQ PUB socket inside the active worker process
-    zmq_service.start()
-
     loop = asyncio.get_running_loop()
 
-    # 2. Milestone 2: let the MQTT service route inbound CloudTTSRequest
+    # 1. Milestone 2: let the MQTT service route inbound CloudTTSRequest
     # messages (delivered on paho's network thread) into the async synthesis
     # pipeline on THIS running event loop.
     mqtt_service.register_cloud_tts_request_handler(
@@ -71,7 +65,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         CLOUD_TTS_REQUEST_PREFIX,
     )
 
-    # 3. Remote-chat brain: answer modules/schedule and conversation turns so
+    # 2. Remote-chat brain: answer modules/schedule and conversation turns so
     # the robot can enter a real turn and later emit CloudTTSRequest.
     mqtt_service.register_remote_chat_handlers(
         loop,
@@ -80,7 +74,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         device_state_handler=_on_device_state,
     )
 
-    # 4. Auto-enable cloud_tts in memory once the brain is ready. The robot
+    # 3. Auto-enable cloud_tts in memory once the brain is ready. The robot
     # gets this on its first bootstrap config push (no manual HTTP needed).
     if settings.CLOUD_TTS_AUTO_ENABLE and not settings.OPENAI_API_KEY:
         logger.error(
@@ -95,7 +89,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
             "(will push when the robot connects)",
         )
 
-    # 4b. Build the OpenAI client now rather than inside the first
+    # 3b. Build the OpenAI client now rather than inside the first
     # CloudTTSRequest. Constructing it costs ~2 s (import + TLS setup), and the
     # robot is already waiting for audio by then.
     if settings.OPENAI_API_KEY:
@@ -111,14 +105,12 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
             "(robot stays awake and speaks only via POST /tts/speak)",
         )
 
-    # 5. Connect external protocols and kick off background consumers
+    # 4. Connect MQTT and start paho's background network loop
     mqtt_service.connect()
-    zmq_service.start_consumer(tts_service.apply_toggle)
 
     yield
 
-    # 6. Clean up all connections on app shutdown
-    await zmq_service.stop()
+    # 5. Clean up MQTT on app shutdown
     mqtt_service.disconnect()
 
 

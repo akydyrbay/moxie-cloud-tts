@@ -51,10 +51,6 @@ class Settings(BaseSettings):
     # config pushes) instead of standalone.
     OPENMOXIE_ENABLED: bool = False
 
-    # In-process ZMQ PUB address used to decouple "the Swagger endpoint received
-    # a toggle" from "the message actually goes out over MQTT".
-    ZMQ_PUB_ADDR: str = "tcp://127.0.0.1:5560"
-
     SOFTWARE_VERSION: str = "0.1.0"
     MODULE_NAME: str = "moxie-tts-service"
 

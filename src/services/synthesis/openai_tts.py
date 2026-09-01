@@ -92,5 +92,5 @@ class OpenAITTSEngine:
         )
 
 
-# Module-level singleton — mirrors the `mqtt_service` / `zmq_service` pattern.
+# Module-level singleton — mirrors the `mqtt_service` pattern.
 openai_tts_engine = OpenAITTSEngine()

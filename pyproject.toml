@@ -9,7 +9,6 @@ dependencies = [
     "paho-mqtt>=2.1.0",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",
-    "pyzmq>=26.0.0",
     "protobuf>=4.25.0",
     "openai>=1.55.0",
 ]
@@ -44,7 +43,7 @@ ignore = [
     "ANN003",   # Missing type annotation for **{name}
     "ANN401",   # Dynamically typed expressions (typing.Any) are disallowed in {name}
     "FBT001",   # Boolean positional arg — this whole service is a bool-toggle
-                # pipeline (`enabled: bool` threaded through zmq -> state ->
-                # mqtt); forcing keyword-only here would just add noise at
-                # every call site for no real ambiguity reduction.
+                # pipeline (`enabled: bool` threaded through state -> mqtt);
+                # forcing keyword-only here would just add noise at every
+                # call site for no real ambiguity reduction.
 ]

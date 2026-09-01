@@ -85,6 +85,19 @@ def test_speak_direct_unsupported_language(client, fake_openai, known_device, ca
     assert captured_publish == []
 
 
+def test_cloud_tts_toggle_pushes_config(client, known_device, captured_publish) -> None:
+    resp = client.post("/tts/cloud-tts", json={"enabled": True})
+    assert resp.status_code == 200
+    assert resp.json()["settings"]["props"]["cloud_tts"] == "1"
+
+    topic, payload = captured_publish[0]
+    assert topic == f"/devices/{DEVICE}/config"
+    assert json.loads(payload)["settings"]["props"]["cloud_tts"] == "1"
+
+    client.post("/tts/cloud-tts", json={"enabled": False})
+    assert json.loads(captured_publish[-1][1])["settings"]["props"]["cloud_tts"] == "0"
+
+
 def test_puppet_toggle_pushes_config(client, known_device, captured_publish) -> None:
     resp = client.post("/tts/puppet", json={"enabled": True})
     assert resp.status_code == 200
