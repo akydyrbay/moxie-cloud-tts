@@ -35,10 +35,12 @@ from src.services.devices import device_registry
 logger = logging.getLogger(__name__)
 
 # Proto message types this service asks the robot to forward to it.
-# `CloudTTSRequest` is what drives synthesis. (zmqSTTRequest is intentionally
-# NOT requested yet — STT is a later milestone.)
+# `CloudTTSRequest` drives synthesis; `zmqSTTRequest` streams the robot's mic
+# audio + VAD state so the STT handler can answer each listen session (Goal 1
+# injects a canned recognized line; real transcription is a later milestone).
 PROTO_SUBSCRIBE_TYPES = [
     "embodied.unity.CloudTTSRequest",
+    "embodied.perception.audio.zmqSTTRequest",
 ]
 
 # Async handler receiving (device_id, raw_payload).
@@ -112,6 +114,8 @@ class MqttService:
         self._loop: asyncio.AbstractEventLoop | None = None
         self._cloud_tts_request_handler: DeviceEventHandler | None = None
         self._cloud_tts_request_prefix: bytes | None = None
+        self._stt_request_handler: DeviceEventHandler | None = None
+        self._stt_request_prefix: bytes | None = None
         self._remote_chat_handler: DeviceEventHandler | None = None
         self._activity_log_handler: DeviceEventHandler | None = None
         self._device_state_handler: DeviceEventHandler | None = None
@@ -133,6 +137,21 @@ class MqttService:
         self._cloud_tts_request_prefix = match_prefix
         logger.info(
             "registered inbound CloudTTSRequest handler (prefix=%r)",
+            match_prefix,
+        )
+
+    def register_stt_request_handler(
+        self,
+        loop: asyncio.AbstractEventLoop,
+        handler: DeviceEventHandler,
+        match_prefix: bytes,
+    ) -> None:
+        """Register the handler for inbound framed `zmqSTTRequest` payloads."""
+        self._loop = loop
+        self._stt_request_handler = handler
+        self._stt_request_prefix = match_prefix
+        logger.info(
+            "registered inbound zmqSTTRequest handler (prefix=%r)",
             match_prefix,
         )
 
@@ -193,6 +212,9 @@ class MqttService:
         if self._dispatch_cloud_tts_request(device_id, msg):
             return
 
+        if self._dispatch_stt_request(device_id, msg):
+            return
+
         if self._dispatch_device_event(
             device_id,
             msg,
@@ -227,8 +249,14 @@ class MqttService:
             return
         if msg.topic.endswith("events/zmq"):
             if msg.payload.startswith(b"embodied.perception.audio.zmqSTTRequest"):
-                # Robot is streaming mic audio for cloud STT. Consuming this is a
-                # later milestone; ignore quietly so it can't flood the log.
+                # Normally consumed by _dispatch_stt_request above. This quiet
+                # fallback only runs when no STT handler is registered, so a
+                # stream of mic-audio frames can't flood the log.
+                return
+            if msg.payload.startswith(b"embodied.perception.audio.ASRAnalytics"):
+                # Per-session ASR analytics the robot emits alongside each STT
+                # session (one per utterance). We don't consume it; ignore
+                # quietly so it can't flood the log.
                 return
             logger.info(
                 "unhandled zmq proto on %s: %r",
@@ -411,6 +439,24 @@ class MqttService:
             len(payload),
         )
         self._schedule(handler, device_id, payload, "CloudTTSRequest")
+        return True
+
+    def _dispatch_stt_request(
+        self, device_id: str | None, msg: MQTTMessage,
+    ) -> bool:
+        """Route a framed `zmqSTTRequest` (streamed mic audio) to the STT handler.
+
+        These frames are high-volume (many per utterance), so unlike the
+        CloudTTSRequest path nothing is logged per frame; the handler logs only
+        when it answers a completed listen session.
+        """
+        handler = self._stt_request_handler
+        prefix = self._stt_request_prefix
+        if handler is None or prefix is None or self._loop is None or not device_id:
+            return False
+        if not msg.payload.startswith(prefix):
+            return False
+        self._schedule(handler, device_id, bytes(msg.payload), "zmqSTTRequest")
         return True
 
     # --- outbound -----------------------------------------------------------

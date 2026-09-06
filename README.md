@@ -140,7 +140,3 @@ frames (16 kHz mono PCM16), flagging `END_OF_SPEECH` itself, then expects a
 work, plus confirming the robot's recognizer settings accept Russian/Kazakh.
 
 ## Documents
-
-- `PIPELINE_AUDIT.md` — end-to-end audit that drove the current design
-- `AUDIT_FIXES.md` — what each finding turned into
-- `FIX_EXPLANATION.md` — why the robot broke and how the brain fixes it

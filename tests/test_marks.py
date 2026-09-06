@@ -8,15 +8,46 @@ time, no mark may point past the audio, and every buffer ends with a closing
 
 from src.services.marks import (
     MARK_SENTENCE,
+    MARK_SSML,
     MARK_VISEME,
     MARK_WORD,
     VISEME_SILENCE,
     build_marks,
+    command_marks,
     viseme_for,
 )
 
 RU = "Привет! Как дела?"
 KK = "Сәлем! Бүгін көңіл-күйің қалай?"
+
+# The robot's entry-animation markup: command marks only, no speakable text.
+ENTRY_MARKUP = (
+    '<mark name="cmd:idlestate,data:{+idleState+:7}"/>'
+    '<mark name="cmd:behaviour-tree,data:{+transition+:0.5}"/>'
+)
+
+
+def test_command_marks_echoes_command_only_markup_at_time_zero() -> None:
+    """Command-only entry markup yields ssml marks the robot needs, at time 0."""
+    marks = command_marks(ENTRY_MARKUP, 200)
+    assert [m.type for m in marks] == [MARK_SSML, MARK_SSML]
+    assert [m.time for m in marks] == [0, 0]
+    assert marks[0].value == "cmd:idlestate,data:{+idleState+:7}"
+    assert marks[1].value == "cmd:behaviour-tree,data:{+transition+:0.5}"
+
+
+def test_command_marks_time_tracks_position_in_speech() -> None:
+    """A mark after the text fires later than one before it."""
+    marks = command_marks('<mark name="cmd:a"/>Привет<mark name="cmd:b"/>', 1000)
+    assert [m.value for m in marks] == ["cmd:a", "cmd:b"]
+    assert marks[0].time == 0
+    assert marks[1].time > marks[0].time
+
+
+def test_command_marks_ignores_plain_and_non_mark_tags() -> None:
+    assert command_marks("Привет, как дела?", 1000) == []
+    assert command_marks('<break time="0.5s"/>', 1000) == []
+    assert command_marks("", 1000) == []
 
 
 def of_type(marks, kind):

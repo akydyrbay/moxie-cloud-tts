@@ -81,6 +81,26 @@ class Settings(BaseSettings):
     SUPPORTED_LANGUAGES: list[str] = ["ru", "kk"]
     DEFAULT_TTS_LANGUAGE: str = "ru"
 
+    # --- STT injection (Goal 1: speak without puppet mode) ------------------
+    # Instead of transcribing the robot's mic audio, the STT handler replies to
+    # each completed listen session with this fixed "recognized" line. The robot
+    # then believes it heard it and drives a normal conversation turn
+    # (remote_chat -> OpenAI chat -> CloudTTS -> playback), so the injected line
+    # is a stimulus and what Moxie says is the chat reply to it. Set to "" to
+    # disable injection (real transcription is a later milestone). See
+    # SPEAK_WITHOUT_PUPPET_PLAN.md.
+    INJECTED_STT_LINE: str = "Привет, как дела?"
+
+    # On wake the robot first enters its onboard WAKEUP module ("say 'Moxie,
+    # let's go!' to start the day") and will not reach OPENMOXIE_CHAT until it
+    # hears that trigger. Until the robot actually enters the remote chat module,
+    # the STT handler injects THIS phrase instead of INJECTED_STT_LINE, to open
+    # the gate; once OPENMOXIE_CHAT is active it switches to INJECTED_STT_LINE.
+    # Set "" if your robot does not gate on WAKEUP (inject the chat line from the
+    # start). If the gate matches on local recognition rather than cloud STT,
+    # say the phrase aloud once — the phase switch still triggers on entry.
+    WAKEUP_TRIGGER_LINE: str = "Moxie, let's go"
+
     # --- Audio --------------------------------------------------------------
     # OpenAI TTS returns mono 24 kHz audio; the rate is recorded explicitly so
     # AudioBuffer.sample_rate is always truthful about the bytes we send.
@@ -179,12 +199,18 @@ REMOTE_CHAT_MODULE_IDS: frozenset[str] = frozenset(
 # Opener lines when the robot sends command=prompt for a remote module.
 # `|` separates alternatives; one is picked at random.
 REMOTE_CHAT_OPENERS: dict[str, str] = {
+    # Line Moxie speaks on wake (non-puppet): the robot launches OPENMOXIE_CHAT
+    # from DEFAULT_SCHEDULE and voices this opener on the first `prompt`.
+    # "default": (
+    #     "I'm so excited. I had no idea the human world would be like this!"
+    # ),
+    # --- previous default opener (kept for reference) --------------------------
     "default": (
-        "Привет! Давай поговорим. О чём ты хочешь поболтать?"
-        "|Привет! Что у тебя на уме сегодня?"
+        "Привет! Давай поговорим. чём ты хочешь поболтать?"
+        "|Привет! Что тебя на уме сегодня?"
     ),
     "short": (
-        "Привет! О чём подумаем сегодня?"
+        "Привет! чём подумаем сегодня?"
         "|Давай поболтаем! Что интересного?"
     ),
 }

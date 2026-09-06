@@ -42,6 +42,10 @@ from src.services.remote_chat import (
     handle_remote_chat_payload,
     remote_chat_brain,
 )
+from src.services.stt_request import (
+    STT_REQUEST_PREFIX,
+    handle_payload as handle_stt_payload,
+)
 
 configure_logging()
 logger = logging.getLogger(__name__)
@@ -63,6 +67,16 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         loop,
         handle_payload,
         CLOUD_TTS_REQUEST_PREFIX,
+    )
+
+    # 1b. Answer the robot's zmqSTT stream. Goal 1 injects a canned recognized
+    # line (settings.INJECTED_STT_LINE) on each completed listen session, which
+    # drives a normal conversation turn (remote_chat -> cloud TTS) without puppet
+    # mode. It also stops the STT timeout / force-idle.
+    mqtt_service.register_stt_request_handler(
+        loop,
+        handle_stt_payload,
+        STT_REQUEST_PREFIX,
     )
 
     # 2. Remote-chat brain: answer modules/schedule and conversation turns so

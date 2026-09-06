@@ -1,0 +1,844 @@
+2026-08-27 13:21:25 | Will watch for changes in these directories: ['/Users/bake.72/Desktop/git/moxie-cloud-tts/src']
+2026-08-27 13:21:25 | Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-08-27 13:21:25 | Started reloader process [34809] using WatchFiles
+2026-08-27 13:21:29 | Started server process [34833]
+2026-08-27 13:21:29 | Waiting for application startup.
+2026-08-27 13:21:29 | Binding ZMQ PUB socket to tcp://127.0.0.1:5560
+2026-08-27 13:21:29 | registered inbound CloudTTSRequest handler (prefix=b'embodied.unity.CloudTTSRequest:')
+2026-08-27 13:21:29 | registered remote-chat + activity-log MQTT handlers
+2026-08-27 13:21:29 | CLOUD_TTS_AUTO_ENABLE is set but OPENAI_API_KEY is empty — leaving cloud_tts=0 so Moxie keeps its onboard voice instead of going mute. Set OPENAI_API_KEY in .env, then POST /tts/cloud-tts {enabled:true}.
+2026-08-27 13:21:29 | connecting to mqtt localhost:8883
+2026-08-27 13:21:29 | mqtt connected (reason_code=Success)
+2026-08-27 13:21:29 | Application startup complete.
+2026-08-27 13:21:35 | Shutting down
+2026-08-27 13:21:35 | Waiting for application shutdown.
+2026-08-27 13:21:35 | Application shutdown complete.
+2026-08-27 13:21:35 | Finished server process [34833]
+2026-08-27 13:21:35 | Stopping reloader process [34809]
+2026-08-27 13:57:47 | Will watch for changes in these directories: ['/Users/bake.72/Desktop/git/moxie-cloud-tts/src']
+2026-08-27 13:57:47 | Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-08-27 13:57:47 | Started reloader process [36469] using WatchFiles
+2026-08-27 13:57:49 | Started server process [36475]
+2026-08-27 13:57:49 | Waiting for application startup.
+2026-08-27 13:57:49 | Binding ZMQ PUB socket to tcp://127.0.0.1:5560
+2026-08-27 13:57:49 | registered inbound CloudTTSRequest handler (prefix=b'embodied.unity.CloudTTSRequest:')
+2026-08-27 13:57:49 | registered remote-chat + activity-log MQTT handlers
+2026-08-27 13:57:49 | CLOUD_TTS_AUTO_ENABLE: cloud_tts set to 1 (will push when the robot connects)
+2026-08-27 13:57:53 | constructed OpenAI client (timeout=8.0s)
+2026-08-27 13:57:53 | connecting to mqtt localhost:8883
+2026-08-27 13:57:53 | Application startup complete.
+2026-08-27 13:57:53 | mqtt connected (reason_code=Success)
+2026-08-27 13:59:36 | robot d_d05e3c66-dd29-4fe2-9758-7223e31511dc connected to broker
+2026-08-27 13:59:36 | discovered device d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 13:59:37 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=None)
+2026-08-27 13:59:37 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2013-01-18T00:50:35-0800","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.78,"mode":"sleep","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"cloud_schedule_reset_threshold":"5","playzone":"0","cloud_translate":"en","brain_entrances_available":"1","local_stt":"on","audio_wake_set":"off","xmos_variant":"vad","cloud_tts_use_mp3":"0","audio_wake":"1","cloud_tts_voice_id":"Joanna","schedule_sensitive":"1","doa_range":"80","target_all":"1","wake_button"…
+2026-08-27 13:59:37 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-08-27 13:59:37 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest']
+2026-08-27 13:59:37 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T01:59:37-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.78,"mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"touch_wake_enabled":"1","xmos_variant":"vad","gcp_upload_disable":"1","audio_wake":"1","max_enroll":"2","cloud_tts":"1","rchat_api":"10","group":"1","debug_whiteboard":"0","wake_alarms":"1","mqtt_files":"0","cloud_tts_gain_db":"3","wake_button_enabled":"1","remote_transition":"1","file…
+2026-08-27 13:59:37 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787821177671', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'license', 'request_id': 'LicenseUpdate', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc'}
+2026-08-27 13:59:37 | unanswered query 'license' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=LicenseUpdate)
+2026-08-27 13:59:37 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T01:59:37-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.78,"mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"max_enroll":"2","touch_wake":"1","wake_button":"1","cloud_tts_gain_db":"3","cloud_tts":"1","cloud_tts_engine":"polly","speaker_id":"0","app_language_support":"0","cloud_tts_speech_rate":"100","brain_entrances_available":"1","wake_button_enabled":"0","file_sync_wait":"0","schedule_sensi…
+2026-08-27 13:59:37 | robot-log [I] BO-LIZZERFACE: [LIZZERFACE_VERSION] [BO-LIZZERFACE] COMMIT: b384982386bd7d04360ede01e06fda3ea8bc97a4, COMMIT_DATE: Tue May 11 18:56:59 2021 -0700
+2026-08-27 13:59:37 | robot-log [W] bo-network-util: Wifi Lost.  Attempting to reconnect/rescan.
+2026-08-27 13:59:37 | robot-log [I] bo-network-util: Wifi Reconnect successful.
+2026-08-27 13:59:37 | robot-log [I] BO-LOGGER: Started GCP Uploader
+2026-08-27 13:59:37 | robot-log [I] EBUploader: Work cycle 1 starting.  Attempting to process 14 files. [NO UPLOAD]
+2026-08-27 13:59:37 | robot-log [I] EBUploader: Upload work cycle 1.  Processed 14 files (uploaded 0 bytes) since last report.
+2026-08-27 13:59:53 | robot-log [I] Unity: [FIRMWARE_VERSION] [LizardInfoEvent] Detected lizard firmware version: Lizard Firmware: v9.11, for Hardware: FEP2, Origin: FLASH
+2026-08-27 13:59:56 | robot-log [I] Unity: [LOCAL_ASSETBUNDLES] [RobotAssetBundleManager] Available local asset bundles (65): adult-moxie,animal-breathing,anxiety,attachments,bed-time,behaviours,being-different,birthday,board-game,bullying,celebration,characters,circuit-animation,confertti-attachment,dance-music,drawing,dynamic-assetbundle-test,episodic-006-personal-space,exercise,feeling-mad,ftue,general,global-narrative,icon-present,icons-12-15-20,imaginative-play,learning-about-family,meditation,microexp,missions,module-stingers,module_icons,month-two,motorcalibration,moxie-life,orchestra,reading-000-general,reading-click-clack,reading-oh-the-places,reading-waiting-is-not-easy,reading-wild-things,rock-paper-scissors,scavenger-hunt,sign-off,sounds-12-16-20,sounds12-14,space,standalone-001-sea-turtles,standalone-003-floyd,startup,startup-audio,startup-icons,startup-shaders,startup-sysicons,startup-textures,stories,storytime,talking,testassetbundlename1,testassetbundlename2,truthfulness,underwater-adventure,whimsy,xotd,yes-chief
+2026-08-27 13:59:56 | robot-log [I] Unity: [REMOTE_ASSETBUNDLES] [RobotAssetBundleManager] Available remote asset bundles (0): 
+2026-08-27 14:00:10 | robot-log [W] Unity: [ASSETBUNDLE_GENERAL] [EBLocalAssetBundleRuntimeState] Duplicated asset filename bht_stop_talking.asset in bundle behaviours
+2026-08-27 14:00:11 | robot-log [W] Unity: [ASSETBUNDLE_GENERAL] [RobotAssetBundleManager] [RecordAssetsInBundle] The file 'bht_stop_talking.asset' in the asset bundle 'behaviours' has been previously found in found in the asset bundles 'behaviours'
+2026-08-27 14:02:24 | robot-log [W] Unity: [ASSETBUNDLE_GENERAL] [RobotAssetBundleManager] [RecordAssetsInBundle] The file 'brain_twister_icon.png' in the asset bundle 'startup-shaders' has been previously found in found in the asset bundles 'module_icons'
+2026-08-27 14:02:25 | robot-log [W] Unity: [ASSETBUNDLE_GENERAL] [RobotAssetBundleManager] [RecordAssetsInBundle] The file 'mindfulness_icon.png' in the asset bundle 'startup-shaders' has been previously found in found in the asset bundles 'module_icons'
+2026-08-27 14:02:25 | robot-log [W] Unity: [ASSETBUNDLE_GENERAL] [RobotAssetBundleManager] [RecordAssetsInBundle] The file 'moxie_thinking_icon.png' in the asset bundle 'startup-shaders' has been previously found in found in the asset bundles 'module_icons'
+2026-08-27 14:02:41 | robot-log [W] Unity: [ASSETBUNDLE_GENERAL] [RobotAssetBundleManager] [RecordAssetsInBundle] The file 'sfxwhi_sparkleexist.ogg' in the asset bundle 'whimsy' has been previously found in found in the asset bundles 'sounds-12-16-20'
+2026-08-27 14:02:46 | robot-log [W] Unity: [ROBOTACTOR_ERROR] [RobotActorComponent] AnimatorController does not contain animation state named 'I_001_01_Idles_Sleep'.
+2026-08-27 14:02:50 | robot-log [I] Unity: [ROBOT_VERSION_INFO] [Embodied.Robot.Logging.LoggingManager] App Version: 24.10.803
+2026-08-27 14:02:50 | robot-log [I] Unity: [ROBOT_VERSION_INFO] [Embodied.Robot.Logging.LoggingManager] Unity Version: 2020.3.48f1
+2026-08-27 14:02:50 | robot-log [I] Unity: [ROBOT_VERSION_INFO] [Embodied.Robot.Logging.LoggingManager] Version Information: Branch "refs/heads/master" at commit "a90cfdee72bc0b2e73bc4ddfac8f7877c5be9990" last built at "12/28/2024 18:32:27" (UNIX: 1735410747974)
+2026-08-27 14:02:50 | robot-log [I] BO-LIZZERFACE: [LIZZERFACE_VERSION] [BO-LIZZERFACE] COMMIT: b384982386bd7d04360ede01e06fda3ea8bc97a4, COMMIT_DATE: Tue May 11 18:56:59 2021 -0700
+2026-08-27 14:02:50 | robot-log [I] Unity: [LIZZERFACE_VERSION] [Lizzerface] Detected Lizard Board Revision REVISION_F2_MoxieFEP2, reply from Lizard was 242.
+2026-08-27 14:03:40 | robot-log [I] Unity: [CHARGING_EVENT] [LizardInfoEvent] New battery level: 80% (BATTERY_OK), and charging.
+2026-08-27 14:03:40 | robot-log [I] Unity: [CHARGING_EVENT] [LizardInfoEvent] Charger plugged in.  Current battery level is 80%
+2026-08-27 14:03:40 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:03:41-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.8,"mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"max_enroll":"2","cloud_tts_voice_id":"Joanna","playzone":"0","cloud_schedule_reset_threshold":"5","wake_button":"1","cloud_tts_gain_db":"3","mqtt_files":"0","xmos_enable_logging":"0","group":"1","default_loglevel":"info","xmos_variant":"vad","doa_range":"80","schedule_sensitive":"1","to…
+2026-08-27 14:03:40 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:03:41-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.81,"mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"max_enroll":"2","cloud_tts_voice_id":"Joanna","playzone":"0","cloud_schedule_reset_threshold":"5","wake_button":"1","cloud_tts_gain_db":"3","mqtt_files":"0","xmos_enable_logging":"0","group":"1","default_loglevel":"info","xmos_variant":"vad","doa_range":"80","schedule_sensitive":"1","t…
+2026-08-27 14:03:40 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (3554 bytes)
+2026-08-27 14:03:40 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='CereprocWarmup-ignore-me' chunk_num=0 timestamp=1787821385095 user_id='' markup[:80]='<mark name="cmd:idlestate,data:{+idleState+:7}"/><mark name="cmd:behaviour-tree,'
+2026-08-27 14:03:40 | handling CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='CereprocWarmup-ignore-me' chunk=0 chars=65 language=ru
+2026-08-27 14:03:42 | robot-log [I] XMOS: Audio startup, wake word previously detected: NO
+2026-08-27 14:03:42 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787821421826', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'remote_lines', 'request_id': '320405d4-9f0f-42d1-9a19-653149804866', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:03:42 | unanswered query 'remote_lines' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=320405d4-9f0f-42d1-9a19-653149804866)
+2026-08-27 14:03:42 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787821423180', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'schedule', 'request_id': 'ba8fa703-1d14-4978-acc7-927a47fa230d', 'schedule_id': 'default', 'api_version': 1, 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:03:43 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=ba8fa703-1d14-4978-acc7-927a47fa230d puppet=False
+2026-08-27 14:03:43 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (271 bytes)
+2026-08-27 14:03:43 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787821423316', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'mentor_behaviors', 'request_id': '97a83815-9605-4abd-8855-11b39c111e40', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:03:43 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=97a83815-9605-4abd-8855-11b39c111e40
+2026-08-27 14:03:43 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-08-27 14:03:43 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=e1ea4f32-5870-41d4-ba5d-57420f553b6c (1 modules)
+2026-08-27 14:03:43 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-08-27 14:03:45 | Request options: {'method': 'post', 'url': '/audio/speech', 'headers': {'Accept': 'application/octet-stream'}, 'files': None, 'idempotency_key': 'stainless-python-retry-10676021-9376-4819-a6c0-8cc5e4ec1572', 'security': {'bearer_auth': True}, 'content': None, 'json_data': {'input': "I'm so excited. I had no idea the human world would belike this !", 'model': 'gpt-4o-mini-tts', 'voice': 'alloy', 'response_format': 'pcm'}}
+2026-08-27 14:03:45 | Sending HTTP Request: POST https://api.openai.com/v1/audio/speech
+2026-08-27 14:03:45 | connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=8.0 socket_options=None
+2026-08-27 14:03:45 | connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10fb9e900>
+2026-08-27 14:03:45 | start_tls.started ssl_context=<truststore._api.SSLContext object at 0x10c414560> server_hostname='api.openai.com' timeout=8.0
+2026-08-27 14:03:45 | start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10fa3a490>
+2026-08-27 14:03:45 | send_request_headers.started request=<Request [b'POST']>
+2026-08-27 14:03:45 | send_request_headers.complete
+2026-08-27 14:03:45 | send_request_body.started request=<Request [b'POST']>
+2026-08-27 14:03:45 | send_request_body.complete
+2026-08-27 14:03:45 | receive_response_headers.started request=<Request [b'POST']>
+2026-08-27 14:03:47 | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Thu, 27 Aug 2026 09:03:48 GMT'), (b'Content-Type', b'audio/pcm'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'access-control-expose-headers', b'X-Request-ID'), (b'Access-Control-Expose-Headers', b'CF-Ray'), (b'openai-organization', b'user-xuwjbox3heapqqquxhll29jo'), (b'openai-processing-ms', b'254'), (b'openai-project', b'proj_2TQIIFQgc5JPmCT7DW93sN4B'), (b'openai-version', b'2020-10-01'), (b'Server', b'cloudflare'), (b'x-ratelimit-limit-requests', b'10000'), (b'x-ratelimit-limit-tokens', b'200000'), (b'x-ratelimit-remaining-requests', b'9999'), (b'x-ratelimit-remaining-tokens', b'199984'), (b'x-ratelimit-reset-requests', b'8.64s'), (b'x-ratelimit-reset-tokens', b'4ms'), (b'x-request-id', b'req_b72e7853682345cf905f89ba7f15f6fa'), (b'x-openai-proxy-wasm', b'v0.1'), (b'cf-cache-status', b'DYNAMIC'), (b'set-cookie', b'__cf_bm=n_Y9zxBSPrirZzYZW3fwncvJNKIjCOaR0qP7BkPT1fs-1787821426.2824667-1.0.1.1-o7mpVFZkiEZVOB35SE.yla80Ukv0dj6zLfmHuY28izX1i52BjKV70h4de5WqqdmSasU77spfkLJoe5GXCp1krWK5kmU5ohDKZfCcoqrb.z_SxhYn4BPdKMxi8IJJQt5V; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 27 Aug 2026 09:33:48 GMT'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'X-Content-Type-Options', b'nosniff'), (b'CF-RAY', b'a319e7aa4ff6b7e6-AKX'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2026-08-27 14:03:47 | HTTP Request: POST https://api.openai.com/v1/audio/speech "HTTP/1.1 200 OK"
+2026-08-27 14:03:47 | receive_response_body.started request=<Request [b'POST']>
+2026-08-27 14:03:47 | robot-log [W] FacePipeline: Face pipeline latency can't support 5fps
+2026-08-27 14:03:48 | receive_response_body.complete
+2026-08-27 14:03:48 | response_closed.started
+2026-08-27 14:03:48 | response_closed.complete
+2026-08-27 14:03:48 | HTTP Response: POST https://api.openai.com/v1/audio/speech "200 OK" Headers([('date', 'Thu, 27 Aug 2026 09:03:48 GMT'), ('content-type', 'audio/pcm'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('access-control-expose-headers', 'X-Request-ID'), ('access-control-expose-headers', 'CF-Ray'), ('openai-organization', 'user-xuwjbox3heapqqquxhll29jo'), ('openai-processing-ms', '254'), ('openai-project', 'proj_2TQIIFQgc5JPmCT7DW93sN4B'), ('openai-version', '2020-10-01'), ('server', 'cloudflare'), ('x-ratelimit-limit-requests', '10000'), ('x-ratelimit-limit-tokens', '200000'), ('x-ratelimit-remaining-requests', '9999'), ('x-ratelimit-remaining-tokens', '199984'), ('x-ratelimit-reset-requests', '8.64s'), ('x-ratelimit-reset-tokens', '4ms'), ('x-request-id', 'req_b72e7853682345cf905f89ba7f15f6fa'), ('x-openai-proxy-wasm', 'v0.1'), ('cf-cache-status', 'DYNAMIC'), ('set-cookie', '__cf_bm=n_Y9zxBSPrirZzYZW3fwncvJNKIjCOaR0qP7BkPT1fs-1787821426.2824667-1.0.1.1-o7mpVFZkiEZVOB35SE.yla80Ukv0dj6zLfmHuY28izX1i52BjKV70h4de5WqqdmSasU77spfkLJoe5GXCp1krWK5kmU5ohDKZfCcoqrb.z_SxhYn4BPdKMxi8IJJQt5V; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 27 Aug 2026 09:33:48 GMT'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('x-content-type-options', 'nosniff'), ('cf-ray', 'a319e7aa4ff6b7e6-AKX'), ('alt-svc', 'h3=":443"; ma=86400')])
+2026-08-27 14:03:48 | request_id: req_b72e7853682345cf905f89ba7f15f6fa
+2026-08-27 14:03:48 | openai tts synthesized 65 chars (ru) -> 199200 bytes in 7937 ms (container=pcm, 199200 pcm bytes ≈ 4.15s)
+2026-08-27 14:03:48 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id=CereprocWarmup-ignore-me chunk=0, 199200 audio bytes)
+2026-08-27 14:03:48 | spoke event_id=CereprocWarmup-ignore-me chunk=0 language=ru audio_bytes=199200 marks=66 raw_pcm=True total_ms=7939 device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 14:03:58 | robot-log [I] EBUploader: Work cycle 2 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:03:58 | robot-log [I] EBUploader: Upload work cycle 2.  Processed 3 files (uploaded 0 bytes) since last report.
+2026-08-27 14:04:00 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:04:00-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.81,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","cloud_tts_engine":"polly","xmos_variant":"vad","rc_topic":"","touch_wake":"1","audio_wake":"1","cloud_translate":"en","debug_whiteboard":"0","wake_alarms":"1","wake_button_enabled":"0","remote_transition":"1","app_language_support":"0","cloud_tts_voice_id":"Joa…
+2026-08-27 14:04:01 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (159 bytes)
+2026-08-27 14:04:01 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='1ec7e89f-5a12-4306-af32-107ddcdcaa17' chunk_num=0 timestamp=1787821441082 user_id='374fdcb1-207c-484c-8907-b4773e6f4ccd' markup[:80]='<break time="0.5s"/>'
+2026-08-27 14:04:01 | CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc has no speakable text (event_id='1ec7e89f-5a12-4306-af32-107ddcdcaa17' markup='<break time="0.5s"/>'); publishing silence
+2026-08-27 14:04:01 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id=1ec7e89f-5a12-4306-af32-107ddcdcaa17 chunk=0, 9600 audio bytes)
+2026-08-27 14:04:01 | published SILENT fallback to d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=1ec7e89f-5a12-4306-af32-107ddcdcaa17 chunk=0 (9600 bytes)
+2026-08-27 14:04:08 | robot-log [I] EBUploader: Work cycle 3 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:04:18 | robot-log [I] EBUploader: Work cycle 4 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:04:29 | robot-log [I] EBUploader: Work cycle 5 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:04:34 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_STANDBY
+2026-08-27 14:04:34 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:04:35-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.81,"mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","cloud_tts_engine":"polly","xmos_variant":"vad","rc_topic":"","touch_wake":"1","audio_wake":"1","cloud_translate":"en","debug_whiteboard":"0","wake_alarms":"1","wake_button_enabled":"0","remote_transition":"1","app_language_support":"0","cloud_tts_voice_id":"Jo…
+2026-08-27 14:04:49 | robot-log [I] EBUploader: Work cycle 6 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:04:52 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:04:52-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.81,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","cloud_tts_engine":"polly","xmos_variant":"vad","rc_topic":"","touch_wake":"1","audio_wake":"1","cloud_translate":"en","debug_whiteboard":"0","wake_alarms":"1","wake_button_enabled":"0","remote_transition":"1","app_language_support":"0","cloud_tts_voice_id":"Joa…
+2026-08-27 14:04:54 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:04:54-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.81,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","cloud_tts_engine":"polly","xmos_variant":"vad","rc_topic":"","touch_wake":"1","audio_wake":"1","cloud_translate":"en","debug_whiteboard":"0","wake_alarms":"1","wake_button_enabled":"0","remote_transition":"1","app_language_support":"0","cloud_tts_voice_id":"Joa…
+2026-08-27 14:04:54 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787821494753', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'mentor_behaviors', 'request_id': 'b8ed7c3c-15ac-4dac-8bfa-b06d37129c74', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:04:54 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=b8ed7c3c-15ac-4dac-8bfa-b06d37129c74
+2026-08-27 14:04:54 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-08-27 14:04:54 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787821494754', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'remote_lines', 'request_id': '64f8f4d6-34c4-452e-ba11-be1118a47408', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:04:54 | unanswered query 'remote_lines' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=64f8f4d6-34c4-452e-ba11-be1118a47408)
+2026-08-27 14:04:54 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787821494759', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'schedule', 'request_id': '752825b8-5461-44b2-b942-42da57150154', 'schedule_id': 'default', 'api_version': 1, 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:04:54 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=752825b8-5461-44b2-b942-42da57150154 puppet=False
+2026-08-27 14:04:54 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (271 bytes)
+2026-08-27 14:04:54 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=7e3b107b-2242-4135-8741-6f53fdd37bd9 (1 modules)
+2026-08-27 14:04:54 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-08-27 14:04:54 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_SLEEPING
+2026-08-27 14:04:54 | robot-log [I] Unity: [WAKEUP_ANDROID_EVENT] [LizardErrorEvent] eventID: TOUCH_WAKEUP
+2026-08-27 14:04:54 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (2067 bytes)
+2026-08-27 14:04:54 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='ba9f3c1a-708b-489f-be78-dcfda74321f1' chunk_num=0 timestamp=1787821495107 user_id='374fdcb1-207c-484c-8907-b4773e6f4ccd' markup[:80]='<mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,'
+2026-08-27 14:04:54 | CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc has no speakable text (event_id='ba9f3c1a-708b-489f-be78-dcfda74321f1' markup='<mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,'); publishing silence
+2026-08-27 14:04:54 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id=ba9f3c1a-708b-489f-be78-dcfda74321f1 chunk=0, 9600 audio bytes)
+2026-08-27 14:04:54 | published SILENT fallback to d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=ba9f3c1a-708b-489f-be78-dcfda74321f1 chunk=0 (9600 bytes)
+2026-08-27 14:04:55 | robot-log [I] XMOS: Audio startup, wake word previously detected: NO
+2026-08-27 14:05:00 | robot-log [I] EBUploader: Upload work cycle 6.  Processed 4 files (uploaded 0 bytes) since last report.
+2026-08-27 14:05:10 | robot-log [I] EBUploader: Work cycle 7 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-08-27 14:05:20 | received puppet mode request: enabled=True
+2026-08-27 14:05:20 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-08-27 14:05:20 | puppet mode=True pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+2026-08-27 14:05:20 | robot-log [F] libc: FORTIFY: pthread_mutex_lock called on a destroyed mutex (0xad90c738)
+2026-08-27 14:05:20 | robot-log [F] libc: Fatal signal 6 (SIGABRT), code -6 (SI_TKILL) in tid 1860 (Main-bo-brain), pid 1800 (o_unity:bobrain)
+2026-08-27 14:05:20 | robot-log [F] DEBUG: *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+2026-08-27 14:05:20 | robot-log [F] DEBUG: Build fingerprint: 'rockchip/rk3288/rk3288:9/PQ2A.190305.002/cloud12282012:user/release-keys'
+2026-08-27 14:05:20 | robot-log [F] DEBUG: Revision: '0'
+2026-08-27 14:05:20 | robot-log [F] DEBUG: ABI: 'arm'
+2026-08-27 14:05:20 | robot-log [F] DEBUG: pid: 1800, tid: 1860, name: Main-bo-brain  >>> com.embodied.bo_unity:bobrain <<<
+2026-08-27 14:05:20 | robot-log [F] DEBUG: signal 6 (SIGABRT), code -6 (SI_TKILL), fault addr --------
+2026-08-27 14:05:20 | robot-log [F] DEBUG: Abort message: 'FORTIFY: pthread_mutex_lock called on a destroyed mutex (0xad90c738)'
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     r0  00000000  r1  00000744  r2  00000006  r3  00000008
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     r4  00000708  r5  00000744  r6  93dd9994  r7  0000010c
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     r8  93dd9b64  r9  ad90c738  r10 93dd9a88  r11 ad90c6c8
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     ip  00000041  sp  93dd9980  lr  b08f601d  pc  b08edd42
+2026-08-27 14:05:20 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=telehealth: {'timestamp': '1787821520679', 'action': 'UPDATE_STATE', 'state': 'READY'}
+2026-08-27 14:05:20 | telehealth state d_d05e3c66-dd29-4fe2-9758-7223e31511dc: None -> READY
+2026-08-27 14:05:20 | robot-log [F] DEBUG: {}
+2026-08-27 14:05:20 | robot-log [F] DEBUG: backtrace:
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #00 pc 0001cd42  /system/lib/libc.so (abort+58)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #01 pc 00065633  /system/lib/libc.so (__fortify_fatal(char const*, ...)+26)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #02 pc 00064dc9  /system/lib/libc.so (HandleUsingDestroyedMutex(pthread_mutex_t*, char const*)+20)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #03 pc 00064ca5  /system/lib/libc.so (pthread_mutex_lock+136)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #04 pc 00b272a1  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (std::__ndk1::recursive_mutex::lock()+4)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #05 pc 0081d0e5  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (embodied::robotbrain::UserIdModule::SaveUserName(std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>> const&, std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>> const&)+2296)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #06 pc 0081bbe9  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (embodied::robotbrain::UserIdModule::AddUser(std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>> const&, std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>> const&, std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>> const&)+108)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #07 pc 0081b873  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (embodied::robotbrain::UserIdModule::SetMentorName(std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>> const&, std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>> const&)+158)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #08 pc 0081845d  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (embodied::robotbrain::UserIdModule::OnCloudSettingsChanged(embodied::ProtoEventArgs<embodied::logging::RobotCloudConfig> const&)+272)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #09 pc 007b0047  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (_ZNSt6__ndk128__invoke_void_return_wrapperIvE6__callIJRZN8embodied4core5EventINS3_14ProtoEventArgsINS3_7logging16RobotCloudConfigEEEvE11AddListenerIS9_vEEyNS_8functionIFvRKT_EEEEUlNS_10shared_ptrINS4_9EventArgsEEEE_SK_EEEvDpOT_+30)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #10 pc 008e15b1  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (embodied::core::EventBase::NonThreadedWorker::Fire(std::__ndk1::shared_ptr<embodied::core::EventArgs>)+44)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #11 pc 008e154d  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (embodied::core::EventBase::Fire(std::__ndk1::shared_ptr<embodied::core::EventArgs>)+68)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #12 pc 0083822d  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (_ZN8embodied4core5EventINS_14ProtoEventArgsINS_7logging16RobotCloudConfigEEEvE4FireIJRS5_EEEvDpOT_+64)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #13 pc 008380e5  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (embodied::ProtoEventArgs<embodied::logging::RobotCloudConfig>::SubscriberCallback(std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>> const&)+88)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #14 pc 008e2703  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (ZMQEventBroadcaster::SubscriberThread()+438)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #15 pc 008e2c21  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (_ZNSt6__ndk114__thread_proxyINS_5tupleIJNS_10unique_ptrINS_15__thread_structENS_14default_deleteIS3_EEEEM19ZMQEventBroadcasterFvvEPS7_EEEEEPvSC_+40)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #16 pc 000642f3  /system/lib/libc.so (__pthread_start(void*)+22)
+2026-08-27 14:05:20 | robot-log [F] DEBUG:     #17 pc 0001df59  /system/lib/libc.so (__start_thread+32)
+2026-08-27 14:05:20 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_ACTIVE
+2026-08-27 14:05:21 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:05:21-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.82,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","cloud_tts_engine":"polly","xmos_variant":"vad","rc_topic":"","touch_wake":"1","audio_wake":"1","cloud_translate":"en","debug_whiteboard":"0","wake_alarms":"1","wake_button_enabled":"0","remote_transition":"1","app_language_support":"0","cloud_tts_voice_id":"Joa…
+2026-08-27 14:05:22 | robot-log [I] Unity: [MOTOR_FAIL_BOOT] [LizardErrorEvent] Fixed 
+2026-08-27 14:05:52 | robot-log [I] EBUploader: Work cycle 8 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:06:02 | robot-log [I] EBUploader: Upload work cycle 8.  Processed 3 files (uploaded 0 bytes) since last report.
+2026-08-27 14:06:14 | received /tts/speak for d_d05e3c66-dd29-4fe2-9758-7223e31511dc: chars=31
+2026-08-27 14:06:14 | telehealth PLAY_OUTPUT to d_d05e3c66-dd29-4fe2-9758-7223e31511dc (31 chars): 'Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:06:14 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/telehealth (413 bytes)
+2026-08-27 14:06:14 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (157 bytes)
+2026-08-27 14:06:14 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk_num=0 timestamp=1787821575092 user_id='374fdcb1-207c-484c-8907-b4773e6f4ccd' markup[:80]='Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:06:14 | handling CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk=0 chars=31 language=kk
+2026-08-27 14:06:14 | Request options: {'method': 'post', 'url': '/audio/speech', 'headers': {'Accept': 'application/octet-stream'}, 'files': None, 'idempotency_key': 'stainless-python-retry-b99a143a-338a-40a9-8c08-f3120a3eb46c', 'security': {'bearer_auth': True}, 'content': None, 'json_data': {'input': 'Сәлем! Бүгін көңіл-күйің қалай?', 'model': 'gpt-4o-mini-tts', 'voice': 'alloy', 'response_format': 'pcm'}}
+2026-08-27 14:06:14 | Sending HTTP Request: POST https://api.openai.com/v1/audio/speech
+2026-08-27 14:06:14 | close.started
+2026-08-27 14:06:14 | close.complete
+2026-08-27 14:06:14 | connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=8.0 socket_options=None
+2026-08-27 14:06:15 | connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10fc9de50>
+2026-08-27 14:06:15 | start_tls.started ssl_context=<truststore._api.SSLContext object at 0x10c414560> server_hostname='api.openai.com' timeout=8.0
+2026-08-27 14:06:15 | start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10fbd5220>
+2026-08-27 14:06:15 | send_request_headers.started request=<Request [b'POST']>
+2026-08-27 14:06:15 | send_request_headers.complete
+2026-08-27 14:06:15 | send_request_body.started request=<Request [b'POST']>
+2026-08-27 14:06:15 | send_request_body.complete
+2026-08-27 14:06:15 | receive_response_headers.started request=<Request [b'POST']>
+2026-08-27 14:06:16 | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Thu, 27 Aug 2026 09:06:16 GMT'), (b'Content-Type', b'audio/pcm'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'access-control-expose-headers', b'X-Request-ID'), (b'Access-Control-Expose-Headers', b'CF-Ray'), (b'openai-organization', b'user-xuwjbox3heapqqquxhll29jo'), (b'openai-processing-ms', b'426'), (b'openai-project', b'proj_2TQIIFQgc5JPmCT7DW93sN4B'), (b'openai-version', b'2020-10-01'), (b'Server', b'cloudflare'), (b'x-ratelimit-limit-requests', b'10000'), (b'x-ratelimit-limit-tokens', b'200000'), (b'x-ratelimit-remaining-requests', b'9999'), (b'x-ratelimit-remaining-tokens', b'199986'), (b'x-ratelimit-reset-requests', b'8.64s'), (b'x-ratelimit-reset-tokens', b'4ms'), (b'x-request-id', b'req_6c1546adc22a4c23b0dbceaa134a574c'), (b'x-openai-proxy-wasm', b'v0.1'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Content-Type-Options', b'nosniff'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'CF-RAY', b'a319eb4ecc29984c-AKX'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2026-08-27 14:06:16 | HTTP Request: POST https://api.openai.com/v1/audio/speech "HTTP/1.1 200 OK"
+2026-08-27 14:06:16 | receive_response_body.started request=<Request [b'POST']>
+2026-08-27 14:06:16 | receive_response_body.complete
+2026-08-27 14:06:16 | response_closed.started
+2026-08-27 14:06:16 | response_closed.complete
+2026-08-27 14:06:16 | HTTP Response: POST https://api.openai.com/v1/audio/speech "200 OK" Headers([('date', 'Thu, 27 Aug 2026 09:06:16 GMT'), ('content-type', 'audio/pcm'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('access-control-expose-headers', 'X-Request-ID'), ('access-control-expose-headers', 'CF-Ray'), ('openai-organization', 'user-xuwjbox3heapqqquxhll29jo'), ('openai-processing-ms', '426'), ('openai-project', 'proj_2TQIIFQgc5JPmCT7DW93sN4B'), ('openai-version', '2020-10-01'), ('server', 'cloudflare'), ('x-ratelimit-limit-requests', '10000'), ('x-ratelimit-limit-tokens', '200000'), ('x-ratelimit-remaining-requests', '9999'), ('x-ratelimit-remaining-tokens', '199986'), ('x-ratelimit-reset-requests', '8.64s'), ('x-ratelimit-reset-tokens', '4ms'), ('x-request-id', 'req_6c1546adc22a4c23b0dbceaa134a574c'), ('x-openai-proxy-wasm', 'v0.1'), ('cf-cache-status', 'DYNAMIC'), ('x-content-type-options', 'nosniff'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('cf-ray', 'a319eb4ecc29984c-AKX'), ('alt-svc', 'h3=":443"; ma=86400')])
+2026-08-27 14:06:16 | request_id: req_6c1546adc22a4c23b0dbceaa134a574c
+2026-08-27 14:06:16 | openai tts synthesized 31 chars (kk) -> 160800 bytes in 1900 ms (container=pcm, 160800 pcm bytes ≈ 3.35s)
+2026-08-27 14:06:16 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id= chunk=0, 160800 audio bytes)
+2026-08-27 14:06:16 | spoke event_id= chunk=0 language=kk audio_bytes=160800 marks=32 raw_pcm=True total_ms=1901 device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 14:06:23 | robot-log [I] EBUploader: Work cycle 9 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:07:02 | received /tts/speak for d_d05e3c66-dd29-4fe2-9758-7223e31511dc: chars=31
+2026-08-27 14:07:02 | telehealth PLAY_OUTPUT to d_d05e3c66-dd29-4fe2-9758-7223e31511dc (31 chars): 'Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:07:02 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/telehealth (413 bytes)
+2026-08-27 14:07:02 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (157 bytes)
+2026-08-27 14:07:02 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk_num=0 timestamp=1787821622433 user_id='374fdcb1-207c-484c-8907-b4773e6f4ccd' markup[:80]='Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:07:02 | handling CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk=0 chars=31 language=kk
+2026-08-27 14:07:02 | Request options: {'method': 'post', 'url': '/audio/speech', 'headers': {'Accept': 'application/octet-stream'}, 'files': None, 'idempotency_key': 'stainless-python-retry-79b2cb07-f271-4e6c-8671-d5dcbeaa9697', 'security': {'bearer_auth': True}, 'content': None, 'json_data': {'input': 'Сәлем! Бүгін көңіл-күйің қалай?', 'model': 'gpt-4o-mini-tts', 'voice': 'alloy', 'response_format': 'pcm'}}
+2026-08-27 14:07:02 | Sending HTTP Request: POST https://api.openai.com/v1/audio/speech
+2026-08-27 14:07:02 | close.started
+2026-08-27 14:07:02 | close.complete
+2026-08-27 14:07:02 | connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=8.0 socket_options=None
+2026-08-27 14:07:02 | connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10fbd68b0>
+2026-08-27 14:07:02 | start_tls.started ssl_context=<truststore._api.SSLContext object at 0x10c414560> server_hostname='api.openai.com' timeout=8.0
+2026-08-27 14:07:02 | start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10fbc3890>
+2026-08-27 14:07:02 | send_request_headers.started request=<Request [b'POST']>
+2026-08-27 14:07:02 | send_request_headers.complete
+2026-08-27 14:07:02 | send_request_body.started request=<Request [b'POST']>
+2026-08-27 14:07:02 | send_request_body.complete
+2026-08-27 14:07:02 | receive_response_headers.started request=<Request [b'POST']>
+2026-08-27 14:07:04 | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Thu, 27 Aug 2026 09:07:04 GMT'), (b'Content-Type', b'audio/pcm'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'access-control-expose-headers', b'X-Request-ID'), (b'Access-Control-Expose-Headers', b'CF-Ray'), (b'openai-organization', b'user-xuwjbox3heapqqquxhll29jo'), (b'openai-processing-ms', b'498'), (b'openai-project', b'proj_2TQIIFQgc5JPmCT7DW93sN4B'), (b'openai-version', b'2020-10-01'), (b'Server', b'cloudflare'), (b'x-ratelimit-limit-requests', b'10000'), (b'x-ratelimit-limit-tokens', b'200000'), (b'x-ratelimit-remaining-requests', b'9999'), (b'x-ratelimit-remaining-tokens', b'199986'), (b'x-ratelimit-reset-requests', b'8.64s'), (b'x-ratelimit-reset-tokens', b'4ms'), (b'x-request-id', b'req_7ecd1e49ca374c4fb591515b329fa2de'), (b'x-openai-proxy-wasm', b'v0.1'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Content-Type-Options', b'nosniff'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'CF-RAY', b'a319ec75cf5c8989-AKX'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2026-08-27 14:07:04 | HTTP Request: POST https://api.openai.com/v1/audio/speech "HTTP/1.1 200 OK"
+2026-08-27 14:07:04 | receive_response_body.started request=<Request [b'POST']>
+2026-08-27 14:07:05 | robot-log [I] EBUploader: Upload work cycle 9.  Processed 1 files (uploaded 0 bytes) since last report.
+2026-08-27 14:07:05 | receive_response_body.complete
+2026-08-27 14:07:05 | response_closed.started
+2026-08-27 14:07:05 | response_closed.complete
+2026-08-27 14:07:05 | HTTP Response: POST https://api.openai.com/v1/audio/speech "200 OK" Headers([('date', 'Thu, 27 Aug 2026 09:07:04 GMT'), ('content-type', 'audio/pcm'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('access-control-expose-headers', 'X-Request-ID'), ('access-control-expose-headers', 'CF-Ray'), ('openai-organization', 'user-xuwjbox3heapqqquxhll29jo'), ('openai-processing-ms', '498'), ('openai-project', 'proj_2TQIIFQgc5JPmCT7DW93sN4B'), ('openai-version', '2020-10-01'), ('server', 'cloudflare'), ('x-ratelimit-limit-requests', '10000'), ('x-ratelimit-limit-tokens', '200000'), ('x-ratelimit-remaining-requests', '9999'), ('x-ratelimit-remaining-tokens', '199986'), ('x-ratelimit-reset-requests', '8.64s'), ('x-ratelimit-reset-tokens', '4ms'), ('x-request-id', 'req_7ecd1e49ca374c4fb591515b329fa2de'), ('x-openai-proxy-wasm', 'v0.1'), ('cf-cache-status', 'DYNAMIC'), ('x-content-type-options', 'nosniff'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('cf-ray', 'a319ec75cf5c8989-AKX'), ('alt-svc', 'h3=":443"; ma=86400')])
+2026-08-27 14:07:05 | request_id: req_7ecd1e49ca374c4fb591515b329fa2de
+2026-08-27 14:07:05 | openai tts synthesized 31 chars (kk) -> 180000 bytes in 2957 ms (container=pcm, 180000 pcm bytes ≈ 3.75s)
+2026-08-27 14:07:05 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id= chunk=0, 180000 audio bytes)
+2026-08-27 14:07:05 | spoke event_id= chunk=0 language=kk audio_bytes=180000 marks=32 raw_pcm=True total_ms=2958 device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 14:07:15 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:07:15-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.83,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","cloud_tts_engine":"polly","xmos_variant":"vad","rc_topic":"","touch_wake":"1","audio_wake":"1","cloud_translate":"en","debug_whiteboard":"0","wake_alarms":"1","wake_button_enabled":"0","remote_transition":"1","app_language_support":"0","cloud_tts_voice_id":"Joa…
+2026-08-27 14:08:49 | robot-log [I] EBUploader: Work cycle 10 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:08:49 | robot-log [I] EBUploader: Upload work cycle 10.  Processed 1 files (uploaded 0 bytes) since last report.
+2026-08-27 14:09:08 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:09:09-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.84,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","cloud_tts_engine":"polly","xmos_variant":"vad","rc_topic":"","touch_wake":"1","audio_wake":"1","cloud_translate":"en","debug_whiteboard":"0","wake_alarms":"1","wake_button_enabled":"0","remote_transition":"1","app_language_support":"0","cloud_tts_voice_id":"Joa…
+2026-08-27 14:09:51 | robot-log [I] EBUploader: Work cycle 11 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:09:51 | robot-log [I] EBUploader: Upload work cycle 11.  Processed 3 files (uploaded 0 bytes) since last report.
+2026-08-27 14:10:01 | robot-log [I] EBUploader: Work cycle 12 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:10:12 | robot-log [I] EBUploader: Work cycle 13 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-08-27 14:10:53 | robot-log [I] EBUploader: Upload work cycle 13.  Processed 3 files (uploaded 0 bytes) since last report.
+2026-08-27 14:11:05 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:11:05-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.85,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","cloud_tts_engine":"polly","xmos_variant":"vad","rc_topic":"","touch_wake":"1","audio_wake":"1","cloud_translate":"en","debug_whiteboard":"0","wake_alarms":"1","wake_button_enabled":"0","remote_transition":"1","app_language_support":"0","cloud_tts_voice_id":"Joa…
+2026-08-27 14:11:45 | robot-log [I] EBUploader: Work cycle 14 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:11:56 | robot-log [I] EBUploader: Upload work cycle 14.  Processed 1 files (uploaded 0 bytes) since last report.
+2026-08-27 14:12:06 | robot-log [I] EBUploader: Work cycle 15 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:12:57 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:12:58-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.86,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","cloud_tts_engine":"polly","xmos_variant":"vad","rc_topic":"","touch_wake":"1","audio_wake":"1","cloud_translate":"en","debug_whiteboard":"0","wake_alarms":"1","wake_button_enabled":"0","remote_transition":"1","app_language_support":"0","cloud_tts_voice_id":"Joa…
+2026-08-27 14:12:58 | robot-log [I] EBUploader: Upload work cycle 15.  Processed 1 files (uploaded 0 bytes) since last report.
+2026-08-27 14:13:06 | received puppet mode request: enabled=False
+2026-08-27 14:13:06 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-08-27 14:13:06 | puppet mode=False pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+2026-08-27 14:13:06 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=telehealth: {'timestamp': '1787821986955', 'action': 'UPDATE_STATE', 'state': 'EXITING'}
+2026-08-27 14:13:06 | telehealth state d_d05e3c66-dd29-4fe2-9758-7223e31511dc: READY -> EXITING
+2026-08-27 14:13:07 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787821987412', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'remote_lines', 'request_id': 'bbf6dc6f-a091-451d-a934-482b60e7ca26', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:13:07 | unanswered query 'remote_lines' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=bbf6dc6f-a091-451d-a934-482b60e7ca26)
+2026-08-27 14:13:08 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787821988288', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'schedule', 'request_id': 'ceb1a340-e602-49ab-8a2b-3de595aebef6', 'schedule_id': 'default', 'api_version': 1, 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:13:08 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=ceb1a340-e602-49ab-8a2b-3de595aebef6 puppet=False
+2026-08-27 14:13:08 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (271 bytes)
+2026-08-27 14:13:08 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787821988322', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'mentor_behaviors', 'request_id': '3f2c92cc-76f7-4080-8f90-33a924396adc', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:13:08 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=3f2c92cc-76f7-4080-8f90-33a924396adc
+2026-08-27 14:13:08 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-08-27 14:13:08 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=f9520a4e-e6c7-4b38-8df5-59986b4ce964 (1 modules)
+2026-08-27 14:13:08 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-08-27 14:13:13 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_STANDBY
+2026-08-27 14:13:13 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:13:13-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.86,"mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","cloud_tts_engine":"polly","xmos_variant":"vad","rc_topic":"","touch_wake":"1","audio_wake":"1","cloud_translate":"en","debug_whiteboard":"0","wake_alarms":"1","wake_button_enabled":"0","remote_transition":"1","app_language_support":"0","cloud_tts_voice_id":"Jo…
+2026-08-27 14:13:15 | received puppet mode request: enabled=True
+2026-08-27 14:13:15 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-08-27 14:13:15 | puppet mode=True pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+2026-08-27 14:13:15 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:13:15-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.86,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","cloud_tts_engine":"polly","xmos_variant":"vad","rc_topic":"","touch_wake":"1","audio_wake":"1","cloud_translate":"en","debug_whiteboard":"0","wake_alarms":"1","wake_button_enabled":"0","remote_transition":"1","app_language_support":"0","cloud_tts_voice_id":"Joa…
+2026-08-27 14:13:15 | robot-log [F] libc: Fatal signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x1392c in tid 2158 (Thread-2), pid 2104 (o_unity:bobrain)
+2026-08-27 14:13:15 | robot-log [F] DEBUG: *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+2026-08-27 14:13:15 | robot-log [F] DEBUG: Build fingerprint: 'rockchip/rk3288/rk3288:9/PQ2A.190305.002/cloud12282012:user/release-keys'
+2026-08-27 14:13:15 | robot-log [F] DEBUG: Revision: '0'
+2026-08-27 14:13:15 | robot-log [F] DEBUG: ABI: 'arm'
+2026-08-27 14:13:15 | robot-log [F] DEBUG: pid: 2104, tid: 2158, name: Thread-2  >>> com.embodied.bo_unity:bobrain <<<
+2026-08-27 14:13:15 | robot-log [F] DEBUG: signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x1392c
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     r0  00000000  r1  0001392c  r2  00000000  r3  ffffffff
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     r4  a685a3a0  r5  00000000  r6  00000000  r7  8407f168
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     r8  b0979d8c  r9  a6786600  r10 8407f280  r11 8407f20c
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     ip  93b54938  sp  8407f0b8  lr  93704acb  pc  935b1288
+2026-08-27 14:13:15 | robot-log [F] DEBUG: {}
+2026-08-27 14:13:15 | robot-log [F] DEBUG: backtrace:
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #00 pc 0077f288  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (embodied::robotbrain::RobotBrain::Stop()+4)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #01 pc 008d2ac9  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (embodied::Service::Stop()+36)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #02 pc 008d2bf7  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (Java_me_embodied_services_Service_ReleaseService+14)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #03 pc 0000d3e3  /data/dalvik-cache/arm/system@priv-app@bo-android@bo-android.apk@classes.dex (offset 0xb000) (me.embodied.services.Service.ReleaseService+82)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #04 pc 0041c575  /system/lib/libart.so (art_quick_invoke_stub_internal+68)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #05 pc 003f5469  /system/lib/libart.so (art_quick_invoke_stub+224)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #06 pc 000a100d  /system/lib/libart.so (art::ArtMethod::Invoke(art::Thread*, unsigned int*, unsigned int, art::JValue*, char const*)+136)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #07 pc 001e9c87  /system/lib/libart.so (art::interpreter::ArtInterpreterToCompiledCodeBridge(art::Thread*, art::ArtMethod*, art::ShadowFrame*, unsigned short, art::JValue*)+230)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #08 pc 001e4901  /system/lib/libart.so (bool art::interpreter::DoCall<false, false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, art::JValue*)+784)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #09 pc 003f0113  /system/lib/libart.so (MterpInvokeVirtual+442)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #10 pc 0040f294  /system/lib/libart.so (ExecuteMterpImpl+14228)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #11 pc 0002f5b0  /system/priv-app/bo-android/bo-android.apk (offset 0x3c15c000) (me.embodied.services.Service$TimedRelease.run+8)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #12 pc 001c92b7  /system/lib/libart.so (_ZN3art11interpreterL7ExecuteEPNS_6ThreadERKNS_20CodeItemDataAccessorERNS_11ShadowFrameENS_6JValueEb.llvm.771620227+354)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #13 pc 001cdb3b  /system/lib/libart.so (art::interpreter::EnterInterpreterFromEntryPoint(art::Thread*, art::CodeItemDataAccessor const&, art::ShadowFrame*)+82)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #14 pc 003e39ab  /system/lib/libart.so (artQuickToInterpreterBridge+882)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #15 pc 00420aff  /system/lib/libart.so (art_quick_to_interpreter_bridge+30)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #16 pc 0041c575  /system/lib/libart.so (art_quick_invoke_stub_internal+68)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #17 pc 003f5469  /system/lib/libart.so (art_quick_invoke_stub+224)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #18 pc 000a100d  /system/lib/libart.so (art::ArtMethod::Invoke(art::Thread*, unsigned int*, unsigned int, art::JValue*, char const*)+136)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #19 pc 00354821  /system/lib/libart.so (art::(anonymous namespace)::InvokeWithArgArray(art::ScopedObjectAccessAlreadyRunnable const&, art::ArtMethod*, art::(anonymous namespace)::ArgArray*, art::JValue*, char const*)+52)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #20 pc 003555b5  /system/lib/libart.so (art::InvokeVirtualOrInterfaceWithJValues(art::ScopedObjectAccessAlreadyRunnable const&, _jobject*, _jmethodID*, jvalue*)+316)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #21 pc 00376f35  /system/lib/libart.so (art::Thread::CreateCallback(void*)+900)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #22 pc 000642f3  /system/lib/libc.so (__pthread_start(void*)+22)
+2026-08-27 14:13:15 | robot-log [F] DEBUG:     #23 pc 0001df59  /system/lib/libc.so (__start_thread+32)
+2026-08-27 14:13:15 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=telehealth: {'timestamp': '1787821996096', 'action': 'UPDATE_STATE', 'state': 'READY'}
+2026-08-27 14:13:15 | telehealth state d_d05e3c66-dd29-4fe2-9758-7223e31511dc: EXITING -> READY
+2026-08-27 14:13:15 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_SLEEPING
+2026-08-27 14:13:15 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_ACTIVE
+2026-08-27 14:13:17 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:13:17-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.86,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","cloud_tts_engine":"polly","xmos_variant":"vad","rc_topic":"","touch_wake":"1","audio_wake":"1","cloud_translate":"en","debug_whiteboard":"0","wake_alarms":"1","wake_button_enabled":"0","remote_transition":"1","app_language_support":"0","cloud_tts_voice_id":"Joa…
+2026-08-27 14:13:17 | robot-log [I] XMOS: Audio startup, wake word previously detected: NO
+2026-08-27 14:13:18 | robot-log [I] Unity: [MOTOR_FAIL_BOOT] [LizardErrorEvent] Fixed 
+2026-08-27 14:13:19 | robot-log [I] EBUploader: Work cycle 16 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-08-27 14:13:27 | received /tts/speak for d_d05e3c66-dd29-4fe2-9758-7223e31511dc: chars=31
+2026-08-27 14:13:27 | telehealth PLAY_OUTPUT to d_d05e3c66-dd29-4fe2-9758-7223e31511dc (31 chars): 'Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:13:27 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/telehealth (413 bytes)
+2026-08-27 14:13:27 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (157 bytes)
+2026-08-27 14:13:27 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk_num=0 timestamp=1787822007720 user_id='374fdcb1-207c-484c-8907-b4773e6f4ccd' markup[:80]='Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:13:27 | handling CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk=0 chars=31 language=kk
+2026-08-27 14:13:27 | Request options: {'method': 'post', 'url': '/audio/speech', 'headers': {'Accept': 'application/octet-stream'}, 'files': None, 'idempotency_key': 'stainless-python-retry-3a4068d6-25f8-4eb5-97ee-cbe7c5bb4a80', 'security': {'bearer_auth': True}, 'content': None, 'json_data': {'input': 'Сәлем! Бүгін көңіл-күйің қалай?', 'model': 'gpt-4o-mini-tts', 'voice': 'alloy', 'response_format': 'pcm'}}
+2026-08-27 14:13:27 | Sending HTTP Request: POST https://api.openai.com/v1/audio/speech
+2026-08-27 14:13:27 | close.started
+2026-08-27 14:13:27 | close.complete
+2026-08-27 14:13:27 | connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=8.0 socket_options=None
+2026-08-27 14:13:27 | connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10fc95370>
+2026-08-27 14:13:27 | start_tls.started ssl_context=<truststore._api.SSLContext object at 0x10c414560> server_hostname='api.openai.com' timeout=8.0
+2026-08-27 14:13:27 | start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10fc95480>
+2026-08-27 14:13:27 | send_request_headers.started request=<Request [b'POST']>
+2026-08-27 14:13:27 | send_request_headers.complete
+2026-08-27 14:13:27 | send_request_body.started request=<Request [b'POST']>
+2026-08-27 14:13:27 | send_request_body.complete
+2026-08-27 14:13:27 | receive_response_headers.started request=<Request [b'POST']>
+2026-08-27 14:13:29 | robot-log [I] EBUploader: Work cycle 17 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:13:30 | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Thu, 27 Aug 2026 09:13:30 GMT'), (b'Content-Type', b'audio/pcm'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'access-control-expose-headers', b'X-Request-ID'), (b'Access-Control-Expose-Headers', b'CF-Ray'), (b'openai-organization', b'user-xuwjbox3heapqqquxhll29jo'), (b'openai-processing-ms', b'468'), (b'openai-project', b'proj_2TQIIFQgc5JPmCT7DW93sN4B'), (b'openai-version', b'2020-10-01'), (b'Server', b'cloudflare'), (b'x-ratelimit-limit-requests', b'10000'), (b'x-ratelimit-limit-tokens', b'200000'), (b'x-ratelimit-remaining-requests', b'9999'), (b'x-ratelimit-remaining-tokens', b'199986'), (b'x-ratelimit-reset-requests', b'8.64s'), (b'x-ratelimit-reset-tokens', b'4ms'), (b'x-request-id', b'req_0e33a4a0b6524b799a799e4ed50e7d76'), (b'x-openai-proxy-wasm', b'v0.1'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Content-Type-Options', b'nosniff'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'CF-RAY', b'a319f5de3865a108-AKX'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2026-08-27 14:13:30 | HTTP Request: POST https://api.openai.com/v1/audio/speech "HTTP/1.1 200 OK"
+2026-08-27 14:13:30 | receive_response_body.started request=<Request [b'POST']>
+2026-08-27 14:13:31 | receive_response_body.complete
+2026-08-27 14:13:31 | response_closed.started
+2026-08-27 14:13:31 | response_closed.complete
+2026-08-27 14:13:31 | HTTP Response: POST https://api.openai.com/v1/audio/speech "200 OK" Headers([('date', 'Thu, 27 Aug 2026 09:13:30 GMT'), ('content-type', 'audio/pcm'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('access-control-expose-headers', 'X-Request-ID'), ('access-control-expose-headers', 'CF-Ray'), ('openai-organization', 'user-xuwjbox3heapqqquxhll29jo'), ('openai-processing-ms', '468'), ('openai-project', 'proj_2TQIIFQgc5JPmCT7DW93sN4B'), ('openai-version', '2020-10-01'), ('server', 'cloudflare'), ('x-ratelimit-limit-requests', '10000'), ('x-ratelimit-limit-tokens', '200000'), ('x-ratelimit-remaining-requests', '9999'), ('x-ratelimit-remaining-tokens', '199986'), ('x-ratelimit-reset-requests', '8.64s'), ('x-ratelimit-reset-tokens', '4ms'), ('x-request-id', 'req_0e33a4a0b6524b799a799e4ed50e7d76'), ('x-openai-proxy-wasm', 'v0.1'), ('cf-cache-status', 'DYNAMIC'), ('x-content-type-options', 'nosniff'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('cf-ray', 'a319f5de3865a108-AKX'), ('alt-svc', 'h3=":443"; ma=86400')])
+2026-08-27 14:13:31 | request_id: req_0e33a4a0b6524b799a799e4ed50e7d76
+2026-08-27 14:13:31 | openai tts synthesized 31 chars (kk) -> 208800 bytes in 3465 ms (container=pcm, 208800 pcm bytes ≈ 4.35s)
+2026-08-27 14:13:31 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id= chunk=0, 208800 audio bytes)
+2026-08-27 14:13:31 | spoke event_id= chunk=0 language=kk audio_bytes=208800 marks=32 raw_pcm=True total_ms=3466 device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 14:13:46 | received puppet mode request: enabled=False
+2026-08-27 14:13:46 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-08-27 14:13:46 | puppet mode=False pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+2026-08-27 14:13:47 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=telehealth: {'timestamp': '1787822027485', 'action': 'UPDATE_STATE', 'state': 'EXITING'}
+2026-08-27 14:13:47 | telehealth state d_d05e3c66-dd29-4fe2-9758-7223e31511dc: READY -> EXITING
+2026-08-27 14:13:47 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822027720', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'remote_lines', 'request_id': '3e030d97-d60c-45f8-807d-b65f6f61c4e4', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:13:47 | unanswered query 'remote_lines' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=3e030d97-d60c-45f8-807d-b65f6f61c4e4)
+2026-08-27 14:13:48 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822028771', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'schedule', 'request_id': 'fa9c1126-cf4f-4cec-952f-eca6e078d80e', 'schedule_id': 'default', 'api_version': 1, 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:13:48 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=fa9c1126-cf4f-4cec-952f-eca6e078d80e puppet=False
+2026-08-27 14:13:48 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (271 bytes)
+2026-08-27 14:13:48 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822028798', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'mentor_behaviors', 'request_id': 'fa374e07-30d6-4a4b-a32c-96f2e142195e', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:13:48 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=fa374e07-30d6-4a4b-a32c-96f2e142195e
+2026-08-27 14:13:48 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-08-27 14:13:48 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=8a0d58b4-9c9a-4d50-9fcf-cef50e42e60b (1 modules)
+2026-08-27 14:13:48 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-08-27 14:13:53 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_STANDBY
+2026-08-27 14:13:53 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:13:53-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.86,"mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","cloud_tts_engine":"polly","xmos_variant":"vad","rc_topic":"","touch_wake":"1","audio_wake":"1","cloud_translate":"en","debug_whiteboard":"0","wake_alarms":"1","wake_button_enabled":"0","remote_transition":"1","app_language_support":"0","cloud_tts_voice_id":"Jo…
+2026-08-27 14:13:57 | Shutting down
+2026-08-27 14:13:57 | Waiting for application shutdown.
+2026-08-27 14:13:58 | Application shutdown complete.
+2026-08-27 14:13:58 | Finished server process [36475]
+2026-08-27 14:13:58 | Stopping reloader process [36469]
+2026-08-27 14:20:40 | Will watch for changes in these directories: ['/Users/bake.72/Desktop/git/moxie-cloud-tts/src']
+2026-08-27 14:20:40 | Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-08-27 14:20:40 | Started reloader process [37547] using WatchFiles
+2026-08-27 14:20:42 | Started server process [37554]
+2026-08-27 14:20:42 | Waiting for application startup.
+2026-08-27 14:20:42 | Binding ZMQ PUB socket to tcp://127.0.0.1:5560
+2026-08-27 14:20:42 | registered inbound CloudTTSRequest handler (prefix=b'embodied.unity.CloudTTSRequest:')
+2026-08-27 14:20:42 | registered remote-chat + activity-log MQTT handlers
+2026-08-27 14:20:42 | CLOUD_TTS_AUTO_ENABLE: cloud_tts set to 1 (will push when the robot connects)
+2026-08-27 14:20:44 | constructed OpenAI client (timeout=8.0s)
+2026-08-27 14:20:44 | connecting to mqtt localhost:8883
+2026-08-27 14:20:44 | mqtt connected (reason_code=Success)
+2026-08-27 14:20:44 | Application startup complete.
+2026-08-27 14:20:44 | discovered device d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 14:20:50 | robot-log [I] EBUploader: Work cycle 2 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:21:01 | received puppet mode request: enabled=True
+2026-08-27 14:21:01 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-08-27 14:21:01 | puppet mode=True pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+2026-08-27 14:21:02 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-08-27 14:21:02 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-08-27 14:21:02 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest']
+2026-08-27 14:21:02 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=telehealth: {'timestamp': '1787822460430', 'action': 'UPDATE_STATE', 'state': 'READY'}
+2026-08-27 14:21:02 | telehealth state d_d05e3c66-dd29-4fe2-9758-7223e31511dc: None -> READY
+2026-08-27 14:21:02 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_ACTIVE
+2026-08-27 14:21:04 | robot-log [I] Unity: [MOTOR_FAIL_BOOT] [LizardErrorEvent] Fixed 
+2026-08-27 14:21:18 | received /tts/speak for d_d05e3c66-dd29-4fe2-9758-7223e31511dc: chars=31
+2026-08-27 14:21:18 | telehealth PLAY_OUTPUT to d_d05e3c66-dd29-4fe2-9758-7223e31511dc (31 chars): 'Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:21:18 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/telehealth (413 bytes)
+2026-08-27 14:21:18 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (157 bytes)
+2026-08-27 14:21:18 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk_num=0 timestamp=1787822477244 user_id='374fdcb1-207c-484c-8907-b4773e6f4ccd' markup[:80]='Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:21:18 | handling CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk=0 chars=31 language=kk
+2026-08-27 14:21:19 | Request options: {'method': 'post', 'url': '/audio/speech', 'headers': {'Accept': 'application/octet-stream'}, 'files': None, 'idempotency_key': 'stainless-python-retry-327d2435-0905-41c6-a9d4-273b50898804', 'security': {'bearer_auth': True}, 'content': None, 'json_data': {'input': 'Сәлем! Бүгін көңіл-күйің қалай?', 'model': 'gpt-4o-mini-tts', 'voice': 'alloy', 'response_format': 'pcm'}}
+2026-08-27 14:21:19 | Sending HTTP Request: POST https://api.openai.com/v1/audio/speech
+2026-08-27 14:21:19 | connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=8.0 socket_options=None
+2026-08-27 14:21:20 | connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10c52cec0>
+2026-08-27 14:21:20 | start_tls.started ssl_context=<truststore._api.SSLContext object at 0x109a59880> server_hostname='api.openai.com' timeout=8.0
+2026-08-27 14:21:20 | start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10c34d590>
+2026-08-27 14:21:20 | send_request_headers.started request=<Request [b'POST']>
+2026-08-27 14:21:20 | send_request_headers.complete
+2026-08-27 14:21:20 | send_request_body.started request=<Request [b'POST']>
+2026-08-27 14:21:20 | send_request_body.complete
+2026-08-27 14:21:20 | receive_response_headers.started request=<Request [b'POST']>
+2026-08-27 14:21:22 | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Thu, 27 Aug 2026 09:21:23 GMT'), (b'Content-Type', b'audio/pcm'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'access-control-expose-headers', b'X-Request-ID'), (b'Access-Control-Expose-Headers', b'CF-Ray'), (b'openai-organization', b'user-xuwjbox3heapqqquxhll29jo'), (b'openai-processing-ms', b'496'), (b'openai-project', b'proj_2TQIIFQgc5JPmCT7DW93sN4B'), (b'openai-version', b'2020-10-01'), (b'Server', b'cloudflare'), (b'x-ratelimit-limit-requests', b'10000'), (b'x-ratelimit-limit-tokens', b'200000'), (b'x-ratelimit-remaining-requests', b'9999'), (b'x-ratelimit-remaining-tokens', b'199986'), (b'x-ratelimit-reset-requests', b'8.64s'), (b'x-ratelimit-reset-tokens', b'4ms'), (b'x-request-id', b'req_20afb929ab514c50b6a4fc026e1af063'), (b'x-openai-proxy-wasm', b'v0.1'), (b'cf-cache-status', b'DYNAMIC'), (b'set-cookie', b'__cf_bm=KM2RAad7bb9PbbUHJm.j72K_qGJsKDnnp348UlhqgaI-1787822480.4791727-1.0.1.1-BOs9q9ORFdKDACWd1A39.0zpMnDESJySA8d4DYNPV3KSHHv5a1W7wvvz8dxUmML.IClgt4SFoGZOqLxwtmdSFLBFjiiUkUJl0CJ.5iytREim.U7tOObbh63fs90N7ULX; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 27 Aug 2026 09:51:23 GMT'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'X-Content-Type-Options', b'nosniff'), (b'CF-RAY', b'a31a0166fb6d8989-AKX'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2026-08-27 14:21:22 | HTTP Request: POST https://api.openai.com/v1/audio/speech "HTTP/1.1 200 OK"
+2026-08-27 14:21:22 | receive_response_body.started request=<Request [b'POST']>
+2026-08-27 14:21:23 | receive_response_body.complete
+2026-08-27 14:21:23 | response_closed.started
+2026-08-27 14:21:23 | response_closed.complete
+2026-08-27 14:21:23 | HTTP Response: POST https://api.openai.com/v1/audio/speech "200 OK" Headers([('date', 'Thu, 27 Aug 2026 09:21:23 GMT'), ('content-type', 'audio/pcm'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('access-control-expose-headers', 'X-Request-ID'), ('access-control-expose-headers', 'CF-Ray'), ('openai-organization', 'user-xuwjbox3heapqqquxhll29jo'), ('openai-processing-ms', '496'), ('openai-project', 'proj_2TQIIFQgc5JPmCT7DW93sN4B'), ('openai-version', '2020-10-01'), ('server', 'cloudflare'), ('x-ratelimit-limit-requests', '10000'), ('x-ratelimit-limit-tokens', '200000'), ('x-ratelimit-remaining-requests', '9999'), ('x-ratelimit-remaining-tokens', '199986'), ('x-ratelimit-reset-requests', '8.64s'), ('x-ratelimit-reset-tokens', '4ms'), ('x-request-id', 'req_20afb929ab514c50b6a4fc026e1af063'), ('x-openai-proxy-wasm', 'v0.1'), ('cf-cache-status', 'DYNAMIC'), ('set-cookie', '__cf_bm=KM2RAad7bb9PbbUHJm.j72K_qGJsKDnnp348UlhqgaI-1787822480.4791727-1.0.1.1-BOs9q9ORFdKDACWd1A39.0zpMnDESJySA8d4DYNPV3KSHHv5a1W7wvvz8dxUmML.IClgt4SFoGZOqLxwtmdSFLBFjiiUkUJl0CJ.5iytREim.U7tOObbh63fs90N7ULX; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 27 Aug 2026 09:51:23 GMT'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('x-content-type-options', 'nosniff'), ('cf-ray', 'a31a0166fb6d8989-AKX'), ('alt-svc', 'h3=":443"; ma=86400')])
+2026-08-27 14:21:23 | request_id: req_20afb929ab514c50b6a4fc026e1af063
+2026-08-27 14:21:23 | openai tts synthesized 31 chars (kk) -> 160800 bytes in 4803 ms (container=pcm, 160800 pcm bytes ≈ 3.35s)
+2026-08-27 14:21:23 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id= chunk=0, 160800 audio bytes)
+2026-08-27 14:21:23 | spoke event_id= chunk=0 language=kk audio_bytes=160800 marks=32 raw_pcm=True total_ms=4807 device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 14:21:32 | robot-log [I] EBUploader: Work cycle 3 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-08-27 14:21:38 | Shutting down
+2026-08-27 14:21:38 | Waiting for application shutdown.
+2026-08-27 14:21:38 | Application shutdown complete.
+2026-08-27 14:21:38 | Finished server process [37554]
+2026-08-27 14:21:38 | Stopping reloader process [37547]
+2026-08-27 14:21:47 | Will watch for changes in these directories: ['/Users/bake.72/Desktop/git/moxie-cloud-tts/src']
+2026-08-27 14:21:47 | Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-08-27 14:21:47 | Started reloader process [37689] using WatchFiles
+2026-08-27 14:21:49 | Started server process [37694]
+2026-08-27 14:21:49 | Waiting for application startup.
+2026-08-27 14:21:49 | Binding ZMQ PUB socket to tcp://127.0.0.1:5560
+2026-08-27 14:21:49 | registered inbound CloudTTSRequest handler (prefix=b'embodied.unity.CloudTTSRequest:')
+2026-08-27 14:21:49 | registered remote-chat + activity-log MQTT handlers
+2026-08-27 14:21:49 | CLOUD_TTS_AUTO_ENABLE: cloud_tts set to 1 (will push when the robot connects)
+2026-08-27 14:21:51 | constructed OpenAI client (timeout=8.0s)
+2026-08-27 14:21:51 | connecting to mqtt localhost:8883
+2026-08-27 14:21:51 | Application startup complete.
+2026-08-27 14:21:51 | mqtt connected (reason_code=Success)
+2026-08-27 14:21:51 | robot d_d05e3c66-dd29-4fe2-9758-7223e31511dc connected to broker
+2026-08-27 14:21:51 | discovered device d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 14:21:52 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=None)
+2026-08-27 14:21:52 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-08-27 14:21:52 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest']
+2026-08-27 14:21:52 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:20:36-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.9,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"cloud_tts_engine":"polly","speaker_id":"0","wake_alarms":"1","schedule_sensitive":"1","cloud_schedule_reset_threshold":"5","cloud_tts_use_mp3":"0","brain_entrances_available":"1","group":"1","xmos_enable_logging":"0","mqtt_files":"0","file_sync_wait":"0","xmos_variant":"vad","max_enroll"…
+2026-08-27 14:21:52 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822510934', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'license', 'request_id': 'LicenseUpdate', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc'}
+2026-08-27 14:21:52 | unanswered query 'license' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=LicenseUpdate)
+2026-08-27 14:21:52 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=telehealth: {'timestamp': '1787822511196', 'action': 'UPDATE_STATE', 'state': 'EXITING'}
+2026-08-27 14:21:52 | telehealth state d_d05e3c66-dd29-4fe2-9758-7223e31511dc: None -> EXITING
+2026-08-27 14:21:53 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822511522', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'remote_lines', 'request_id': '8f72917a-9dfc-4f55-94a7-600210f5911d', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:21:53 | unanswered query 'remote_lines' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=8f72917a-9dfc-4f55-94a7-600210f5911d)
+2026-08-27 14:21:54 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822512590', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'schedule', 'request_id': '6ddfc4da-26b8-49fa-8501-1dd6d89deda9', 'schedule_id': 'default', 'api_version': 1, 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:21:54 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=6ddfc4da-26b8-49fa-8501-1dd6d89deda9 puppet=False
+2026-08-27 14:21:54 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (271 bytes)
+2026-08-27 14:21:54 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822512625', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'mentor_behaviors', 'request_id': '11a4244d-38eb-4985-9c23-8e548cc8e5ff', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:21:54 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=11a4244d-38eb-4985-9c23-8e548cc8e5ff
+2026-08-27 14:21:54 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-08-27 14:21:54 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=a3602122-f592-4f8e-840f-a0e9e7d0beff (1 modules)
+2026-08-27 14:21:54 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-08-27 14:21:59 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:21:57-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.9,"mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"group":"1","xmos_enable_logging":"0","cloud_tts_speech_rate":"100","touch_wake_enabled":"0","mqtt_files":"0","xmos_variant":"vad","cloud_tts_gain_db":"3","cloud_tts_engine":"polly","cloud_tts_voice_id":"Joanna","speaker_id":"0","wake_button":"1","cloud_translate":"en","remote_transition…
+2026-08-27 14:21:59 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_STANDBY
+2026-08-27 14:21:59 | received puppet mode request: enabled=True
+2026-08-27 14:21:59 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-08-27 14:21:59 | puppet mode=True pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+2026-08-27 14:21:59 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=telehealth: {'timestamp': '1787822518360', 'action': 'UPDATE_STATE', 'state': 'READY'}
+2026-08-27 14:21:59 | telehealth state d_d05e3c66-dd29-4fe2-9758-7223e31511dc: EXITING -> READY
+2026-08-27 14:22:00 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_SLEEPING
+2026-08-27 14:22:00 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_ACTIVE
+2026-08-27 14:22:01 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:21:59-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.9,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"brain_entrances_available":"1","app_language_support":"0","group":"1","cloud_tts_speech_rate":"100","touch_wake_enabled":"0","mqtt_files":"0","debug_whiteboard":"0","speaker_id":"0","schedule_sensitive":"1","wake_button":"1","cloud_translate":"en","remote_transition":"1","default_logleve…
+2026-08-27 14:22:01 | robot-log [F] libc: Fatal signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x1392c in tid 2665 (Thread-2), pid 2627 (o_unity:bobrain)
+2026-08-27 14:22:01 | robot-log [F] DEBUG: *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+2026-08-27 14:22:01 | robot-log [F] DEBUG: Build fingerprint: 'rockchip/rk3288/rk3288:9/PQ2A.190305.002/cloud12282012:user/release-keys'
+2026-08-27 14:22:01 | robot-log [F] DEBUG: Revision: '0'
+2026-08-27 14:22:01 | robot-log [F] DEBUG: ABI: 'arm'
+2026-08-27 14:22:01 | robot-log [F] DEBUG: pid: 2627, tid: 2665, name: Thread-2  >>> com.embodied.bo_unity:bobrain <<<
+2026-08-27 14:22:01 | robot-log [F] DEBUG: signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x1392c
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     r0  00000000  r1  0001392c  r2  00000000  r3  ffffffff
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     r4  a685d770  r5  00000000  r6  00000000  r7  83fff168
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     r8  b0979d8c  r9  a6786600  r10 83fff280  r11 83fff20c
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     ip  93b0c938  sp  83fff0b8  lr  936bcacb  pc  93569288
+2026-08-27 14:22:01 | robot-log [F] DEBUG: {}
+2026-08-27 14:22:01 | robot-log [F] DEBUG: backtrace:
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #00 pc 0077f288  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (embodied::robotbrain::RobotBrain::Stop()+4)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #01 pc 008d2ac9  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (embodied::Service::Stop()+36)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #02 pc 008d2bf7  /system/priv-app/bo-android/bo-android.apk (offset 0x12d2d000) (Java_me_embodied_services_Service_ReleaseService+14)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #03 pc 0000d3e3  /data/dalvik-cache/arm/system@priv-app@bo-android@bo-android.apk@classes.dex (offset 0xb000) (me.embodied.services.Service.ReleaseService+82)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #04 pc 0041c575  /system/lib/libart.so (art_quick_invoke_stub_internal+68)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #05 pc 003f5469  /system/lib/libart.so (art_quick_invoke_stub+224)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #06 pc 000a100d  /system/lib/libart.so (art::ArtMethod::Invoke(art::Thread*, unsigned int*, unsigned int, art::JValue*, char const*)+136)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #07 pc 001e9c87  /system/lib/libart.so (art::interpreter::ArtInterpreterToCompiledCodeBridge(art::Thread*, art::ArtMethod*, art::ShadowFrame*, unsigned short, art::JValue*)+230)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #08 pc 001e4901  /system/lib/libart.so (bool art::interpreter::DoCall<false, false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, art::JValue*)+784)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #09 pc 003f0113  /system/lib/libart.so (MterpInvokeVirtual+442)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #10 pc 0040f294  /system/lib/libart.so (ExecuteMterpImpl+14228)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #11 pc 0002f5b0  /system/priv-app/bo-android/bo-android.apk (offset 0x3c15c000) (me.embodied.services.Service$TimedRelease.run+8)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #12 pc 001c92b7  /system/lib/libart.so (_ZN3art11interpreterL7ExecuteEPNS_6ThreadERKNS_20CodeItemDataAccessorERNS_11ShadowFrameENS_6JValueEb.llvm.771620227+354)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #13 pc 001cdb3b  /system/lib/libart.so (art::interpreter::EnterInterpreterFromEntryPoint(art::Thread*, art::CodeItemDataAccessor const&, art::ShadowFrame*)+82)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #14 pc 003e39ab  /system/lib/libart.so (artQuickToInterpreterBridge+882)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #15 pc 00420aff  /system/lib/libart.so (art_quick_to_interpreter_bridge+30)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #16 pc 0041c575  /system/lib/libart.so (art_quick_invoke_stub_internal+68)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #17 pc 003f5469  /system/lib/libart.so (art_quick_invoke_stub+224)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #18 pc 000a100d  /system/lib/libart.so (art::ArtMethod::Invoke(art::Thread*, unsigned int*, unsigned int, art::JValue*, char const*)+136)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #19 pc 00354821  /system/lib/libart.so (art::(anonymous namespace)::InvokeWithArgArray(art::ScopedObjectAccessAlreadyRunnable const&, art::ArtMethod*, art::(anonymous namespace)::ArgArray*, art::JValue*, char const*)+52)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #20 pc 003555b5  /system/lib/libart.so (art::InvokeVirtualOrInterfaceWithJValues(art::ScopedObjectAccessAlreadyRunnable const&, _jobject*, _jmethodID*, jvalue*)+316)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #21 pc 00376f35  /system/lib/libart.so (art::Thread::CreateCallback(void*)+900)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #22 pc 000642f3  /system/lib/libc.so (__pthread_start(void*)+22)
+2026-08-27 14:22:01 | robot-log [F] DEBUG:     #23 pc 0001df59  /system/lib/libc.so (__start_thread+32)
+2026-08-27 14:22:02 | robot-log [I] Unity: [MOTOR_FAIL_BOOT] [LizardErrorEvent] Fixed 
+2026-08-27 14:22:03 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:22:01-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.9,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"brain_entrances_available":"1","app_language_support":"0","group":"1","cloud_tts_speech_rate":"100","touch_wake_enabled":"0","mqtt_files":"0","debug_whiteboard":"0","speaker_id":"0","schedule_sensitive":"1","wake_button":"1","cloud_translate":"en","remote_transition":"1","default_logleve…
+2026-08-27 14:22:03 | robot-log [I] XMOS: Audio startup, wake word previously detected: NO
+2026-08-27 14:22:06 | received /tts/speak for d_d05e3c66-dd29-4fe2-9758-7223e31511dc: chars=31
+2026-08-27 14:22:06 | telehealth PLAY_OUTPUT to d_d05e3c66-dd29-4fe2-9758-7223e31511dc (31 chars): 'Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:22:06 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/telehealth (413 bytes)
+2026-08-27 14:22:06 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (157 bytes)
+2026-08-27 14:22:06 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk_num=0 timestamp=1787822525136 user_id='374fdcb1-207c-484c-8907-b4773e6f4ccd' markup[:80]='Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:22:06 | handling CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk=0 chars=31 language=kk
+2026-08-27 14:22:07 | Request options: {'method': 'post', 'url': '/audio/speech', 'headers': {'Accept': 'application/octet-stream'}, 'files': None, 'idempotency_key': 'stainless-python-retry-2715b5f0-b7c7-46c4-a8c0-9ccc460f69db', 'security': {'bearer_auth': True}, 'content': None, 'json_data': {'input': 'Сәлем! Бүгін көңіл-күйің қалай?', 'model': 'gpt-4o-mini-tts', 'voice': 'alloy', 'response_format': 'pcm'}}
+2026-08-27 14:22:08 | Sending HTTP Request: POST https://api.openai.com/v1/audio/speech
+2026-08-27 14:22:08 | connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=8.0 socket_options=None
+2026-08-27 14:22:08 | connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10fc34ec0>
+2026-08-27 14:22:08 | start_tls.started ssl_context=<truststore._api.SSLContext object at 0x10d081880> server_hostname='api.openai.com' timeout=8.0
+2026-08-27 14:22:08 | start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x10fa71450>
+2026-08-27 14:22:08 | send_request_headers.started request=<Request [b'POST']>
+2026-08-27 14:22:08 | send_request_headers.complete
+2026-08-27 14:22:08 | send_request_body.started request=<Request [b'POST']>
+2026-08-27 14:22:08 | send_request_body.complete
+2026-08-27 14:22:08 | receive_response_headers.started request=<Request [b'POST']>
+2026-08-27 14:22:09 | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Thu, 27 Aug 2026 09:22:09 GMT'), (b'Content-Type', b'audio/pcm'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'access-control-expose-headers', b'X-Request-ID'), (b'Access-Control-Expose-Headers', b'CF-Ray'), (b'openai-organization', b'user-xuwjbox3heapqqquxhll29jo'), (b'openai-processing-ms', b'495'), (b'openai-project', b'proj_2TQIIFQgc5JPmCT7DW93sN4B'), (b'openai-version', b'2020-10-01'), (b'Server', b'cloudflare'), (b'x-ratelimit-limit-requests', b'10000'), (b'x-ratelimit-limit-tokens', b'200000'), (b'x-ratelimit-remaining-requests', b'9999'), (b'x-ratelimit-remaining-tokens', b'199986'), (b'x-ratelimit-reset-requests', b'8.64s'), (b'x-ratelimit-reset-tokens', b'4ms'), (b'x-request-id', b'req_c030436eab134a9f9ad43742cd8b081e'), (b'x-openai-proxy-wasm', b'v0.1'), (b'cf-cache-status', b'DYNAMIC'), (b'set-cookie', b'__cf_bm=Sl66WXS7xTw1MgsuLh.Jbm4n6dtFXGEfJ7IGEN.ncic-1787822528.4462514-1.0.1.1-plZX8EwTC5OZ1W9DBXUVG8.6SSEXAqz3VXJHaPwt8RVUaM1s0YiNePuedZmUqq07KiZjAgbkHycFfz7JqJRraovEoauiGT2Nuo0yZPiK6raf.XNwVY8ZWx4nTNOK.W4j; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 27 Aug 2026 09:52:09 GMT'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'X-Content-Type-Options', b'nosniff'), (b'CF-RAY', b'a31a0292cd2be4c5-AKX'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2026-08-27 14:22:09 | HTTP Request: POST https://api.openai.com/v1/audio/speech "HTTP/1.1 200 OK"
+2026-08-27 14:22:09 | receive_response_body.started request=<Request [b'POST']>
+2026-08-27 14:22:10 | receive_response_body.complete
+2026-08-27 14:22:10 | response_closed.started
+2026-08-27 14:22:10 | response_closed.complete
+2026-08-27 14:22:10 | HTTP Response: POST https://api.openai.com/v1/audio/speech "200 OK" Headers([('date', 'Thu, 27 Aug 2026 09:22:09 GMT'), ('content-type', 'audio/pcm'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('access-control-expose-headers', 'X-Request-ID'), ('access-control-expose-headers', 'CF-Ray'), ('openai-organization', 'user-xuwjbox3heapqqquxhll29jo'), ('openai-processing-ms', '495'), ('openai-project', 'proj_2TQIIFQgc5JPmCT7DW93sN4B'), ('openai-version', '2020-10-01'), ('server', 'cloudflare'), ('x-ratelimit-limit-requests', '10000'), ('x-ratelimit-limit-tokens', '200000'), ('x-ratelimit-remaining-requests', '9999'), ('x-ratelimit-remaining-tokens', '199986'), ('x-ratelimit-reset-requests', '8.64s'), ('x-ratelimit-reset-tokens', '4ms'), ('x-request-id', 'req_c030436eab134a9f9ad43742cd8b081e'), ('x-openai-proxy-wasm', 'v0.1'), ('cf-cache-status', 'DYNAMIC'), ('set-cookie', '__cf_bm=Sl66WXS7xTw1MgsuLh.Jbm4n6dtFXGEfJ7IGEN.ncic-1787822528.4462514-1.0.1.1-plZX8EwTC5OZ1W9DBXUVG8.6SSEXAqz3VXJHaPwt8RVUaM1s0YiNePuedZmUqq07KiZjAgbkHycFfz7JqJRraovEoauiGT2Nuo0yZPiK6raf.XNwVY8ZWx4nTNOK.W4j; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 27 Aug 2026 09:52:09 GMT'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('x-content-type-options', 'nosniff'), ('cf-ray', 'a31a0292cd2be4c5-AKX'), ('alt-svc', 'h3=":443"; ma=86400')])
+2026-08-27 14:22:10 | request_id: req_c030436eab134a9f9ad43742cd8b081e
+2026-08-27 14:22:10 | openai tts synthesized 31 chars (kk) -> 148800 bytes in 3206 ms (container=pcm, 148800 pcm bytes ≈ 3.10s)
+2026-08-27 14:22:10 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id= chunk=0, 148800 audio bytes)
+2026-08-27 14:22:10 | spoke event_id= chunk=0 language=kk audio_bytes=148800 marks=32 raw_pcm=True total_ms=3207 device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 14:22:10 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:22:08-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.91,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"cloud_tts_speech_rate":"100","target_all":"1","group":"1","xmos_enable_logging":"0","playzone":"0","cloud_tts_engine":"polly","speaker_id":"0","wake_button_enabled":"0","cloud_tts_voice_id":"Joanna","gcp_upload_disable":"1","cloud_translate":"en","rchat_api":"10","debug_whiteboard":"0",…
+2026-08-27 14:22:13 | robot-log [I] EBUploader: Work cycle 4 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:22:19 | received puppet mode request: enabled=False
+2026-08-27 14:22:19 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-08-27 14:22:19 | puppet mode=False pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+2026-08-27 14:22:20 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=telehealth: {'timestamp': '1787822538635', 'action': 'UPDATE_STATE', 'state': 'EXITING'}
+2026-08-27 14:22:20 | telehealth state d_d05e3c66-dd29-4fe2-9758-7223e31511dc: READY -> EXITING
+2026-08-27 14:22:20 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822538714', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'remote_lines', 'request_id': 'e3c1d6e8-5842-4c2b-a721-fa5cff50cd49', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:22:20 | unanswered query 'remote_lines' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=e3c1d6e8-5842-4c2b-a721-fa5cff50cd49)
+2026-08-27 14:22:21 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822539591', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'schedule', 'request_id': '2d22d6e5-74a3-443c-8bf8-5713af3318f1', 'schedule_id': 'default', 'api_version': 1, 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:22:21 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=2d22d6e5-74a3-443c-8bf8-5713af3318f1 puppet=False
+2026-08-27 14:22:21 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (271 bytes)
+2026-08-27 14:22:21 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822539619', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'mentor_behaviors', 'request_id': '8129efdc-e183-4935-836a-19448dd94016', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:22:21 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=8129efdc-e183-4935-836a-19448dd94016
+2026-08-27 14:22:21 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-08-27 14:22:21 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=55e2c7df-cb69-46ec-8d59-53c7cbd1fb5a (1 modules)
+2026-08-27 14:22:21 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-08-27 14:22:26 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:22:24-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.91,"mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"brain_entrances_available":"1","app_language_support":"0","group":"1","cloud_tts_speech_rate":"100","touch_wake_enabled":"0","mqtt_files":"0","debug_whiteboard":"0","speaker_id":"0","schedule_sensitive":"1","wake_button":"1","cloud_translate":"en","remote_transition":"1","default_logle…
+2026-08-27 14:22:26 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_STANDBY
+2026-08-27 14:22:30 | Shutting down
+2026-08-27 14:22:30 | Waiting for application shutdown.
+2026-08-27 14:22:31 | Application shutdown complete.
+2026-08-27 14:22:31 | Finished server process [37694]
+2026-08-27 14:22:31 | Stopping reloader process [37689]
+2026-08-27 14:22:58 | Will watch for changes in these directories: ['/Users/bake.72/Desktop/git/moxie-cloud-tts/src']
+2026-08-27 14:22:58 | Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-08-27 14:22:58 | Started reloader process [37866] using WatchFiles
+2026-08-27 14:22:59 | Started server process [37869]
+2026-08-27 14:22:59 | Waiting for application startup.
+2026-08-27 14:22:59 | Binding ZMQ PUB socket to tcp://127.0.0.1:5560
+2026-08-27 14:22:59 | registered inbound CloudTTSRequest handler (prefix=b'embodied.unity.CloudTTSRequest:')
+2026-08-27 14:22:59 | registered remote-chat + activity-log MQTT handlers
+2026-08-27 14:22:59 | CLOUD_TTS_AUTO_ENABLE: cloud_tts set to 1 (will push when the robot connects)
+2026-08-27 14:23:01 | constructed OpenAI client (timeout=8.0s)
+2026-08-27 14:23:01 | connecting to mqtt localhost:8883
+2026-08-27 14:23:01 | Application startup complete.
+2026-08-27 14:23:01 | mqtt connected (reason_code=Success)
+2026-08-27 14:23:06 | robot d_d05e3c66-dd29-4fe2-9758-7223e31511dc connected to broker
+2026-08-27 14:23:06 | discovered device d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 14:23:07 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=None)
+2026-08-27 14:23:07 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-08-27 14:23:07 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:23:06-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","mode":"sleep","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"default_loglevel":"info","local_stt":"on","max_enroll":"2","audio_wake":"1","target_all":"1","cloud_tts":"1","cloud_tts_engine":"polly","xmos_enable_logging":"0","wake_button":"1","cloud_schedule_reset_threshold":"5","speaker_id":"0","touch_wake":"1","group":"1","cloud_tts_gain_db":"3","playzone":"0","cloud_tts_speech_rate":"100"…
+2026-08-27 14:23:07 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest']
+2026-08-27 14:23:07 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822586194', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'license', 'request_id': 'LicenseUpdate', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc'}
+2026-08-27 14:23:07 | unanswered query 'license' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=LicenseUpdate)
+2026-08-27 14:23:07 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822586197', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'mentor_behaviors', 'request_id': '2463fa5f-ba6b-44dc-af53-f5e3d3e1a3ba', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:23:07 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=2463fa5f-ba6b-44dc-af53-f5e3d3e1a3ba
+2026-08-27 14:23:07 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-08-27 14:23:07 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822586198', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'remote_lines', 'request_id': '4d2f21a7-bd16-419e-954c-c4c6d9697753', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:23:07 | unanswered query 'remote_lines' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=4d2f21a7-bd16-419e-954c-c4c6d9697753)
+2026-08-27 14:23:07 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822586198', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'schedule', 'request_id': '754f45c8-92ed-42bf-b0d6-a8f9f001c6f6', 'schedule_id': 'default', 'api_version': 1, 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:23:07 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=754f45c8-92ed-42bf-b0d6-a8f9f001c6f6 puppet=False
+2026-08-27 14:23:07 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (271 bytes)
+2026-08-27 14:23:07 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=842dade4-45bf-4470-a36a-33a46bde11e1 (1 modules)
+2026-08-27 14:23:07 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-08-27 14:23:07 | robot-log [W] RobotStateModule: Forcing IDLE state, MarkingUp has gone too long without transitioning.
+2026-08-27 14:23:07 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_SLEEPING
+2026-08-27 14:23:07 | robot-log [I] Unity: [WAKEUP_ANDROID_EVENT] [LizardErrorEvent] eventID: TOUCH_WAKEUP
+2026-08-27 14:23:07 | robot-log [I] XMOS: Audio startup, wake word previously detected: NO
+2026-08-27 14:23:08 | robot-log [I] BO-LOGGER: Started GCP Uploader
+2026-08-27 14:23:10 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:23:08-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"cloud_tts_gain_db":"3","playzone":"0","cloud_tts_voice_id":"Joanna","xmos_variant":"vad","file_sync_wait":"0","wake_button":"1","cloud_tts_use_mp3":"0","brain_entrances_available":"1","doa_range":"80","rchat_api":"10","remote_transition":"1","rc_topic":"","local_stt":"on","speaker_id":"0","audio_wake":"1",…
+2026-08-27 14:23:10 | robot-log [W] RobotStateModule: Forcing IDLE state, MarkingUp has gone too long without transitioning.
+2026-08-27 14:23:17 | received puppet mode request: enabled=True
+2026-08-27 14:23:17 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-08-27 14:23:17 | puppet mode=True pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+2026-08-27 14:23:18 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=telehealth: {'timestamp': '1787822596922', 'action': 'UPDATE_STATE', 'state': 'READY'}
+2026-08-27 14:23:18 | telehealth state d_d05e3c66-dd29-4fe2-9758-7223e31511dc: None -> READY
+2026-08-27 14:23:18 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:23:16-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.91,"mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"gcp_upload_disable":"1","debug_whiteboard":"0","max_enroll":"2","group":"1","playzone":"0","app_language_support":"0","cloud_tts":"1","touch_wake_enabled":"0","cloud_tts_engine":"polly","speaker_id":"0","touch_wake":"1","rc_topic":"","doa_range":"80","cloud_tts_speech_rate":"100","wake…
+2026-08-27 14:23:18 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_ACTIVE
+2026-08-27 14:23:19 | robot-log [I] EBUploader: Work cycle 1 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-08-27 14:23:19 | robot-log [I] EBUploader: Upload work cycle 1.  Processed 2 files (uploaded 0 bytes) since last report.
+2026-08-27 14:23:20 | robot-log [I] Unity: [MOTOR_FAIL_BOOT] [LizardErrorEvent] Fixed 
+2026-08-27 14:23:25 | received /tts/speak for d_d05e3c66-dd29-4fe2-9758-7223e31511dc: chars=31
+2026-08-27 14:23:25 | telehealth PLAY_OUTPUT to d_d05e3c66-dd29-4fe2-9758-7223e31511dc (31 chars): 'Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:23:25 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/telehealth (413 bytes)
+2026-08-27 14:23:25 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (157 bytes)
+2026-08-27 14:23:25 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk_num=0 timestamp=1787822604327 user_id='374fdcb1-207c-484c-8907-b4773e6f4ccd' markup[:80]='Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:23:25 | handling CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk=0 chars=31 language=kk
+2026-08-27 14:23:26 | Request options: {'method': 'post', 'url': '/audio/speech', 'headers': {'Accept': 'application/octet-stream'}, 'files': None, 'idempotency_key': 'stainless-python-retry-dee11c74-4cc8-4350-99e4-a65af899000f', 'security': {'bearer_auth': True}, 'content': None, 'json_data': {'input': 'Сәлем! Бүгін көңіл-күйің қалай?', 'model': 'gpt-4o-mini-tts', 'voice': 'alloy', 'response_format': 'pcm'}}
+2026-08-27 14:23:26 | Sending HTTP Request: POST https://api.openai.com/v1/audio/speech
+2026-08-27 14:23:26 | connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=8.0 socket_options=None
+2026-08-27 14:23:27 | connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x114628ec0>
+2026-08-27 14:23:27 | start_tls.started ssl_context=<truststore._api.SSLContext object at 0x111b55880> server_hostname='api.openai.com' timeout=8.0
+2026-08-27 14:23:27 | start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x114461450>
+2026-08-27 14:23:27 | send_request_headers.started request=<Request [b'POST']>
+2026-08-27 14:23:27 | send_request_headers.complete
+2026-08-27 14:23:27 | send_request_body.started request=<Request [b'POST']>
+2026-08-27 14:23:27 | send_request_body.complete
+2026-08-27 14:23:27 | receive_response_headers.started request=<Request [b'POST']>
+2026-08-27 14:23:28 | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Thu, 27 Aug 2026 09:23:28 GMT'), (b'Content-Type', b'audio/pcm'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'access-control-expose-headers', b'X-Request-ID'), (b'Access-Control-Expose-Headers', b'CF-Ray'), (b'openai-organization', b'user-xuwjbox3heapqqquxhll29jo'), (b'openai-processing-ms', b'432'), (b'openai-project', b'proj_2TQIIFQgc5JPmCT7DW93sN4B'), (b'openai-version', b'2020-10-01'), (b'Server', b'cloudflare'), (b'x-ratelimit-limit-requests', b'10000'), (b'x-ratelimit-limit-tokens', b'200000'), (b'x-ratelimit-remaining-requests', b'9999'), (b'x-ratelimit-remaining-tokens', b'199986'), (b'x-ratelimit-reset-requests', b'8.64s'), (b'x-ratelimit-reset-tokens', b'4ms'), (b'x-request-id', b'req_fefcef0959274fd09353bcd5005890bd'), (b'x-openai-proxy-wasm', b'v0.1'), (b'cf-cache-status', b'DYNAMIC'), (b'set-cookie', b'__cf_bm=RvLSYIZz0HR270BGm45Y7l.4ghbCaiGIRyn.bOQia5o-1787822607.5350726-1.0.1.1-CVLzrldt5_bLLTxne6pT6Vfs9g2EzSyRKC6SKFr9oAYe_hLfE7Ni7eplCV8KGwJlLmjCosWBXwJmyy.oeSqN3PFBs5xKIjso3kDg2gyDfYA02hmoTC5a_PjWCx7N4t5o; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 27 Aug 2026 09:53:28 GMT'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'X-Content-Type-Options', b'nosniff'), (b'CF-RAY', b'a31a04811c47e4bd-AKX'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2026-08-27 14:23:28 | HTTP Request: POST https://api.openai.com/v1/audio/speech "HTTP/1.1 200 OK"
+2026-08-27 14:23:28 | receive_response_body.started request=<Request [b'POST']>
+2026-08-27 14:23:29 | receive_response_body.complete
+2026-08-27 14:23:29 | response_closed.started
+2026-08-27 14:23:29 | response_closed.complete
+2026-08-27 14:23:29 | HTTP Response: POST https://api.openai.com/v1/audio/speech "200 OK" Headers([('date', 'Thu, 27 Aug 2026 09:23:28 GMT'), ('content-type', 'audio/pcm'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('access-control-expose-headers', 'X-Request-ID'), ('access-control-expose-headers', 'CF-Ray'), ('openai-organization', 'user-xuwjbox3heapqqquxhll29jo'), ('openai-processing-ms', '432'), ('openai-project', 'proj_2TQIIFQgc5JPmCT7DW93sN4B'), ('openai-version', '2020-10-01'), ('server', 'cloudflare'), ('x-ratelimit-limit-requests', '10000'), ('x-ratelimit-limit-tokens', '200000'), ('x-ratelimit-remaining-requests', '9999'), ('x-ratelimit-remaining-tokens', '199986'), ('x-ratelimit-reset-requests', '8.64s'), ('x-ratelimit-reset-tokens', '4ms'), ('x-request-id', 'req_fefcef0959274fd09353bcd5005890bd'), ('x-openai-proxy-wasm', 'v0.1'), ('cf-cache-status', 'DYNAMIC'), ('set-cookie', '__cf_bm=RvLSYIZz0HR270BGm45Y7l.4ghbCaiGIRyn.bOQia5o-1787822607.5350726-1.0.1.1-CVLzrldt5_bLLTxne6pT6Vfs9g2EzSyRKC6SKFr9oAYe_hLfE7Ni7eplCV8KGwJlLmjCosWBXwJmyy.oeSqN3PFBs5xKIjso3kDg2gyDfYA02hmoTC5a_PjWCx7N4t5o; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 27 Aug 2026 09:53:28 GMT'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('x-content-type-options', 'nosniff'), ('cf-ray', 'a31a04811c47e4bd-AKX'), ('alt-svc', 'h3=":443"; ma=86400')])
+2026-08-27 14:23:29 | request_id: req_fefcef0959274fd09353bcd5005890bd
+2026-08-27 14:23:29 | openai tts synthesized 31 chars (kk) -> 163200 bytes in 3220 ms (container=pcm, 163200 pcm bytes ≈ 3.40s)
+2026-08-27 14:23:29 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id= chunk=0, 163200 audio bytes)
+2026-08-27 14:23:29 | spoke event_id= chunk=0 language=kk audio_bytes=163200 marks=32 raw_pcm=True total_ms=3222 device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 14:23:39 | robot-log [I] EBUploader: Work cycle 2 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:23:49 | received /tts/speak for d_d05e3c66-dd29-4fe2-9758-7223e31511dc: chars=31
+2026-08-27 14:23:49 | telehealth PLAY_OUTPUT to d_d05e3c66-dd29-4fe2-9758-7223e31511dc (31 chars): 'Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:23:49 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/telehealth (413 bytes)
+2026-08-27 14:23:49 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (157 bytes)
+2026-08-27 14:23:49 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk_num=0 timestamp=1787822628455 user_id='374fdcb1-207c-484c-8907-b4773e6f4ccd' markup[:80]='Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:23:49 | handling CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk=0 chars=31 language=kk
+2026-08-27 14:23:49 | Request options: {'method': 'post', 'url': '/audio/speech', 'headers': {'Accept': 'application/octet-stream'}, 'files': None, 'idempotency_key': 'stainless-python-retry-36a738fb-d1d0-40d9-a549-f57320c56896', 'security': {'bearer_auth': True}, 'content': None, 'json_data': {'input': 'Сәлем! Бүгін көңіл-күйің қалай?', 'model': 'gpt-4o-mini-tts', 'voice': 'alloy', 'response_format': 'pcm'}}
+2026-08-27 14:23:49 | Sending HTTP Request: POST https://api.openai.com/v1/audio/speech
+2026-08-27 14:23:49 | close.started
+2026-08-27 14:23:49 | close.complete
+2026-08-27 14:23:49 | connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=8.0 socket_options=None
+2026-08-27 14:23:49 | connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x1144625d0>
+2026-08-27 14:23:49 | start_tls.started ssl_context=<truststore._api.SSLContext object at 0x111b55880> server_hostname='api.openai.com' timeout=8.0
+2026-08-27 14:23:49 | start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x11439ac40>
+2026-08-27 14:23:49 | send_request_headers.started request=<Request [b'POST']>
+2026-08-27 14:23:49 | send_request_headers.complete
+2026-08-27 14:23:49 | send_request_body.started request=<Request [b'POST']>
+2026-08-27 14:23:49 | send_request_body.complete
+2026-08-27 14:23:49 | receive_response_headers.started request=<Request [b'POST']>
+2026-08-27 14:23:51 | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Thu, 27 Aug 2026 09:23:51 GMT'), (b'Content-Type', b'audio/pcm'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'access-control-expose-headers', b'X-Request-ID'), (b'Access-Control-Expose-Headers', b'CF-Ray'), (b'openai-organization', b'user-xuwjbox3heapqqquxhll29jo'), (b'openai-processing-ms', b'529'), (b'openai-project', b'proj_2TQIIFQgc5JPmCT7DW93sN4B'), (b'openai-version', b'2020-10-01'), (b'Server', b'cloudflare'), (b'x-ratelimit-limit-requests', b'10000'), (b'x-ratelimit-limit-tokens', b'200000'), (b'x-ratelimit-remaining-requests', b'9999'), (b'x-ratelimit-remaining-tokens', b'199986'), (b'x-ratelimit-reset-requests', b'8.64s'), (b'x-ratelimit-reset-tokens', b'4ms'), (b'x-request-id', b'req_1c47993064f643f2812e15026c56fca5'), (b'x-openai-proxy-wasm', b'v0.1'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Content-Type-Options', b'nosniff'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'CF-RAY', b'a31a050f3938e4c6-AKX'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2026-08-27 14:23:51 | HTTP Request: POST https://api.openai.com/v1/audio/speech "HTTP/1.1 200 OK"
+2026-08-27 14:23:51 | receive_response_body.started request=<Request [b'POST']>
+2026-08-27 14:23:52 | receive_response_body.complete
+2026-08-27 14:23:52 | response_closed.started
+2026-08-27 14:23:52 | response_closed.complete
+2026-08-27 14:23:52 | HTTP Response: POST https://api.openai.com/v1/audio/speech "200 OK" Headers([('date', 'Thu, 27 Aug 2026 09:23:51 GMT'), ('content-type', 'audio/pcm'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('access-control-expose-headers', 'X-Request-ID'), ('access-control-expose-headers', 'CF-Ray'), ('openai-organization', 'user-xuwjbox3heapqqquxhll29jo'), ('openai-processing-ms', '529'), ('openai-project', 'proj_2TQIIFQgc5JPmCT7DW93sN4B'), ('openai-version', '2020-10-01'), ('server', 'cloudflare'), ('x-ratelimit-limit-requests', '10000'), ('x-ratelimit-limit-tokens', '200000'), ('x-ratelimit-remaining-requests', '9999'), ('x-ratelimit-remaining-tokens', '199986'), ('x-ratelimit-reset-requests', '8.64s'), ('x-ratelimit-reset-tokens', '4ms'), ('x-request-id', 'req_1c47993064f643f2812e15026c56fca5'), ('x-openai-proxy-wasm', 'v0.1'), ('cf-cache-status', 'DYNAMIC'), ('x-content-type-options', 'nosniff'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('cf-ray', 'a31a050f3938e4c6-AKX'), ('alt-svc', 'h3=":443"; ma=86400')])
+2026-08-27 14:23:52 | request_id: req_1c47993064f643f2812e15026c56fca5
+2026-08-27 14:23:52 | openai tts synthesized 31 chars (kk) -> 153600 bytes in 2163 ms (container=pcm, 153600 pcm bytes ≈ 3.20s)
+2026-08-27 14:23:52 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id= chunk=0, 153600 audio bytes)
+2026-08-27 14:23:52 | spoke event_id= chunk=0 language=kk audio_bytes=153600 marks=32 raw_pcm=True total_ms=2165 device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 14:24:05 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:24:03-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.92,"mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"gcp_upload_disable":"1","debug_whiteboard":"0","max_enroll":"2","group":"1","playzone":"0","app_language_support":"0","cloud_tts":"1","touch_wake_enabled":"0","cloud_tts_engine":"polly","speaker_id":"0","touch_wake":"1","rc_topic":"","doa_range":"80","cloud_tts_speech_rate":"100","wake…
+2026-08-27 14:24:11 | received puppet mode request: enabled=False
+2026-08-27 14:24:11 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-08-27 14:24:11 | puppet mode=False pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+2026-08-27 14:24:11 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822650481', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'remote_lines', 'request_id': 'fe5a0420-72ba-430f-bdad-97622d0883af', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:24:11 | unanswered query 'remote_lines' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=fe5a0420-72ba-430f-bdad-97622d0883af)
+2026-08-27 14:24:11 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=telehealth: {'timestamp': '1787822650670', 'action': 'UPDATE_STATE', 'state': 'EXITING'}
+2026-08-27 14:24:11 | telehealth state d_d05e3c66-dd29-4fe2-9758-7223e31511dc: READY -> EXITING
+2026-08-27 14:24:12 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822651370', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'schedule', 'request_id': 'da1d622c-24d7-42ae-99cc-3e59ba99d2dc', 'schedule_id': 'default', 'api_version': 1, 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:24:12 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=da1d622c-24d7-42ae-99cc-3e59ba99d2dc puppet=False
+2026-08-27 14:24:12 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (271 bytes)
+2026-08-27 14:24:12 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787822651400', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'mentor_behaviors', 'request_id': '381c5765-9c93-4886-9d28-a4cdbe203485', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:24:12 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=381c5765-9c93-4886-9d28-a4cdbe203485
+2026-08-27 14:24:12 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-08-27 14:24:12 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=1f0b1bd4-9f8e-447e-9d24-de5a73fe28a7 (1 modules)
+2026-08-27 14:24:12 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-08-27 14:24:17 | Shutting down
+2026-08-27 14:24:17 | Waiting for application shutdown.
+2026-08-27 14:24:18 | Application shutdown complete.
+2026-08-27 14:24:18 | Finished server process [37869]
+2026-08-27 14:24:18 | Stopping reloader process [37866]
+2026-08-27 14:42:35 | Will watch for changes in these directories: ['/Users/bake.72/Desktop/git/moxie-cloud-tts/src']
+2026-08-27 14:42:35 | Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-08-27 14:42:35 | Started reloader process [38296] using WatchFiles
+2026-08-27 14:42:37 | Started server process [38300]
+2026-08-27 14:42:37 | Waiting for application startup.
+2026-08-27 14:42:37 | Binding ZMQ PUB socket to tcp://127.0.0.1:5560
+2026-08-27 14:42:37 | registered inbound CloudTTSRequest handler (prefix=b'embodied.unity.CloudTTSRequest:')
+2026-08-27 14:42:37 | registered remote-chat + activity-log MQTT handlers
+2026-08-27 14:42:37 | CLOUD_TTS_AUTO_ENABLE: cloud_tts set to 1 (will push when the robot connects)
+2026-08-27 14:42:39 | constructed OpenAI client (timeout=8.0s)
+2026-08-27 14:42:39 | connecting to mqtt localhost:8883
+2026-08-27 14:42:39 | Application startup complete.
+2026-08-27 14:42:39 | mqtt connected (reason_code=Success)
+2026-08-27 14:43:03 | received puppet mode request: enabled=True
+2026-08-27 14:43:03 | no device to push config to yet; it will be applied when a robot connects and is bootstrapped
+2026-08-27 14:43:03 | puppet mode=True pushed to no devices
+2026-08-27 14:43:07 | robot d_d05e3c66-dd29-4fe2-9758-7223e31511dc connected to broker
+2026-08-27 14:43:07 | discovered device d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 14:43:08 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:43:07-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","mode":"sleep","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"schedule_sensitive":"1","xmos_variant":"vad","touch_wake_enabled":"0","max_enroll":"2","local_stt":"on","xmos_enable_logging":"0","cloud_tts_engine":"polly","wake_button_enabled":"0","wake_button":"1","group":"1","cloud_tts_voice_id":"Joanna","cloud_tts":"1","default_loglevel":"info","touch_wake":"1","remote_transition":"1","app_…
+2026-08-27 14:43:08 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-08-27 14:43:08 | robot-log [W] RobotStateModule: Forcing IDLE state, MarkingUp has gone too long without transitioning.
+2026-08-27 14:43:08 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-08-27 14:43:08 | robot-log [W] Chatscript: chatscript input->output time: 9735ms too high!. Max is 800ms
+2026-08-27 14:43:08 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest']
+2026-08-27 14:43:08 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_SLEEPING
+2026-08-27 14:43:08 | robot-log [I] Unity: [WAKEUP_ANDROID_EVENT] [LizardErrorEvent] eventID: TOUCH_WAKEUP
+2026-08-27 14:43:08 | robot-log [I] XMOS: Audio startup, wake word previously detected: NO
+2026-08-27 14:43:08 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_STANDBY
+2026-08-27 14:43:08 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787823787061', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'license', 'request_id': 'LicenseUpdate', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc'}
+2026-08-27 14:43:08 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:43:07-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"app_language_support":"0","remote_transition":"1","touch_wake":"1","cloud_tts_speech_rate":"100","local_stt":"on","speaker_id":"0","wake_button":"1","wake_alarms":"1","brain_entrances_available":"1","default_loglevel":"info","cloud_tts":"1","cloud_translate":"en","xmos_enable_logging":"0","doa_range":"80",…
+2026-08-27 14:43:08 | unanswered query 'license' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=LicenseUpdate)
+2026-08-27 14:43:08 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787823787057', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'mentor_behaviors', 'request_id': '6a068e8c-3c25-4292-96bc-50927199f804', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:43:08 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=6a068e8c-3c25-4292-96bc-50927199f804
+2026-08-27 14:43:08 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-08-27 14:43:08 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787823787058', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'remote_lines', 'request_id': 'c7295961-1f98-4a5b-9718-12edf719cca6', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:43:08 | unanswered query 'remote_lines' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=c7295961-1f98-4a5b-9718-12edf719cca6)
+2026-08-27 14:43:08 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787823787058', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'schedule', 'request_id': '3fe8233c-0c7b-4a0f-ade8-cb1c11bd0d16', 'schedule_id': 'default', 'api_version': 1, 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:43:08 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=3fe8233c-0c7b-4a0f-ade8-cb1c11bd0d16 puppet=True
+2026-08-27 14:43:08 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (141 bytes)
+2026-08-27 14:43:08 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=6ee473c9-8b29-4e6d-aa10-be9dfb57baa4 (1 modules)
+2026-08-27 14:43:08 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-08-27 14:43:08 | robot-log [I] BO-LOGGER: Started GCP Uploader
+2026-08-27 14:43:08 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=telehealth: {'timestamp': '1787823787803', 'action': 'UPDATE_STATE', 'state': 'READY'}
+2026-08-27 14:43:08 | telehealth state d_d05e3c66-dd29-4fe2-9758-7223e31511dc: None -> READY
+2026-08-27 14:43:08 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787823787811', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'mentor_behaviors', 'request_id': 'a7502677-02a5-4072-b3e3-8b6a61e5911b', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:43:08 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=a7502677-02a5-4072-b3e3-8b6a61e5911b
+2026-08-27 14:43:08 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-08-27 14:43:08 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:43:07-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.98,"mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"touch_wake_enabled":"0","touch_wake":"1","wake_alarms":"1","doa_range":"80","xmos_enable_logging":"0","max_enroll":"2","gcp_upload_disable":"1","audio_wake_set":"off","remote_transition":"1","mqtt_files":"0","cloud_schedule_reset_threshold":"5","schedule_sensitive":"1","brain_entrances…
+2026-08-27 14:43:08 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787823787811', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'remote_lines', 'request_id': '64ee7b3a-0117-4c17-a7fd-fc1e9eeff4cb', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:43:08 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_SLEEPING
+2026-08-27 14:43:08 | unanswered query 'remote_lines' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=64ee7b3a-0117-4c17-a7fd-fc1e9eeff4cb)
+2026-08-27 14:43:08 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787823787811', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'schedule', 'request_id': 'cb705b32-f173-4aee-b810-e48099718271', 'schedule_id': 'default', 'api_version': 1, 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:43:08 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=cb705b32-f173-4aee-b810-e48099718271 puppet=True
+2026-08-27 14:43:08 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (141 bytes)
+2026-08-27 14:43:08 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_ACTIVE
+2026-08-27 14:43:10 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:43:09-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.98,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"touch_wake_enabled":"0","touch_wake":"1","wake_alarms":"1","doa_range":"80","xmos_enable_logging":"0","max_enroll":"2","gcp_upload_disable":"1","audio_wake_set":"off","remote_transition":"1","mqtt_files":"0","cloud_schedule_reset_threshold":"5","schedule_sensitive":"1","brain_entrances_…
+2026-08-27 14:43:11 | robot-log [I] Unity: [MOTOR_FAIL_BOOT] [LizardErrorEvent] Fixed 
+2026-08-27 14:43:12 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:43:11-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.98,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"rchat_api":"10","cloud_tts_voice_id":"Joanna","xmos_variant":"vad","default_loglevel":"info","cloud_tts_gain_db":"3","audio_wake":"1","wake_button_enabled":"0","debug_whiteboard":"0","group":"1","target_all":"1","mqtt_files":"0","schedule_sensitive":"1","wake_button":"1","playzone":"0",…
+2026-08-27 14:43:12 | robot-log [I] XMOS: Audio startup, wake word previously detected: NO
+2026-08-27 14:43:18 | robot-log [I] EBUploader: Work cycle 1 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-08-27 14:43:18 | robot-log [I] EBUploader: Upload work cycle 1.  Processed 4 files (uploaded 0 bytes) since last report.
+2026-08-27 14:43:29 | robot-log [I] EBUploader: Work cycle 2 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:43:30 | received /tts/speak for d_d05e3c66-dd29-4fe2-9758-7223e31511dc: chars=31
+2026-08-27 14:43:30 | telehealth PLAY_OUTPUT to d_d05e3c66-dd29-4fe2-9758-7223e31511dc (31 chars): 'Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:43:30 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/telehealth (413 bytes)
+2026-08-27 14:43:30 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (157 bytes)
+2026-08-27 14:43:30 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk_num=0 timestamp=1787823809179 user_id='374fdcb1-207c-484c-8907-b4773e6f4ccd' markup[:80]='Сәлем! Бүгін көңіл-күйің қалай?'
+2026-08-27 14:43:30 | handling CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='' chunk=0 chars=31 language=kk
+2026-08-27 14:43:31 | Request options: {'method': 'post', 'url': '/audio/speech', 'headers': {'Accept': 'application/octet-stream'}, 'files': None, 'idempotency_key': 'stainless-python-retry-d4399d0c-abcb-44d0-bcaa-7439f228debf', 'security': {'bearer_auth': True}, 'content': None, 'json_data': {'input': 'Сәлем! Бүгін көңіл-күйің қалай?', 'model': 'gpt-4o-mini-tts', 'voice': 'alloy', 'response_format': 'pcm'}}
+2026-08-27 14:43:31 | Sending HTTP Request: POST https://api.openai.com/v1/audio/speech
+2026-08-27 14:43:31 | connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=8.0 socket_options=None
+2026-08-27 14:43:31 | connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x109d20ec0>
+2026-08-27 14:43:31 | start_tls.started ssl_context=<truststore._api.SSLContext object at 0x107249880> server_hostname='api.openai.com' timeout=8.0
+2026-08-27 14:43:31 | start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x109b59450>
+2026-08-27 14:43:31 | send_request_headers.started request=<Request [b'POST']>
+2026-08-27 14:43:31 | send_request_headers.complete
+2026-08-27 14:43:31 | send_request_body.started request=<Request [b'POST']>
+2026-08-27 14:43:31 | send_request_body.complete
+2026-08-27 14:43:31 | receive_response_headers.started request=<Request [b'POST']>
+2026-08-27 14:43:32 | receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Thu, 27 Aug 2026 09:43:32 GMT'), (b'Content-Type', b'audio/pcm'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'access-control-expose-headers', b'X-Request-ID'), (b'Access-Control-Expose-Headers', b'CF-Ray'), (b'openai-organization', b'user-xuwjbox3heapqqquxhll29jo'), (b'openai-processing-ms', b'393'), (b'openai-project', b'proj_2TQIIFQgc5JPmCT7DW93sN4B'), (b'openai-version', b'2020-10-01'), (b'Server', b'cloudflare'), (b'x-ratelimit-limit-requests', b'10000'), (b'x-ratelimit-limit-tokens', b'200000'), (b'x-ratelimit-remaining-requests', b'9999'), (b'x-ratelimit-remaining-tokens', b'199986'), (b'x-ratelimit-reset-requests', b'8.64s'), (b'x-ratelimit-reset-tokens', b'4ms'), (b'x-request-id', b'req_12381d6d4e3e4f26896cd61489ef4d2e'), (b'x-openai-proxy-wasm', b'v0.1'), (b'cf-cache-status', b'DYNAMIC'), (b'set-cookie', b'__cf_bm=nRf3O3S4fcMIo_opCY8L8K8zvZui1vkux8UNUWZjC8Y-1787823811.9573185-1.0.1.1-AAXbeAPmiPcd6ZFfnNg_Vv3XCq6V2zJ5nEQCatz4HVBGYrU.YlXsqHy3LI93rHS2fR0eYCFJA25M.BUWZqwuNduWd2PfzIZcCHDismFWkWx9Q1I7fdQQX55.ALzLXU8d; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 27 Aug 2026 10:13:32 GMT'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'X-Content-Type-Options', b'nosniff'), (b'CF-RAY', b'a31a21e8bf11b85e-AKX'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2026-08-27 14:43:32 | HTTP Request: POST https://api.openai.com/v1/audio/speech "HTTP/1.1 200 OK"
+2026-08-27 14:43:32 | receive_response_body.started request=<Request [b'POST']>
+2026-08-27 14:43:33 | receive_response_body.complete
+2026-08-27 14:43:33 | response_closed.started
+2026-08-27 14:43:33 | response_closed.complete
+2026-08-27 14:43:33 | HTTP Response: POST https://api.openai.com/v1/audio/speech "200 OK" Headers([('date', 'Thu, 27 Aug 2026 09:43:32 GMT'), ('content-type', 'audio/pcm'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('access-control-expose-headers', 'X-Request-ID'), ('access-control-expose-headers', 'CF-Ray'), ('openai-organization', 'user-xuwjbox3heapqqquxhll29jo'), ('openai-processing-ms', '393'), ('openai-project', 'proj_2TQIIFQgc5JPmCT7DW93sN4B'), ('openai-version', '2020-10-01'), ('server', 'cloudflare'), ('x-ratelimit-limit-requests', '10000'), ('x-ratelimit-limit-tokens', '200000'), ('x-ratelimit-remaining-requests', '9999'), ('x-ratelimit-remaining-tokens', '199986'), ('x-ratelimit-reset-requests', '8.64s'), ('x-ratelimit-reset-tokens', '4ms'), ('x-request-id', 'req_12381d6d4e3e4f26896cd61489ef4d2e'), ('x-openai-proxy-wasm', 'v0.1'), ('cf-cache-status', 'DYNAMIC'), ('set-cookie', '__cf_bm=nRf3O3S4fcMIo_opCY8L8K8zvZui1vkux8UNUWZjC8Y-1787823811.9573185-1.0.1.1-AAXbeAPmiPcd6ZFfnNg_Vv3XCq6V2zJ5nEQCatz4HVBGYrU.YlXsqHy3LI93rHS2fR0eYCFJA25M.BUWZqwuNduWd2PfzIZcCHDismFWkWx9Q1I7fdQQX55.ALzLXU8d; HttpOnly; SameSite=None; Secure; Path=/; Domain=api.openai.com; Expires=Thu, 27 Aug 2026 10:13:32 GMT'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('x-content-type-options', 'nosniff'), ('cf-ray', 'a31a21e8bf11b85e-AKX'), ('alt-svc', 'h3=":443"; ma=86400')])
+2026-08-27 14:43:33 | request_id: req_12381d6d4e3e4f26896cd61489ef4d2e
+2026-08-27 14:43:33 | openai tts synthesized 31 chars (kk) -> 160800 bytes in 3281 ms (container=pcm, 160800 pcm bytes ≈ 3.35s)
+2026-08-27 14:43:33 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id= chunk=0, 160800 audio bytes)
+2026-08-27 14:43:33 | spoke event_id= chunk=0 language=kk audio_bytes=160800 marks=32 raw_pcm=True total_ms=3284 device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-08-27 14:43:39 | robot-log [I] EBUploader: Work cycle 3 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-08-27 14:43:49 | robot-log [I] EBUploader: Work cycle 4 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:43:50 | robot-log [I] Unity: [CHARGING_EVENT] [LizardInfoEvent] New battery level: 99% (BATTERY_FULL), and charging.
+2026-08-27 14:43:50 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:43:49-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.99,"mode":"idle","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"rchat_api":"10","cloud_tts_voice_id":"Joanna","xmos_variant":"vad","default_loglevel":"info","cloud_tts_gain_db":"3","audio_wake":"1","wake_button_enabled":"0","debug_whiteboard":"0","group":"1","target_all":"1","mqtt_files":"0","schedule_sensitive":"1","wake_button":"1","playzone":"0",…
+2026-08-27 14:44:00 | robot-log [I] EBUploader: Work cycle 5 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-08-27 14:44:10 | robot-log [I] EBUploader: Work cycle 6 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:44:21 | robot-log [I] EBUploader: Work cycle 7 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-08-27 14:44:21 | robot-log [I] EBUploader: Upload work cycle 7.  Processed 22 files (uploaded 0 bytes) since last report.
+2026-08-27 14:44:31 | robot-log [I] EBUploader: Work cycle 8 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:44:42 | robot-log [I] EBUploader: Work cycle 9 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:44:42 | robot-log [I] EBUploader: Work cycle 10 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:44:52 | robot-log [I] EBUploader: Work cycle 11 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-08-27 14:45:02 | robot-log [I] EBUploader: Work cycle 12 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-08-27 14:45:13 | robot-log [I] EBUploader: Work cycle 13 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:45:23 | robot-log [I] EBUploader: Work cycle 14 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:45:23 | robot-log [I] EBUploader: Upload work cycle 14.  Processed 17 files (uploaded 0 bytes) since last report.
+2026-08-27 14:45:34 | robot-log [I] EBUploader: Work cycle 15 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-08-27 14:45:44 | robot-log [I] EBUploader: Work cycle 16 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:45:55 | robot-log [I] EBUploader: Work cycle 17 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-08-27 14:46:05 | robot-log [I] EBUploader: Work cycle 18 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:46:15 | robot-log [I] EBUploader: Work cycle 19 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:46:26 | robot-log [I] EBUploader: Work cycle 20 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:46:26 | robot-log [I] EBUploader: Upload work cycle 20.  Processed 18 files (uploaded 0 bytes) since last report.
+2026-08-27 14:46:36 | robot-log [I] EBUploader: Work cycle 21 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:46:47 | robot-log [I] EBUploader: Work cycle 22 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:46:57 | robot-log [I] EBUploader: Work cycle 23 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-08-27 14:47:08 | robot-log [I] EBUploader: Work cycle 24 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-08-27 14:47:18 | robot-log [I] EBUploader: Work cycle 25 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:47:28 | robot-log [I] EBUploader: Work cycle 26 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-08-27 14:47:28 | robot-log [I] EBUploader: Upload work cycle 26.  Processed 15 files (uploaded 0 bytes) since last report.
+2026-08-27 14:47:39 | robot-log [I] EBUploader: Work cycle 27 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-08-27 14:47:48 | received puppet mode request: enabled=False
+2026-08-27 14:47:48 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-08-27 14:47:48 | puppet mode=False pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+2026-08-27 14:47:48 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787824067768', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'remote_lines', 'request_id': '6dd9f294-f368-4a22-bc2c-7ddc619a7aaf', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:47:48 | unanswered query 'remote_lines' from d_d05e3c66-dd29-4fe2-9758-7223e31511dc (request_id=6dd9f294-f368-4a22-bc2c-7ddc619a7aaf)
+2026-08-27 14:47:49 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=telehealth: {'timestamp': '1787824068074', 'action': 'UPDATE_STATE', 'state': 'EXITING'}
+2026-08-27 14:47:49 | telehealth state d_d05e3c66-dd29-4fe2-9758-7223e31511dc: READY -> EXITING
+2026-08-27 14:47:49 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787824068697', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'schedule', 'request_id': '2b148b54-1046-4837-964b-7423b9a2697b', 'schedule_id': 'default', 'api_version': 1, 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:47:49 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=2b148b54-1046-4837-964b-7423b9a2697b puppet=False
+2026-08-27 14:47:49 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (271 bytes)
+2026-08-27 14:47:49 | activity-log d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query: {'timestamp': '1787824068727', 'subtopic': 'query', 'auid': '374fdcb1-207c-484c-8907-b4773e6f4ccd', 'query': 'mentor_behaviors', 'request_id': '26c6dd58-496b-402d-af0a-d0125e45ea06', 'child_id': 'eb0cd1ef-01da-453a-aae9-17aed91f3bfc', 'software_version': '24.10.803', 'module_name': 'robotbrain'}
+2026-08-27 14:47:49 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=26c6dd58-496b-402d-af0a-d0125e45ea06
+2026-08-27 14:47:49 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-08-27 14:47:49 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=19f5d46b-3bcf-4027-862a-7df8088cf99b (1 modules)
+2026-08-27 14:47:49 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-08-27 14:47:49 | robot-log [I] EBUploader: Work cycle 28 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-08-27 14:47:55 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-08-27T02:47:54-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.99,"mode":"sleep","wifi_ssid":"MiraiTech","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"wake_button":"1","rchat_api":"10","cloud_tts_voice_id":"Joanna","playzone":"0","xmos_variant":"vad","xmos_enable_logging":"0","gcp_upload_disable":"1","cloud_tts_use_mp3":"0","local_stt":"on","audio_wake":"1","brain_entrances_available":"1","cloud_tts":"1","file_sync_wait":"0","group":…
+2026-08-27 14:47:55 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_STANDBY
+2026-08-27 14:48:00 | robot-log [I] EBUploader: Work cycle 29 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-08-27 14:48:01 | Shutting down
+2026-08-27 14:48:01 | Waiting for application shutdown.
+2026-08-27 14:48:02 | Application shutdown complete.
+2026-08-27 14:48:02 | Finished server process [38300]
+2026-08-27 14:48:02 | Stopping reloader process [38296]

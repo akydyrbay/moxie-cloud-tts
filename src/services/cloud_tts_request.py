@@ -81,7 +81,7 @@ async def handle_cloud_tts_request(
             (request.markup or "")[:80],
         )
         return speak_service.publish_silence(
-            device_id, event_id, request.chunk_num,
+            device_id, event_id, request.chunk_num, markup=request.markup or "",
         )
 
     language = detect_language(text)
@@ -101,6 +101,7 @@ async def handle_cloud_tts_request(
             event_id=event_id,
             chunk_num=request.chunk_num,
             device_id=device_id,
+            markup=request.markup or "",
         )
     except Exception:
         # speak() already published silence; swallow so the MQTT dispatcher logs

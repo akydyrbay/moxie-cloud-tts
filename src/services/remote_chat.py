@@ -32,6 +32,10 @@ from src.services.devices import device_registry
 from src.services.language import detect_language, fallback_language
 from src.services.llm import openai_chat
 from src.services.mqtt_service import mqtt_service
+from src.services.stt_request import (
+    note_conversation_active,
+    reset_conversation_state,
+)
 from src.services.telehealth import handle_activity_log_telehealth
 
 logger = logging.getLogger(__name__)
@@ -169,6 +173,9 @@ class RemoteChatBrain:
         """
         if not device_registry.mark_bootstrapped(device_id):
             return
+        # New session (fresh connect or reboot): the robot is back at the WAKEUP
+        # gate, so re-arm wake-trigger injection until it re-enters chat.
+        reset_conversation_state(device_id)
         config = await device_state.get_config()
         props = config.get("settings", {}).get("props", {})
         logger.info(
@@ -330,6 +337,10 @@ class RemoteChatBrain:
 
         if self.is_remote_module(module_id, content_id):
             logger.debug("RCR:%s for remote module %s", cmd, module_key)
+            # The robot has reached OPENMOXIE_CHAT (past the onboard WAKEUP gate),
+            # so the STT handler can switch from the wake trigger to the actual
+            # conversation line.
+            note_conversation_active(device_id)
             await self._remote_module_response(
                 device_id, request, module_id, content_id,
             )
@@ -369,6 +380,23 @@ class RemoteChatBrain:
         except Exception:
             logger.exception("invalid remote-chat JSON from %s", device_id)
             return
+
+        # Log every inbound remote-chat message so conversation-entry is visible:
+        # after the modules handshake the robot should send a backend=router turn
+        # (command=prompt, then the child's speech). If only modules queries ever
+        # appear here, the robot never entered a conversation.
+        logger.info(
+            "Rx remote-chat from %s backend=%r command=%r module=%s/%s "
+            "event_id=%r speech=%r keys=%s",
+            device_id,
+            request.get("backend"),
+            request.get("command"),
+            request.get("module_id") or "",
+            request.get("content_id") or "",
+            request.get("event_id", ""),
+            (request.get("speech") or "")[:80],
+            list(request.keys()),
+        )
 
         if _is_modules_query(request):
             await self.handle_modules_query(device_id, request)

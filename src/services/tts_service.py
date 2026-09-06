@@ -13,6 +13,7 @@ override), so a toggle reaches whichever robot is actually connected.
 """
 
 import logging
+from copy import deepcopy
 
 from src.config import settings
 from src.services.device_state import device_state
@@ -20,6 +21,23 @@ from src.services.devices import device_registry
 from src.services.mqtt_service import mqtt_service
 
 logger = logging.getLogger(__name__)
+
+# Mentor/user identity fields. Re-pushing them mid-session crashes the native
+# brain: OnCloudSettingsChanged -> SetMentorName -> AddUser -> SaveUserName locks
+# a destroyed mutex and SIGABRTs (backtrace in PUPPET_SPEAK_SILENCE_ANALYSIS.md
+# §4.1; reproduced on every puppet enable). A cloud_tts / moxie_mode toggle does
+# not need identity, so it is stripped from toggle pushes — the change then
+# carries no mentor/user delta for the handler to act on. Identity is still sent
+# once, at bootstrap (remote_chat.ensure_device_bootstrapped).
+_IDENTITY_FIELDS = ("child_pii", "pairing_status")
+
+
+def _without_identity_fields(config: dict) -> dict:
+    """Return a copy of `config` with mentor/user identity fields removed."""
+    stripped = deepcopy(config)
+    for field in _IDENTITY_FIELDS:
+        stripped.pop(field, None)
+    return stripped
 
 
 async def get_status() -> dict:
@@ -78,6 +96,9 @@ def push_config(config: dict) -> list[str]:
             "connects and is bootstrapped",
         )
         return []
+    # Strip identity so a mid-session toggle cannot re-trigger SetMentorName and
+    # crash the brain (see _IDENTITY_FIELDS).
+    payload = _without_identity_fields(config)
     for device_id in targets:
-        mqtt_service.publish_settings_update(device_id, config)
+        mqtt_service.publish_settings_update(device_id, payload)
     return targets

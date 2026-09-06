@@ -27,6 +27,11 @@ from src.protos.embodied.unity.CloudTTS_pb2 import TTSMark
 MARK_SENTENCE = "sentence"
 MARK_WORD = "word"
 MARK_VISEME = "viseme"
+# Polly emits `ssml`-type marks for `<mark name="..."/>` tags. The robot embeds
+# command marks (cmd:behaviour-tree, cmd:idlestate, cmd:attachment-animator, ...)
+# in the markup it sends and expects them echoed back so it can fire the
+# behaviour/animation in sync with the audio.
+MARK_SSML = "ssml"
 
 # Polly's "mouth at rest" viseme. Emitted last so the utterance has an explicit
 # end rather than trailing off after the final sound.
@@ -35,6 +40,9 @@ VISEME_SILENCE = "sil"
 _WORD_RE = re.compile(r"\S+")
 # Keeps the terminator with the sentence it ends.
 _SENTENCE_RE = re.compile(r"[^.!?…]+[.!?…]*", re.UNICODE)
+# Any xml-like tag, and the `name` of a `<mark name="..."/>` specifically.
+_ANY_TAG_RE = re.compile(r"<[^>]*>")
+_MARK_NAME_RE = re.compile(r'<mark\b[^>]*\bname="([^"]*)"', re.IGNORECASE | re.DOTALL)
 
 # Grapheme -> Polly viseme, grouped by place of articulation (which is what a
 # viseme represents, so letters that sound different but look the same on the
@@ -90,6 +98,41 @@ def _sentence_spans(text: str) -> list[tuple[int, int]]:
         for m in _SENTENCE_RE.finditer(text)
         if m.group().strip()
     ]
+
+
+def command_marks(markup: str, duration_ms: int) -> list[TTSMark]:
+    """Echo `<mark name="..."/>` tags from `markup` as Polly `ssml` marks.
+
+    The robot embeds command marks (cmd:behaviour-tree, cmd:idlestate,
+    cmd:attachment-animator, ...) in the markup it sends and expects them echoed
+    back in the response `marks` so it can execute the behaviour/animation in
+    sync with the audio. Without this echo the robot's entry-sequence commands
+    never fire and it stalls in MarkingUp, so it never enters a conversation.
+
+    Each mark is timed by the fraction of viseme-bearing characters that precede
+    it, so command-only markup (no speakable text) emits every mark at time 0.
+    """
+    if not markup:
+        return []
+    total_units = sum(1 for ch in _ANY_TAG_RE.sub("", markup) if viseme_for(ch))
+    marks: list[TTSMark] = []
+    units_before = 0
+    pos = 0
+    for tag in _ANY_TAG_RE.finditer(markup):
+        units_before += sum(
+            1 for ch in markup[pos:tag.start()] if viseme_for(ch)
+        )
+        pos = tag.end()
+        name_match = _MARK_NAME_RE.match(tag.group(0))
+        if name_match is None:
+            continue
+        time = (
+            int(units_before / total_units * duration_ms)
+            if total_units and duration_ms > 0
+            else 0
+        )
+        marks.append(TTSMark(time=time, type=MARK_SSML, value=name_match.group(1)))
+    return marks
 
 
 def build_marks(text: str, duration_ms: int) -> list[TTSMark]:
@@ -165,9 +208,11 @@ def build_marks(text: str, duration_ms: int) -> list[TTSMark]:
 
 __all__ = [
     "MARK_SENTENCE",
+    "MARK_SSML",
     "MARK_VISEME",
     "MARK_WORD",
     "VISEME_SILENCE",
     "build_marks",
+    "command_marks",
     "viseme_for",
 ]

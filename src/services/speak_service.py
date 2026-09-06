@@ -34,7 +34,7 @@ from src.protos.embodied.unity.CloudTTS_pb2 import (
 )
 from src.services.audio import duration_ms, pcm_to_wav, repair_wav
 from src.services.devices import device_registry
-from src.services.marks import build_marks
+from src.services.marks import build_marks, command_marks
 from src.services.mqtt_service import mqtt_service
 from src.services.synthesis.base import (
     SynthesisResult,
@@ -82,6 +82,7 @@ def _build_response(
     chunk_num: int,
     request_source: RequestSourceType,
     total_time_ms: int,
+    markup: str = "",
 ) -> CloudTTSResponse:
     """Assemble a CloudTTSResponse for playback.
 
@@ -89,17 +90,19 @@ def _build_response(
     to be longer than the samples it carries.
 
     `marks` carries Polly-style viseme/word timings derived from `result.text`
-    and the measured audio length (see `src/services/marks.py`).
+    plus any `ssml` command marks echoed from `markup` — the robot needs those
+    `cmd:` marks back to fire its behaviour/animation and leave MarkingUp (see
+    `src/services/marks.py`).
     """
     audio = repair_wav(result.audio)
-    marks = (
-        build_marks(
-            result.text,
-            duration_ms(audio, result.sample_rate, result.channels),
-        )
-        if settings.CLOUD_TTS_EMIT_MARKS
-        else []
-    )
+    if settings.CLOUD_TTS_EMIT_MARKS:
+        dur = duration_ms(audio, result.sample_rate, result.channels)
+        marks = [*command_marks(markup, dur), *build_marks(result.text, dur)]
+        # Time order; stable so a command mark keeps its place ahead of a viseme
+        # emitted at the same instant.
+        marks.sort(key=lambda mark: mark.time)
+    else:
+        marks = []
     return CloudTTSResponse(
         request_source=request_source,
         audio=AudioBuffer(
@@ -134,8 +137,15 @@ def publish_silence(
     event_id: str,
     chunk_num: int = 0,
     request_source: RequestSourceType | None = None,
+    markup: str = "",
 ) -> dict:
-    """Publish a correlated silent response so the robot stops waiting."""
+    """Publish a correlated silent response so the robot stops waiting.
+
+    `markup` is the original request markup: command-only lines (the robot's
+    entry animation) carry no speakable text but DO carry `cmd:` marks that must
+    be echoed, or the robot stalls in MarkingUp. Passing it here lets the silent
+    response still carry those commands.
+    """
     audio = _silence()
     result = SynthesisResult(
         audio=audio,
@@ -144,13 +154,15 @@ def publish_silence(
         synthesis_time_ms=0,
     )
     # `result.text` is empty: no speech, so no visemes — `build_marks` still
-    # closes the utterance with a trailing `sil`.
+    # closes the utterance with a trailing `sil`, and any `cmd:` marks in
+    # `markup` are echoed as `ssml` marks.
     response = _build_response(
         result,
         event_id=event_id,
         chunk_num=chunk_num,
         request_source=request_source or configured_request_source(),
         total_time_ms=0,
+        markup=markup,
     )
     mqtt_service.publish_cloud_tts_response(device_id, response)
     logger.warning(
@@ -176,6 +188,7 @@ async def speak(
     chunk_num: int = 0,
     request_source: RequestSourceType | None = None,
     device_id: str | None = None,
+    markup: str | None = None,
 ) -> dict:
     """Synthesize `text` and publish it to the robot; return a result summary.
 
@@ -209,7 +222,7 @@ async def speak(
             event_id,
             target,
         )
-        publish_silence(target, event_id, chunk_num, source)
+        publish_silence(target, event_id, chunk_num, source, markup=markup or "")
         raise
 
     total_time_ms = int((time.monotonic() - start) * 1000)
@@ -219,6 +232,7 @@ async def speak(
         chunk_num=chunk_num,
         request_source=source,
         total_time_ms=total_time_ms,
+        markup=markup or "",
     )
     mqtt_service.publish_cloud_tts_response(target, response)
 
