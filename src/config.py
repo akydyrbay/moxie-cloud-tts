@@ -214,7 +214,7 @@ DEFAULT_SCHEDULE: dict = {
 # DEFAULT_ROBOT_CONFIG + DEFAULT_ROBOT_SETTINGS. `cloud_tts` and `moxie_mode`
 # are deliberately absent here — `device_state.py` overlays them live.
 #
-# Enrollment skip (SPEAK_WITHOUT_PUPPET_PLAN.md §4 A): identity is a paired,
+# Enrollment skip (docs/SPEAK_LIVE_PLAN.md §4 A): identity is a paired,
 # nicknamed mentor, and max_enroll="0" is OpenMoxie's documented disable of
 # ENROLLCONVO ("Clearance Check": chocolate vs strawberry). Firmware still
 # runs that as a brain-entrance even when DEFAULT_SCHEDULE is only_chat, so

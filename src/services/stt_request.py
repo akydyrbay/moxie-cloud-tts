@@ -10,7 +10,7 @@ Once `OPENMOXIE_CHAT` is active, canned chat injection is off. The first spoken
 line is the `REMOTE_CHAT_OPENERS` opener from remote-chat `command=prompt`,
 voiced by Cloud TTS — not an STT "the child said this" stimulus. Real
 transcription (accumulate `audio_content`, wrap as 16 kHz WAV, run OpenAI STT)
-is M2; see SPEAK_WITHOUT_PUPPET_PLAN.md.
+is M2; see docs/SPEAK_LIVE_PLAN.md.
 """
 
 import logging

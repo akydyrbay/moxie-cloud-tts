@@ -138,3 +138,7 @@ frames (16 kHz mono PCM16), flagging `END_OF_SPEECH` itself, then expects a
 work, plus confirming the robot's recognizer settings accept Russian/Kazakh.
 
 ## Documents
+
+- [AGENTS.md](docs/AGENTS.md) — architecture, MQTT topics, and remaining Cloud TTS work for development agents.
+- [Speak Live Plan](docs/SPEAK_LIVE_PLAN.md) — autonomous (non-puppet) conversation path.
+- [Speak Puppet Analysis](docs/SPEAK_PUPPET_ANALYSIS.md) — why TELEHEALTH only plays the first `/tts/speak` line.

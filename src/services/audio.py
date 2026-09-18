@@ -14,7 +14,7 @@ and, when a container is wanted, build it here with truthful sizes.
 
 It is **not** the cause of "only the first puppet line plays". After this
 repair, both a truthful WAV and raw PCM still play line 1 and stay silent for
-line 2 in the same TELEHEALTH session. See `PUPPET_SPEAK_SILENCE_ANALYSIS.md`.
+line 2 in the same TELEHEALTH session. See `docs/SPEAK_PUPPET_ANALYSIS.md`.
 """
 
 import io

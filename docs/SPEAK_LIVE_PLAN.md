@@ -1,4 +1,4 @@
-# Making Moxie Speak Without Puppet Mode — Implementation Plan
+# Speak Live Plan
 
 Status: **IN PROGRESS.** Last updated 2026-09-07 (M1 option A in tree).
 
@@ -7,7 +7,8 @@ speak **Russian / Kazakh**, driven by this server: opener via Cloud TTS, then a
 listen → chat → TTS loop.
 
 Puppet / TELEHEALTH (`POST /tts/speak`) is **out of scope** for this plan. That
-path is a different firmware mode (command-only). This document is the
+path is a different firmware mode (command-only). Why it was dropped as the
+conversation path: `SPEAK_PUPPET_ANALYSIS.md`. This document is the
 autonomous conversation path.
 
 ---
@@ -411,7 +412,7 @@ No new MQTT service. No new HTTP speak path for this plan.
 - OpenMoxie STT contract: `~/Desktop/hri-lab/openmoxie/site/hive/mqtt/zmq_stt_handler.py`
 - OpenMoxie proto subscribe / `send_zmq_to_bot`: `moxie_server.py`
 - OpenMoxie `no_onboarding` / enrollment config: same clone
-- Puppet line-2 / config-crash: `PUPPET_SPEAK_SILENCE_ANALYSIS.md` (do not
+- Puppet line-2 / config-crash: `SPEAK_PUPPET_ANALYSIS.md` (do not
   re-push identity mid-session while implementing M1)
 
 ---
