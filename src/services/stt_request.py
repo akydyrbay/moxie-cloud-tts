@@ -1,17 +1,16 @@
-"""Canned-line injection over the STT channel (Goal 1: speak without puppet).
+"""STT-channel replies (Goal 1 / M1: speak without puppet).
 
 The robot streams framed `zmqSTTRequest` frames (mic audio + VAD state) on
 `/devices/{id}/events/zmq` and waits for a `zmqSTTResponse` carrying the
 recognized text. Rather than transcribe, this handler waits for
-`END_OF_SPEECH` and replies with a fixed line (`settings.INJECTED_STT_LINE`).
-The robot then believes it heard that line and drives its normal conversation
-turn — which the remote-chat + cloud-TTS stages answer — so the injected line is
-a *stimulus* and what Moxie says is the chat reply to it.
+`END_OF_SPEECH` and, while the robot is still in onboard WAKEUP, replies with
+`WAKEUP_TRIGGER_LINE` ("Moxie, let's go") so the day-start gate opens.
 
-Answering the stream also stops the `zmqSTT: UUID has gone too long without a
-response` warnings and the resulting force-idle. Real transcription (accumulate
-`audio_content`, wrap as 16 kHz WAV, run OpenAI STT) is a later milestone; see
-SPEAK_WITHOUT_PUPPET_PLAN.md (M2).
+Once `OPENMOXIE_CHAT` is active, canned chat injection is off. The first spoken
+line is the `REMOTE_CHAT_OPENERS` opener from remote-chat `command=prompt`,
+voiced by Cloud TTS — not an STT "the child said this" stimulus. Real
+transcription (accumulate `audio_content`, wrap as 16 kHz WAV, run OpenAI STT)
+is M2; see SPEAK_WITHOUT_PUPPET_PLAN.md.
 """
 
 import logging
@@ -36,9 +35,8 @@ _session_start_ms: dict[tuple[str, str], int] = {}
 
 # Devices that have entered OPENMOXIE_CHAT (past the onboard WAKEUP gate). Until
 # a device is in this set we inject WAKEUP_TRIGGER_LINE to open the gate; after,
-# we inject INJECTED_STT_LINE (the actual conversation line). remote_chat marks
-# entry via note_conversation_active(); a reconnect clears it via
-# reset_conversation_state().
+# listen sessions are left unanswered. remote_chat marks entry via
+# note_conversation_active(); a reconnect clears it via reset_conversation_state().
 _conversation_active: set[str] = set()
 
 
@@ -60,11 +58,11 @@ def _injected_line(device_id: str) -> str:
     """The phrase to inject for `device_id`, given its conversation phase.
 
     Before OPENMOXIE_CHAT is active, inject the WAKEUP trigger so the robot
-    leaves its onboard "start the day" gate; after, inject the conversation
-    line. An empty WAKEUP_TRIGGER_LINE means inject the chat line from the start.
+    leaves its onboard "start the day" gate. After that, inject nothing so the
+    opener from remote-chat is what Moxie speaks next.
     """
-    if device_id in _conversation_active or not settings.WAKEUP_TRIGGER_LINE:
-        return settings.INJECTED_STT_LINE
+    if device_id in _conversation_active:
+        return ""
     return settings.WAKEUP_TRIGGER_LINE
 
 
@@ -97,8 +95,8 @@ async def handle_stt_request(
 
     Mid-stream frames (START/SPEECH) only record the session start and return
     None. On END_OF_SPEECH exactly one `zmqSTTResponse` is published back to the
-    robot. When `INJECTED_STT_LINE` is empty, injection is disabled (real STT is
-    a later milestone) and nothing is sent.
+    robot. When the chosen line is empty (default after OPENMOXIE_CHAT: no
+    canned chat stimulus), nothing is sent.
     """
     key = (device_id, request.uuid)
     if key not in _session_start_ms:

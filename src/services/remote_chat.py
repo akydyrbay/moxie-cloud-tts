@@ -43,6 +43,16 @@ logger = logging.getLogger(__name__)
 _ACTION_TAG_RE = re.compile(r"<[^>]*>")
 _MAX_HISTORY = 20
 
+# Local brain-entrance modules. FALLBACK loses to the local scripted line
+# ("Excellent!"), which Cloud TTS then voices in English. An empty
+# GLOBAL_COMMAND beats that line but leaves WAKEUP looping "Moxie, let's go!"
+# because the module never hears a completed confirmation. A `launch` action
+# on the *primary* response skips Cloud TTS (the robot jumps modules before
+# the renderer runs). Replace Excellent with a short Russian confirmation and
+# do not launch — DEFAULT_SCHEDULE already starts OPENMOXIE_CHAT after WAKEUP.
+_ENTRANCE_MODULES = frozenset({"WAKEUP", "ENROLLCONVO"})
+_ENTRANCE_OK_TEXT = "Отлично!"
+
 
 def fallback_line(language: str) -> str:
     """Canned line in the child's language (never English)."""
@@ -58,13 +68,19 @@ def _build_response(
     actions: list[dict] | None = None,
 ) -> dict:
     """Build a RemoteChatResponse matching OpenMoxie's Volley schema."""
+    speak_only = {"output_type": output_type}
     if actions:
         response_actions = [
             {**action, "output_type": action.get("output_type", output_type)}
             for action in actions
         ]
+        # Side-effect actions (launch/sleep) as the primary block skip Cloud
+        # TTS: the robot leaves the current module before it emits a request.
+        # Keep a speak-only primary so `output` is voiced first.
+        if "action" in response_actions[0]:
+            response_actions.insert(0, speak_only)
     else:
-        response_actions = [{"output_type": output_type}]
+        response_actions = [speak_only]
     primary = response_actions[0]
 
     response: dict[str, Any] = {
@@ -109,6 +125,16 @@ def _strip_action_tags(text: str) -> tuple[str, list[dict]]:
     return clean, actions
 
 
+def _speech_markup(text: str) -> str:
+    """Wrap spoken text the way local lines arrive on CloudTTSRequest.
+
+    Plain markup is accepted in remote-chat history (notify) but the speech
+    renderer does not raise CloudTTSRequest for it. Local content uses
+    `<usel variant ...>`; matching that shape is what gets voiced.
+    """
+    return f'<usel variant="2" genre="none">{text}</usel>'
+
+
 def _is_modules_query(payload: dict) -> bool:
     """True for OpenMoxie's nested form and the flat capture form."""
     query = payload.get("query")
@@ -151,6 +177,9 @@ class RemoteChatBrain:
 
     def __init__(self) -> None:
         self._sessions: dict[str, _ChatSession] = {}
+        # Last router event_id per device, so an HTTP sleep can attach a
+        # `sleep` action to a volley the robot still has in flight.
+        self._last_event_id: dict[str, str] = {}
 
     def get_modules_info(self) -> dict:
         return copy.deepcopy(DEFAULT_REMOTE_MODULES_INFO)
@@ -176,6 +205,8 @@ class RemoteChatBrain:
         # New session (fresh connect or reboot): the robot is back at the WAKEUP
         # gate, so re-arm wake-trigger injection until it re-enters chat.
         reset_conversation_state(device_id)
+        self._sessions.pop(device_id, None)
+        self._last_event_id.pop(device_id, None)
         config = await device_state.get_config()
         props = config.get("settings", {}).get("props", {})
         logger.info(
@@ -272,6 +303,52 @@ class RemoteChatBrain:
         openers = REMOTE_CHAT_OPENERS.get(content_id) or REMOTE_CHAT_OPENERS["default"]
         return random.choice(openers.split("|"))
 
+    def _complete_entrance(self, device_id: str, request: dict) -> None:
+        """Replace local "Excellent!" so WAKEUP can finish and the opener can run.
+
+        Empty GLOBAL_COMMAND won the slot but did not complete WAKEUP, so the
+        robot re-asked for "Moxie, let's go!" and never sent `command=prompt`.
+        """
+        self._send_remote_chat(
+            device_id,
+            _build_response(
+                request,
+                text=_ENTRANCE_OK_TEXT,
+                markup=_speech_markup(_ENTRANCE_OK_TEXT),
+                output_type="GLOBAL_COMMAND",
+            ),
+        )
+
+    def request_sleep(self, device_id: str) -> None:
+        """Ask the robot to sleep via a remote-chat `sleep` action.
+
+        Firmware only honours this on an accepted volley, so we reuse the last
+        router `event_id` when we have one. The MQTT `sleep` command (see
+        `telehealth.sleep`) is sent alongside this from the HTTP handler.
+        """
+        event_id = self._last_event_id.get(device_id, "")
+        payload = {
+            "command": "remote_chat",
+            "result": 0,
+            "backend": "router",
+            "event_id": event_id,
+            "output": {"text": "", "markup": '<break time="0.01s"/>'},
+            "response_actions": [
+                {"action": "sleep", "output_type": "GLOBAL_COMMAND"},
+            ],
+            "response_action": {
+                "action": "sleep",
+                "output_type": "GLOBAL_COMMAND",
+            },
+            "fallback": False,
+        }
+        logger.info(
+            "Tx remote_chat sleep to %s event_id=%r",
+            device_id,
+            event_id,
+        )
+        mqtt_service.publish_command_json(device_id, "remote_chat", payload)
+
     async def _remote_module_response(
         self,
         device_id: str,
@@ -293,7 +370,11 @@ class RemoteChatBrain:
             text = self._opener_for(content_id or "default")
             self._send_remote_chat(
                 device_id,
-                _build_response(request, text=text, markup=text),
+                _build_response(
+                    request,
+                    text=text,
+                    markup=_speech_markup(text),
+                ),
             )
             return
 
@@ -323,7 +404,7 @@ class RemoteChatBrain:
         response = _build_response(
             request,
             text=text,
-            markup=text,
+            markup=_speech_markup(text),
             actions=actions or None,
         )
         self._send_remote_chat(device_id, response)
@@ -335,22 +416,38 @@ class RemoteChatBrain:
         cmd = request.get("command")
         module_key = f"{module_id}/{content_id}"
 
+        event_id = request.get("event_id") or ""
+        if event_id:
+            self._last_event_id[device_id] = event_id
+
         if self.is_remote_module(module_id, content_id):
             logger.debug("RCR:%s for remote module %s", cmd, module_key)
-            # The robot has reached OPENMOXIE_CHAT (past the onboard WAKEUP gate),
-            # so the STT handler can switch from the wake trigger to the actual
-            # conversation line.
-            note_conversation_active(device_id)
+            # Notify is history-only and can fire while WAKEUP is still looping.
+            # Marking conversation active on that notify stopped wake-gate STT
+            # inject, so the robot re-prompted English and never reached prompt.
+            if cmd in {"prompt", "continue", "reprompt", "start"}:
+                note_conversation_active(device_id)
             await self._remote_module_response(
                 device_id, request, module_id, content_id,
             )
             return
 
-        # Onboard / unknown module: drop any remote session and answer FALLBACK
-        # so the robot does not wait forever for a cloud reply.
+        # Onboard / unknown module: drop any remote session. Notify is a
+        # no-reply path. Entrance modules must not FALLBACK — that loses to the
+        # local script and Cloud TTS voices English instead of the opener.
         if device_id in self._sessions:
             self._clear_session(device_id)
         if cmd == "notify":
+            return
+        if module_id in _ENTRANCE_MODULES:
+            logger.info(
+                "entrance %s cmd=%s device=%s — replace Excellent with Russian "
+                "GLOBAL_COMMAND (no launch)",
+                module_key,
+                cmd,
+                device_id,
+            )
+            self._complete_entrance(device_id, request)
             return
         logger.debug(
             "FALLBACK for non-remote module %s cmd=%s device=%s",

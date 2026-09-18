@@ -4,6 +4,7 @@ import json
 
 import pytest
 
+from src.config import REMOTE_CHAT_OPENERS
 from src.services.device_state import device_state
 from src.services.mqtt_service import mqtt_service
 from src.services.remote_chat import RemoteChatBrain, fallback_line, remote_chat_brain
@@ -103,6 +104,63 @@ async def test_onboard_module_gets_fallback(brain: RemoteChatBrain) -> None:
     assert payload["event_id"] == "e1"
 
 
+async def test_wakeup_start_replaces_excellent_without_launch(
+    brain: RemoteChatBrain,
+) -> None:
+    """GLOBAL_COMMAND 'Отлично!' beats English Excellent without skipping TTS via launch."""
+    req = {
+        "backend": "router",
+        "command": "start",
+        "event_id": "wake-stt-uuid",
+        "module_id": "WAKEUP",
+        "content_id": "",
+        "speech": "Moxie, let's go",
+    }
+    await brain.handle_router_request(TEST_DEVICE_ID, req)
+    _topic, payload = brain._published[0]  # type: ignore[attr-defined]
+    assert payload["event_id"] == "wake-stt-uuid"
+    assert payload["response_action"]["output_type"] == "GLOBAL_COMMAND"
+    assert payload["output"]["text"] == "Отлично!"
+    assert "<usel" in payload["output"]["markup"]
+    assert "Отлично!" in payload["output"]["markup"]
+    assert payload["response_action"].get("action") is None
+    assert all("action" not in a for a in payload["response_actions"])
+
+
+async def test_prompt_sends_opener_after_wakeup(
+    brain: RemoteChatBrain,
+) -> None:
+    """After WAKEUP confirms in Russian, OPENMOXIE_CHAT prompt voices the opener."""
+    await brain.handle_router_request(
+        TEST_DEVICE_ID,
+        {
+            "backend": "router",
+            "command": "start",
+            "event_id": "wake-1",
+            "module_id": "WAKEUP",
+            "speech": "Moxie, let's go",
+        },
+    )
+    brain._published.clear()  # type: ignore[attr-defined]
+    await brain.handle_router_request(
+        TEST_DEVICE_ID,
+        {
+            "backend": "router",
+            "command": "prompt",
+            "event_id": "prompt-1",
+            "module_id": "OPENMOXIE_CHAT",
+            "content_id": "default",
+        },
+    )
+    _topic, payload = brain._published[0]  # type: ignore[attr-defined]
+    assert payload["event_id"] == "prompt-1"
+    text = payload["output"]["text"]
+    assert text in REMOTE_CHAT_OPENERS["default"].split("|")
+    assert text in payload["output"]["markup"]
+    assert "<usel" in payload["output"]["markup"]
+    assert payload["response_action"]["output_type"] == "GLOBAL_RESPONSE"
+
+
 @pytest.mark.parametrize(
     ("speech", "expected"),
     [
@@ -149,21 +207,6 @@ async def test_llm_failure_falls_back_in_language(
     assert payload["output"]["text"] == fallback_line("kk")
 
 
-async def test_prompt_sends_opener(brain: RemoteChatBrain) -> None:
-    req = {
-        "backend": "router",
-        "command": "prompt",
-        "event_id": "e-prompt",
-        "module_id": "OPENMOXIE_CHAT",
-        "content_id": "default",
-    }
-    await brain.handle_router_request(TEST_DEVICE_ID, req)
-    _topic, payload = brain._published[0]  # type: ignore[attr-defined]
-    assert payload["response_action"]["output_type"] == "GLOBAL_RESPONSE"
-    assert payload["output"]["text"]
-    assert payload["output"]["markup"] == payload["output"]["text"]
-
-
 async def test_continue_uses_openai(
     brain: RemoteChatBrain, fake_openai,
 ) -> None:
@@ -193,6 +236,85 @@ async def test_notify_does_not_publish(brain: RemoteChatBrain) -> None:
     }
     await brain.handle_router_request(TEST_DEVICE_ID, req)
     assert brain._published == []  # type: ignore[attr-defined]
+
+
+async def test_openmoxie_notify_does_not_mark_conversation_active(
+    brain: RemoteChatBrain, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A silent OPENMOXIE_CHAT notify must not stop wake-gate STT inject."""
+    marked: list[str] = []
+    monkeypatch.setattr(
+        "src.services.remote_chat.note_conversation_active",
+        lambda device_id: marked.append(device_id),
+    )
+    await brain.handle_router_request(
+        TEST_DEVICE_ID,
+        {
+            "backend": "router",
+            "command": "notify",
+            "event_id": "e-notify",
+            "module_id": "OPENMOXIE_CHAT",
+            "content_id": "default",
+            "speech": "",
+        },
+    )
+    assert marked == []
+
+    await brain.handle_router_request(
+        TEST_DEVICE_ID,
+        {
+            "backend": "router",
+            "command": "prompt",
+            "event_id": "e-prompt",
+            "module_id": "OPENMOXIE_CHAT",
+            "content_id": "default",
+        },
+    )
+    assert marked == [TEST_DEVICE_ID]
+
+
+async def test_sleep_tag_keeps_speak_as_primary(
+    brain: RemoteChatBrain, fake_openai, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """`<sleep>` must not replace the speak block or Cloud TTS is skipped."""
+    monkeypatch.setattr(
+        "src.services.llm.openai_chat.respond",
+        lambda *_a, **_k: type("R", (), {"text": "Спокойной ночи <sleep>"})(),
+    )
+    await brain.handle_router_request(
+        TEST_DEVICE_ID,
+        {
+            "backend": "router",
+            "command": "continue",
+            "event_id": "e-sleep",
+            "module_id": "OPENMOXIE_CHAT",
+            "content_id": "default",
+            "speech": "Спокойной ночи",
+        },
+    )
+    _topic, payload = brain._published[0]  # type: ignore[attr-defined]
+    assert payload["output"]["text"] == "Спокойной ночи"
+    assert payload["response_action"].get("action") is None
+    assert payload["response_actions"][0].get("action") is None
+    assert payload["response_actions"][1]["action"] == "sleep"
+
+
+async def test_request_sleep_uses_last_event_id(brain: RemoteChatBrain) -> None:
+    await brain.handle_router_request(
+        TEST_DEVICE_ID,
+        {
+            "backend": "router",
+            "command": "notify",
+            "event_id": "last-volley",
+            "module_id": "OPENMOXIE_CHAT",
+            "content_id": "default",
+        },
+    )
+    brain._published.clear()  # type: ignore[attr-defined]
+    brain.request_sleep(TEST_DEVICE_ID)
+    _topic, payload = brain._published[0]  # type: ignore[attr-defined]
+    assert payload["event_id"] == "last-volley"
+    assert payload["response_action"]["action"] == "sleep"
 
 
 async def test_mqtt_dispatches_remote_chat(monkeypatch: pytest.MonkeyPatch) -> None:

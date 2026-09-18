@@ -12,7 +12,6 @@ from fastapi.testclient import TestClient
 
 from src.router.tts import router
 from src.services.telehealth import note_puppet_state
-from tests.conftest import make_wav
 
 DEVICE = "test-device-1"
 
@@ -69,22 +68,6 @@ def test_speak_without_a_robot_is_a_clear_error(client, captured_publish) -> Non
     assert captured_publish == []
 
 
-def test_speak_direct_publishes_audio(client, fake_openai, known_device, captured_publish) -> None:
-    resp = client.post(
-        "/tts/speak-direct",
-        json={"text": "Сәлем!", "language": "kk", "event_id": "evt-1"},
-    )
-    assert resp.status_code == 200
-    assert resp.json()["status"] == "published"
-    assert captured_publish[0][0] == f"/devices/{DEVICE}/commands/zmq"
-
-
-def test_speak_direct_unsupported_language(client, fake_openai, known_device, captured_publish) -> None:
-    resp = client.post("/tts/speak-direct", json={"text": "hi", "language": "en"})
-    assert resp.status_code == 422
-    assert captured_publish == []
-
-
 def test_cloud_tts_toggle_pushes_config(client, known_device, captured_publish) -> None:
     resp = client.post("/tts/cloud-tts", json={"enabled": True})
     assert resp.status_code == 200
@@ -124,14 +107,29 @@ def test_devices_endpoint_reports_discovered_robot(client, known_device) -> None
     assert body["primary"] == DEVICE
 
 
-def test_transcribe_endpoint(client, fake_openai) -> None:
-    files = {"file": ("speech.wav", make_wav(), "audio/wav")}
-    resp = client.post("/tts/transcribe", files=files, data={"language": "ru"})
+def test_wakeup_publishes_mqtt_command(client, known_device, captured_publish) -> None:
+    resp = client.post("/tts/wakeup")
     assert resp.status_code == 200
-    assert resp.json()["text"] == "Привет, меня зовут Мокси"
+    assert resp.json() == {"status": "wakeup_sent", "device_id": DEVICE}
+    topic, payload = captured_publish[0]
+    assert topic == f"/devices/{DEVICE}/commands/wakeup"
+    assert json.loads(payload) == {"command": "wakeup"}
 
 
-def test_respond_endpoint(client, fake_openai) -> None:
-    resp = client.post("/tts/respond", json={"text": "Привет", "language": "ru"})
+def test_sleep_publishes_mqtt_and_remote_chat(
+    client, known_device, captured_publish,
+) -> None:
+    resp = client.post("/tts/sleep")
     assert resp.status_code == 200
-    assert resp.json()["reply_text"] == "Привет! Рад тебя видеть!"
+    assert resp.json() == {"status": "sleep_sent", "device_id": DEVICE}
+    commands = {topic.rsplit("/", 1)[-1]: json.loads(payload)
+                for topic, payload in captured_publish}
+    assert commands["sleep"] == {"command": "sleep"}
+    assert commands["remote_chat"]["response_action"]["action"] == "sleep"
+
+
+def test_sleep_without_a_robot_is_a_clear_error(client, captured_publish) -> None:
+    resp = client.post("/tts/sleep")
+    assert resp.status_code == 409
+    assert "no robot" in resp.json()["detail"]
+    assert captured_publish == []

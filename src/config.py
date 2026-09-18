@@ -6,7 +6,7 @@ which is what the robot firmware expects:
 - `/devices/{device}/config`             plain JSON device config (cloud_tts lives here)
 - `/devices/{device}/commands/zmq`       framed protobuf (ProtoSubscribe, CloudTTSResponse)
 - `/devices/{device}/commands/{command}` plain JSON commands (remote_chat, query_result,
-                                          telehealth, wakeup)
+                                          telehealth, wakeup, sleep)
 - `/devices/{device}/events/...`         robot -> server
 
 The device id is NOT hardcoded: it is learned from the MQTT topics the robot
@@ -31,11 +31,9 @@ class Settings(BaseSettings):
     # (a dict setting would require JSON in the environment).
     MQTT_HOST: str = "localhost"
     MQTT_PORT: int = 8883
-    MQTT_PROJECT: str = "openmoxie"
 
     # Optional manual override. Leave empty in normal operation — the service
-    # discovers the real device id from `/devices/{id}/...` topics. Setting this
-    # only forces a target for bench commands when no robot has been seen yet.
+    # discovers the real device id from `/devices/{id}/...` topics.
     DEVICE_ID: str = ""
 
     # Framed-protobuf channel (ProtoSubscribe, CloudTTSResponse).
@@ -44,7 +42,7 @@ class Settings(BaseSettings):
     # Device settings/config push (plain JSON).
     CONFIG_TOPIC_TEMPLATE: str = "/devices/{device}/config"
 
-    # JSON command topic (remote_chat, query_result, telehealth, wakeup).
+    # JSON command topic (remote_chat, query_result, telehealth, wakeup, sleep).
     COMMAND_JSON_TOPIC_TEMPLATE: str = "/devices/{device}/commands/{command}"
 
     # Lets this service run alongside a real OpenMoxie backend (which then owns
@@ -82,23 +80,11 @@ class Settings(BaseSettings):
     DEFAULT_TTS_LANGUAGE: str = "ru"
 
     # --- STT injection (Goal 1: speak without puppet mode) ------------------
-    # Instead of transcribing the robot's mic audio, the STT handler replies to
-    # each completed listen session with this fixed "recognized" line. The robot
-    # then believes it heard it and drives a normal conversation turn
-    # (remote_chat -> OpenAI chat -> CloudTTS -> playback), so the injected line
-    # is a stimulus and what Moxie says is the chat reply to it. Set to "" to
-    # disable injection (real transcription is a later milestone). See
-    # SPEAK_WITHOUT_PUPPET_PLAN.md.
-    INJECTED_STT_LINE: str = "Привет, как дела?"
-
     # On wake the robot first enters its onboard WAKEUP module ("say 'Moxie,
     # let's go!' to start the day") and will not reach OPENMOXIE_CHAT until it
     # hears that trigger. Until the robot actually enters the remote chat module,
-    # the STT handler injects THIS phrase instead of INJECTED_STT_LINE, to open
-    # the gate; once OPENMOXIE_CHAT is active it switches to INJECTED_STT_LINE.
-    # Set "" if your robot does not gate on WAKEUP (inject the chat line from the
-    # start). If the gate matches on local recognition rather than cloud STT,
-    # say the phrase aloud once — the phase switch still triggers on entry.
+    # the STT handler injects THIS phrase to open the gate. After that, listen
+    # sessions are not answered with a canned transcript (real STT is M2).
     WAKEUP_TRIGGER_LINE: str = "Moxie, let's go"
 
     # --- Audio --------------------------------------------------------------
@@ -111,14 +97,10 @@ class Settings(BaseSettings):
     #   True  (default) -> raw little-endian PCM16 samples
     #   False           -> locally built WAV (truthful RIFF sizes; never OpenAI's
     #                      streamed `response_format=wav`, which writes 0xFFFFFFFF)
-    # Tried both on the robot: neither makes the 2nd puppet line play. The proto
-    # carries `channels` and `sample_rate` beside `buffer`, so PCM is the
-    # default; False is for bench/debug.
     CLOUD_TTS_AUDIO_RAW_PCM: bool = True
 
     # Populate CloudTTSResponse.marks with derived Polly-style viseme/word
-    # timings. These drive lip movement on the first (heard) line. They do not
-    # make later lines play. Set false to publish an empty marks list.
+    # timings. These drive lip movement on the first (heard) line.
     CLOUD_TTS_EMIT_MARKS: bool = True
 
     # CloudTTSResponse.request_source. "robot" = ROBOT_TTS_REQUEST (0),
@@ -199,12 +181,6 @@ REMOTE_CHAT_MODULE_IDS: frozenset[str] = frozenset(
 # Opener lines when the robot sends command=prompt for a remote module.
 # `|` separates alternatives; one is picked at random.
 REMOTE_CHAT_OPENERS: dict[str, str] = {
-    # Line Moxie speaks on wake (non-puppet): the robot launches OPENMOXIE_CHAT
-    # from DEFAULT_SCHEDULE and voices this opener on the first `prompt`.
-    # "default": (
-    #     "I'm so excited. I had no idea the human world would be like this!"
-    # ),
-    # --- previous default opener (kept for reference) --------------------------
     "default": (
         "Привет! Давай поговорим. чём ты хочешь поболтать?"
         "|Привет! Что тебя на уме сегодня?"
@@ -219,7 +195,7 @@ REMOTE_CHAT_OPENERS: dict[str, str] = {
 # Keyed by language so a Russian/Kazakh child never hears an English line.
 FALLBACK_LINES: dict[str, str] = {
     "ru": "Извини, я не расслышала. Можешь повторить?",
-    "kk": "Кешір, мен естімедім. Қайталай аласың ба?",
+    "kk": "Кешір, мен естімедім. Қайталай аласың?",
 }
 
 # Session schedule. `only_chat` style — skip onboard onboarding modules that
@@ -237,6 +213,13 @@ DEFAULT_SCHEDULE: dict = {
 # Device config pushed on `/devices/{device}/config`. Mirrors OpenMoxie's
 # DEFAULT_ROBOT_CONFIG + DEFAULT_ROBOT_SETTINGS. `cloud_tts` and `moxie_mode`
 # are deliberately absent here — `device_state.py` overlays them live.
+#
+# Enrollment skip (SPEAK_WITHOUT_PUPPET_PLAN.md §4 A): identity is a paired,
+# nicknamed mentor, and max_enroll="0" is OpenMoxie's documented disable of
+# ENROLLCONVO ("Clearance Check": chocolate vs strawberry). Firmware still
+# runs that as a brain-entrance even when DEFAULT_SCHEDULE is only_chat, so
+# the prop — not the schedule — is the skip. Full identity is bootstrap-only;
+# mid-session toggles must strip child_pii / pairing_status.
 HARDCODED_DEVICE_CONFIG: dict = {
     "pairing_status": "paired",
     "audio_volume": 1.0,
@@ -253,7 +236,7 @@ HARDCODED_DEVICE_CONFIG: dict = {
             "target_all": "1",
             "gcp_upload_disable": "1",
             "local_stt": "on",
-            "max_enroll": "2",
+            "max_enroll": "0",
             "audio_wake": "1",
             "cloud_schedule_reset_threshold": "5",
             "debug_whiteboard": "0",

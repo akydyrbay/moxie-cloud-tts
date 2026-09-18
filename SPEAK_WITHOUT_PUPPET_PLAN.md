@@ -1,6 +1,6 @@
 # Making Moxie Speak Without Puppet Mode — Implementation Plan
 
-Status: **IN PROGRESS.** Last updated 2026-09-07.
+Status: **IN PROGRESS.** Last updated 2026-09-07 (M1 option A in tree).
 
 Target: run Moxie in **normal (non-puppet) conversational mode** and have it
 speak **Russian / Kazakh**, driven by this server: opener via Cloud TTS, then a
@@ -27,16 +27,17 @@ invisible, …).
 Because `cloud_tts=1`, we faithfully synthesize that English. The robot loops
 there. `note_conversation_active()` never fires.
 
-**Next work is not “make TTS work”.** TTS already works. Next work is: **get
-past onboard onboarding into `OPENMOXIE_CHAT`**, then replace canned STT with
-real OpenAI transcription for the conversation loop.
+**Next work is not “make TTS work”.** TTS already works. Next work is: **prove
+on-device that option A skipped `ENROLLCONVO`**, then **M2** (real OpenAI STT).
+If ENROLLCONVO still runs after a reboot with `max_enroll=0`, go to option B
+(`exit_module` / `launch OPENMOXIE_CHAT`).
 
 ### Intended end-to-end flow (what we are building)
 
 ```
 wakeup
   → pass WAKEUP gate ("Moxie, let's go")
-  → skip / finish ENROLLCONVO   ← NOT DONE, not 100% proven
+  → skip ENROLLCONVO (max_enroll=0 at bootstrap)  ← IN TREE, not 100% proven on-device
   → OPENMOXIE_CHAT
   → opener (REMOTE_CHAT_OPENERS ru/kk) → Cloud TTS → plays
   → listen (zmqSTT)
@@ -54,7 +55,8 @@ wakeup
 | Entry-sequence `cmd:` marks echoed | `src/services/marks.py` → `speak_service._build_response` | ✅ |
 | Config toggle no longer crashes brain (identity stripped on mid-session push) | `tts_service._without_identity_fields` | ✅ |
 | STT subscribe + dispatch | `mqtt_service.PROTO_SUBSCRIBE_TYPES`, `register_stt_request_handler`, `_dispatch_stt_request` | ✅ |
-| Canned STT reply on `END_OF_SPEECH` (wake-gate vs chat phase) | `src/services/stt_request.py` | ✅ |
+| Canned STT reply on `END_OF_SPEECH` (wake-gate only) | `src/services/stt_request.py` | ✅ wake inject; chat inject empty |
+| Enrollment skip via bootstrap config | `HARDCODED_DEVICE_CONFIG.max_enroll="0"` | ✅ in tree, prove on boot |
 | Cloud TTS of whatever markup the robot requests | `cloud_tts_request.py` → `speak_service.speak` | ✅ |
 | Remote-chat brain (modules / schedule / `OPENMOXIE_CHAT` turns) | `remote_chat.py` | ✅ |
 | OpenAI STT **bench** (not wired to the robot) | `stt/openai_stt.py`, `POST /tts/transcribe` | ✅ exists, unused on robot path |
@@ -64,7 +66,8 @@ wakeup
 ### The blocker (evidence: 16:28–16:31 run)
 
 `DEFAULT_SCHEDULE` already asks only for `OPENMOXIE_CHAT`. The robot **does not
-honor that until brain-entrance onboarding finishes**. Sequence observed:
+honor that until brain-entrance onboarding finishes**. Sequence observed
+**before** `max_enroll="0"`:
 
 1. `module=WAKEUP` `notify` — English “Here we go again!” spoken via our Cloud TTS.
 2. STT injects `WAKEUP_TRIGGER_LINE` = `"Moxie, let's go"` → robot `continue`s WAKEUP.
@@ -74,11 +77,12 @@ honor that until brain-entrance onboarding finishes**. Sequence observed:
 5. `OPENMOXIE_CHAT` never launches → STT stays in `wake-gate` forever.
 
 Enrollment is **not** the same as “has `child_pii` in config”. Bootstrap already
-sends PII; `ENROLLCONVO` still ran. Completing (or skipping) the **script**, not
-just nicknaming the child, appears to be the gate.
+sends PII; `ENROLLCONVO` still ran at `max_enroll="2"`. Completing (or skipping)
+the **script**, not just nicknaming the child, appears to be the gate.
 
-Telling the robot “onboarding is passed” is the **desired** skip. It is **not**
-proven 100% possible. See §4.
+**Option A is now in tree:** bootstrap `max_enroll="0"` (OpenMoxie: `"0"` to
+disable ENROLLCONVO) plus paired `child_pii`. Prove on a real boot: after WAKEUP
++ `"Moxie, let's go"`, next router module must be `OPENMOXIE_CHAT`. If not, B.
 
 ---
 
@@ -138,8 +142,8 @@ Once `handle_router_request` sees `module_id` in `REMOTE_CHAT_MODULE_IDS`:
 3. Robot emits `CloudTTSRequest` with that markup → OpenAI TTS → playback.
 4. Robot listens. VAD streams `zmqSTTRequest` (`START` / `SPEECH` / `END`,
    16 kHz PCM, one `uuid` per utterance).
-5. **Today:** canned `INJECTED_STT_LINE`. **Target:** accumulate PCM, OpenAI STT,
-   `zmqSTTResponse.speech = transcript` (same `uuid`, `type=FINAL`).
+5. **Today:** no canned chat STT (`INJECTED_STT_LINE=""`). **Target:** accumulate
+   PCM, OpenAI STT, `zmqSTTResponse.speech = transcript` (same `uuid`, `type=FINAL`).
 6. Robot sends `RemoteChatRequest(command=reprompt, speech=transcript)`.
 7. `_remote_module_response` → `openai_chat.respond` (same language) →
    `output.markup` = reply.
@@ -168,12 +172,14 @@ transcribing. Wires ears so the robot does not STT-timeout / force-idle.
 **In tree:** `stt_request.py`, MQTT subscribe/dispatch, `main.py` registration,
 `tests/test_stt_request.py`, `WAKEUP_TRIGGER_LINE` / `INJECTED_STT_LINE`.
 
-Keep wake-gate injection until M1 lands and `OPENMOXIE_CHAT` is reached. After
-M2, keep it **only** while `device_id not in _conversation_active`.
+Keep wake-gate injection until `OPENMOXIE_CHAT` is reached. Chat-phase canned
+injection is **off** (`INJECTED_STT_LINE=""`); the opener is
+`REMOTE_CHAT_OPENERS`. After M2, transcribe only while
+`device_id in _conversation_active`.
 
 ---
 
-### M1 — Skip or finish onboard onboarding → reach `OPENMOXIE_CHAT` — **NEXT**
+### M1 — Skip or finish onboard onboarding → reach `OPENMOXIE_CHAT` — **OPTION A IN TREE**
 
 **Why:** Schedule already says `only_chat`. Firmware still runs `WAKEUP` →
 `ENROLLCONVO` first. FALLBACK does not eject those modules; it tells the robot
@@ -187,7 +193,7 @@ M2, keep it **only** while `device_id not in _conversation_active`.
 | `_strip_action_tags` / `exit_module` / `launch` only used on `OPENMOXIE_CHAT` replies | Cannot tell firmware to leave a **local** module | Optionally send those actions on onboard router requests |
 | STT always injects wake trigger until chat | During ENROLLCONVO the trigger is the wrong “heard” line | After a successful skip, `note_conversation_active` must fire; until then wake-gate injection is OK for WAKEUP only |
 | `cloud_tts_request` synthesizes every markup | English enrollment is voiced | Optional stopgap: silence / skip synth when request is clearly onboard English — **does not** advance the FSM |
-| `HARDCODED_DEVICE_CONFIG` / bootstrap PII | Identity on bootstrap is OK; mid-session identity push still crashes the brain | Any “already enrolled” config must go out **at bootstrap**, not as a later full-config toggle. Use `_without_identity_fields` for live toggles |
+| `HARDCODED_DEVICE_CONFIG` / bootstrap PII | Identity on bootstrap is OK; mid-session identity push still crashes the brain | **Done (option A):** `max_enroll="0"` + paired `child_pii` at bootstrap only. Do not set `brain_entrances_available="0"` (risks blocking chat). Use `_without_identity_fields` for live toggles. If ENROLLCONVO still runs on-device, go to option B. |
 
 **Success:** log shows `Rx remote-chat … module=OPENMOXIE_CHAT … command=prompt`,
 then `Tx remote_chat` with opener text, then Cloud TTS of that opener (ru/kk).
@@ -291,14 +297,14 @@ Clearance Check and take `DEFAULT_SCHEDULE` (`OPENMOXIE_CHAT`).
 - OpenMoxie clone (`~/Desktop/hri-lab/openmoxie`): `no_onboarding` schedule,
   how it sets enrolled/PII, any `schedule_sensitive` / entrance flags.
 
-**Levers to try (one at a time, bootstrap only):**
+**Levers tried / remaining (bootstrap only):**
 
-1. Set `brain_entrances_available` to `"0"` so entrance modules are not
-   offered. Risk: might also block chat entry; A/B on a real boot.
-2. Align PII / pairing with a “already paired, already named mentor”
-   snapshot from a robot that finished Clearance Check (capture
-   `events/client-service-robot-status` + config after a full onboard, if you
-   have one).
+1. ~~Set `brain_entrances_available` to `"0"`~~ **Not used.** That flag is
+   “ALLOW GLOBAL LAUNCH PATTERNS”; turning it off may block chat entry and is
+   not the enrollment disable.
+2. **Done:** `max_enroll="0"` (OpenMoxie: disable ENROLLCONVO) + paired
+   `child_pii` / `pairing_status` at bootstrap. Aligning with a post-Clearance
+   Check snapshot is still available if `"0"` is ignored.
 3. Copy OpenMoxie’s enrolled-device config rather than inventing fields.
 4. Do **not** strip PII at bootstrap to “avoid ENROLLCONVO” — missing PII is
    more likely to **force** enrollment. Strip identity only on later toggles.
@@ -454,11 +460,12 @@ Intended path:
 **wakeup → `"Moxie, let's go"` on STT → leave ENROLLCONVO → `OPENMOXIE_CHAT` →
 ru/kk opener via Cloud TTS → listen → OpenAI STT → chat → Cloud TTS → loop.**
 
-Already built: ears injection, mouth TTS, brain for `OPENMOXIE_CHAT`, ru/kk
-openers, bench STT.
+Already built: ears wake-gate injection, mouth TTS, brain for `OPENMOXIE_CHAT`,
+ru/kk openers, bench STT, bootstrap `max_enroll="0"`.
 
-Missing: **M1 skip/finish onboarding** (blocker), then **M2 wire
-`openai_stt.transcribe` into `stt_request` after chat is active**.
+Missing: **on-device proof that option A skipped ENROLLCONVO**, then **M2 wire
+`openai_stt.transcribe` into `stt_request` after chat is active**. If A fails
+on boot, option B (`exit_module` / `launch`).
 
 Spoken ru/kk is always `remote_chat` `output.markup` → robot `CloudTTSRequest`.
 Never STT `speech`, never `/tts/speak`, for this plan.

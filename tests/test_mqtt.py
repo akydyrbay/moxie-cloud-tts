@@ -201,4 +201,12 @@ def test_robot_log_level_is_pushed_to_the_device() -> None:
     assert props["default_loglevel"] == settings.ROBOT_LOG_LEVEL
 
 
+def test_bootstrap_config_marks_enrollment_done() -> None:
+    """ENROLLCONVO is skipped by firmware when max_enroll is 0 (OpenMoxie docs)."""
+    props = HARDCODED_DEVICE_CONFIG["settings"]["props"]
+    assert props["max_enroll"] == "0"
+    assert HARDCODED_DEVICE_CONFIG["pairing_status"] == "paired"
+    assert HARDCODED_DEVICE_CONFIG["child_pii"]["nickname"]
+
+
 assert mqtt_module  # module import sanity

@@ -69,10 +69,10 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         CLOUD_TTS_REQUEST_PREFIX,
     )
 
-    # 1b. Answer the robot's zmqSTT stream. Goal 1 injects a canned recognized
-    # line (settings.INJECTED_STT_LINE) on each completed listen session, which
-    # drives a normal conversation turn (remote_chat -> cloud TTS) without puppet
-    # mode. It also stops the STT timeout / force-idle.
+    # 1b. Answer the robot's zmqSTT stream. Until OPENMOXIE_CHAT is active,
+    # inject WAKEUP_TRIGGER_LINE so the onboard "start the day" gate opens.
+    # After that, canned chat injection is off; the opener is spoken via
+    # remote-chat + Cloud TTS. Real STT is M2.
     mqtt_service.register_stt_request_handler(
         loop,
         handle_stt_payload,
@@ -133,8 +133,3 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.include_router(tts_router)
-
-
-@app.get("/info")
-async def info() -> dict:
-    return {}

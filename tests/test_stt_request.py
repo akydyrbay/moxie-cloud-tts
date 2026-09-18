@@ -1,9 +1,10 @@
-"""Tests for the canned-STT-line injection handler (Goal 1).
+"""Tests for the STT-channel handler (wake-gate inject; no canned chat line).
 
 Feeds framed `zmqSTTRequest` frames (START/SPEECH/END) into the handler and
-asserts that exactly one framed `zmqSTTResponse` carrying the canned line is
-published on END_OF_SPEECH, with the session `uuid` echoed. No robot or OpenAI
-client is needed — the handler does not transcribe.
+asserts that exactly one framed `zmqSTTResponse` carrying the wake trigger is
+published on END_OF_SPEECH before OPENMOXIE_CHAT, with the session `uuid`
+echoed. After conversation is active, nothing is injected by default. No robot
+or OpenAI client is needed — the handler does not transcribe.
 """
 
 import pytest
@@ -90,18 +91,19 @@ async def test_injects_wake_trigger_before_conversation_active(
     assert message.start_timestamp == 1000
 
 
-async def test_injects_chat_line_once_conversation_active(
+async def test_no_canned_chat_line_once_conversation_active(
     captured_protos: list[tuple[str, object]],
 ) -> None:
-    """After the robot enters OPENMOXIE_CHAT, inject the conversation line."""
+    """After OPENMOXIE_CHAT, do not inject a canned child line.
+
+    The opener is spoken via remote-chat REMOTE_CHAT_OPENERS, not STT.
+    """
     stt_request.note_conversation_active(TEST_DEVICE_ID)
     await stt_request.handle_payload(
         TEST_DEVICE_ID,
         _frame(_request("sess-2", zmqSTTRequest.VADState.END_OF_SPEECH)),
     )
-    assert len(captured_protos) == 1
-    _, message = captured_protos[0]
-    assert message.speech == settings.INJECTED_STT_LINE
+    assert captured_protos == []
 
     # A reconnect re-arms the wake trigger.
     stt_request.reset_conversation_state(TEST_DEVICE_ID)
@@ -109,16 +111,16 @@ async def test_injects_chat_line_once_conversation_active(
         TEST_DEVICE_ID,
         _frame(_request("sess-3", zmqSTTRequest.VADState.END_OF_SPEECH)),
     )
-    assert captured_protos[1][1].speech == settings.WAKEUP_TRIGGER_LINE
+    assert len(captured_protos) == 1
+    assert captured_protos[0][1].speech == settings.WAKEUP_TRIGGER_LINE
 
 
 async def test_no_line_to_inject_sends_nothing(
     captured_protos: list[tuple[str, object]],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """With no wake trigger and (post-gate) an empty chat line, inject nothing."""
+    """With no wake trigger, inject nothing."""
     monkeypatch.setattr(settings, "WAKEUP_TRIGGER_LINE", "")
-    monkeypatch.setattr(settings, "INJECTED_STT_LINE", "")
     await stt_request.handle_payload(
         TEST_DEVICE_ID,
         _frame(_request("sess-4", zmqSTTRequest.VADState.END_OF_SPEECH)),

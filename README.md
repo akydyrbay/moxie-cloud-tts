@@ -106,10 +106,8 @@ the robot stuck waiting until it force-idles and sleeps.
 | `POST /tts/cloud-tts` | Toggle cloud TTS on the robot |
 | `POST /tts/interrupt` | Stop current playback |
 | `POST /tts/wakeup` | Wake a sleeping robot |
+| `POST /tts/sleep` | Put an awake robot to sleep |
 | `GET /tts/devices` | Robots seen on the broker |
-| `POST /tts/speak-direct` | Bench test of synthesis + publish only |
-| `POST /tts/transcribe` | Bench test of OpenAI STT |
-| `POST /tts/respond` | Bench test of OpenAI chat |
 
 ## Configuration
 

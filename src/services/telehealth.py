@@ -141,6 +141,12 @@ def wakeup(device_id: str) -> None:
     mqtt_service.publish_command_json(device_id, "wakeup", {"command": "wakeup"})
 
 
+def sleep(device_id: str) -> None:
+    """Put an awake robot to sleep (MQTT counterpart of `wakeup`)."""
+    logger.info("sending sleep to %s", device_id)
+    mqtt_service.publish_command_json(device_id, "sleep", {"command": "sleep"})
+
+
 async def wait_until_ready(
     device_id: str,
     timeout_s: float | None = None,
@@ -243,6 +249,7 @@ __all__ = [
     "interrupt",
     "note_puppet_state",
     "play_output",
+    "sleep",
     "speak_line",
     "wait_until_ready",
     "wakeup",
