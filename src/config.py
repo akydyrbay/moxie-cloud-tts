@@ -14,6 +14,7 @@ publishes on (see `src/services/devices.py`). `DEVICE_ID` remains only as an
 optional manual override for bench testing without a robot.
 """
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -31,6 +32,17 @@ class Settings(BaseSettings):
     # (a dict setting would require JSON in the environment).
     MQTT_HOST: str = "localhost"
     MQTT_PORT: int = 8883
+
+    # Moxie's MQTT host is set by scanning an OpenMoxie-compatible endpoint QR.
+    # Empty means discover this Mac's LAN IPv4 address when the QR is requested.
+    # Set this when the computer has multiple LAN adapters or the broker is on
+    # another machine; never use localhost because Moxie resolves it to itself.
+    MQTT_PUBLIC_HOST: str = ""
+    MQTT_PUBLIC_PORT: int = 8883
+    MQTT_QR_PROJECT: str = "openmoxie"
+    # The bundled broker uses a self-signed certificate. The relocation QR must
+    # therefore tell Moxie not to verify the expired/public CA chain.
+    MQTT_QR_DISABLE_VERIFY: bool = True
 
     # Optional manual override. Leave empty in normal operation — the service
     # discovers the real device id from `/devices/{id}/...` topics.
@@ -78,6 +90,28 @@ class Settings(BaseSettings):
 
     SUPPORTED_LANGUAGES: list[str] = ["ru", "kk"]
     DEFAULT_TTS_LANGUAGE: str = "ru"
+
+    # --- Wake-up greeting (prompt.md Path A) -------------------------------
+    # A1: use this line in the entrance GLOBAL_COMMAND and chat opener.
+    # A2: if firmware still requests its local Good morning! / Excellent!,
+    # voice this line in that existing Cloud TTS slot. Never applies in puppet
+    # mode. Disable the override to inspect the firmware's original output.
+    WAKEUP_TTS_OVERRIDE_ENABLED: bool = True
+    WAKEUP_TTS_TEXT: str = "Сәлем! Қалайсың?"
+
+    @field_validator("WAKEUP_TTS_TEXT")
+    @classmethod
+    def validate_wakeup_tts_text(cls, value: str) -> str:
+        """Require a speakable ru/kk line, not markup or an empty greeting."""
+        value = value.strip()
+        if (
+            not any("\u0400" <= char <= "\u04ff" for char in value)
+            or "<" in value
+            or ">" in value
+        ):
+            msg = "WAKEUP_TTS_TEXT must be plain Russian or Kazakh Cyrillic text"
+            raise ValueError(msg)
+        return value
 
     # --- STT injection (Goal 1: speak without puppet mode) ------------------
     # On wake the robot first enters its onboard WAKEUP module ("say 'Moxie,
@@ -178,17 +212,11 @@ REMOTE_CHAT_MODULE_IDS: frozenset[str] = frozenset(
     },
 )
 
-# Opener lines when the robot sends command=prompt for a remote module.
-# `|` separates alternatives; one is picked at random.
+# Use the same short greeting whether firmware honours the entrance response,
+# asks for the chat opener, or keeps its local wake-up Cloud TTS slot.
 REMOTE_CHAT_OPENERS: dict[str, str] = {
-    "default": (
-        "Привет! Давай поговорим. чём ты хочешь поболтать?"
-        "|Привет! Что тебя на уме сегодня?"
-    ),
-    "short": (
-        "Привет! чём подумаем сегодня?"
-        "|Давай поболтаем! Что интересного?"
-    ),
+    "default": settings.WAKEUP_TTS_TEXT,
+    "short": settings.WAKEUP_TTS_TEXT,
 }
 
 # Spoken when a turn cannot be answered (onboard module, or LLM failure).

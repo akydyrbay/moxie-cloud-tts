@@ -19,6 +19,19 @@ Device ids look like `d_<uuid>`. They are **discovered** from MQTT topics, never
 
 **Invariant:** Moxie only plays cloud audio that answers a request it is already waiting on, matched by `event_id` / `chunk_num`. You cannot push a `CloudTTSResponse` and have it play.
 
+**Current narrow milestone (2026-09-18):** `prompt.md` Path A1 + A2 is implemented,
+pending operator playback confirmation. `WAKEUP_TTS_TEXT` defaults to
+`Сәлем! Қалайсың?` for entrance responses and chat openers. With
+`WAKEUP_TTS_OVERRIDE_ENABLED=true`, known local `Good morning!` / `Excellent!`
+requests are voiced as that line outside TELEHEALTH, preserving the live IDs and
+original command marks. This also handles captured `Excellent! " "` text.
+Do not gate the override on conversation-active state: chat prompt can arrive
+before the wake-up confirmation's Cloud TTS request. Logs show incoming
+`speakable` and effective `synthesis_text` separately. An overridden English
+request is not a native Cyrillic request; only operator-heard audio confirms
+playback. See the current [README verification steps](../README.md#verify-on-the-robot).
+The conversation roadmap below is later work, beyond this one-line milestone.
+
 ---
 
 ## 2. Component breakdown
@@ -149,8 +162,8 @@ Spoken ru/kk = `RemoteChatResponse.output.markup` → robot copies it into `Clou
 - Identity strip on mid-session config toggle.
 - Wake-gate STT inject: on `END_OF_SPEECH` before chat, reply `WAKEUP_TRIGGER_LINE` = `"Moxie, let's go"`.
 - Remote-chat: modules handshake, schedule (`OPENMOXIE_CHAT/default`), mentor_behaviors `[]`.
-- WAKEUP/`ENROLLCONVO` `start|continue`: `GLOBAL_COMMAND` «Отлично!» (no `launch` on primary). Empty GLOBAL_COMMAND left WAKEUP looping English; `launch` as primary skipped Cloud TTS.
-- `OPENMOXIE_CHAT` `prompt` → `REMOTE_CHAT_OPENERS` (ru) wrapped in `<usel variant="2" genre="none">`.
+- WAKEUP/`ENROLLCONVO` `start|continue`: `GLOBAL_COMMAND` with `WAKEUP_TTS_TEXT` (no `launch` on primary). Empty GLOBAL_COMMAND left WAKEUP looping English; `launch` as primary skipped Cloud TTS.
+- `OPENMOXIE_CHAT` `prompt` → `REMOTE_CHAT_OPENERS` (configured greeting, kk by default) wrapped in `<usel variant="2" genre="none">`.
 - `OPENMOXIE_CHAT` `continue`/`reprompt` → `openai_chat.respond`.
 - `note_conversation_active` only on remote `prompt|continue|reprompt|start`, **not** `notify`.
 - HTTP: devices, cloud-tts toggle, puppet toggle, speak, interrupt, wakeup, sleep.
@@ -176,7 +189,7 @@ Operator ──HTTP──► FastAPI /tts/*  (control only)
    - `publish_settings_update` (full config **including** identity)
    - `send_proto_subscribe`
 4. Robot queries `modules` → we advertise `OPENMOXIE_CHAT`. Queries `schedule` → `DEFAULT_SCHEDULE` unless puppet (empty).
-5. Firmware still runs onboard **WAKEUP**. STT inject `"Moxie, let's go"`. Entrance volley gets «Отлично!» GLOBAL_COMMAND.
+5. Firmware still runs onboard **WAKEUP**. STT inject `"Moxie, let's go"`. Entrance volley gets `WAKEUP_TTS_TEXT` GLOBAL_COMMAND; known local English TTS requests can use the same greeting via the guarded override.
 6. Target: `OPENMOXIE_CHAT` `command=prompt` → opener → Cloud TTS → listen.
 7. Disconnect/reboot: `$SYS` disconnect regex → `forget_bootstrap`. Next session bootstraps again.
 

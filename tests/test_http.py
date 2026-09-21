@@ -4,13 +4,18 @@ Uses a minimal app that mounts only the router, so we don't trigger the app
 lifespan (which would try to reach a real MQTT broker).
 """
 
+import base64
 import json
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from src.config import settings
+from src.protos.embodied.logging.Cloud2_pb2 import ServiceConfiguration2
+from src.protos.embodied.wifiapp.QRCommands_pb2 import StartPairingQR
 from src.router.tts import router
+from src.services.pairing_qr import EndpointQrConfig, endpoint_qr_payload, wifi_qr_payload
 from src.services.telehealth import note_puppet_state
 
 DEVICE = "test-device-1"
@@ -105,6 +110,76 @@ def test_devices_endpoint_reports_discovered_robot(client, known_device) -> None
     body = client.get("/tts/devices").json()
     assert body["devices"] == [DEVICE]
     assert body["primary"] == DEVICE
+
+
+def test_endpoint_qr_payload_matches_openmoxie_service_configuration() -> None:
+    payload = endpoint_qr_payload(
+        EndpointQrConfig("192.168.8.71", 8883, True, "openmoxie"),
+    )
+    encoded = json.loads(payload)["debug"]
+    assert encoded["command"] == "om"
+    service = ServiceConfiguration2()
+    service.ParseFromString(base64.b64decode(encoded["param"]))
+    assert service.gcp_project == "openmoxie"
+    assert service.mqtt_host == "192.168.8.71"
+    assert service.override_port == 8883
+    assert service.disable_verify is True
+
+
+def test_wifi_qr_payload_matches_openmoxie_pairing_format() -> None:
+    payload = wifi_qr_payload(
+        ssid="Moxie-network",
+        password="not-logged-here",
+        hidden=True,
+        band=StartPairingQR.WifiBandSelect.ONLY_24G,
+    )
+    assert payload.startswith("PA")
+    creds = StartPairingQR()
+    creds.ParseFromString(base64.b64decode(payload[2:]))
+    assert creds.wifi_only is True
+    assert creds.ssid == "Moxie-network"
+    assert creds.password == "not-logged-here"
+    assert creds.is_hidden is True
+    assert creds.band_select == StartPairingQR.WifiBandSelect.ONLY_24G
+
+
+def test_endpoint_qr_returns_a_png_for_the_configured_lan_host(
+    client, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "MQTT_PUBLIC_HOST", "192.168.8.71")
+    response = client.get("/tts/endpoint-qr")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/png"
+    assert response.headers["cache-control"] == "no-store"
+    assert response.content.startswith(b"\x89PNG\r\n\x1a\n")
+    assert len(response.content) > 100
+    assert client.get("/tts/endpoint-qr/info").json() == {
+        "mqtt_host": "192.168.8.71",
+        "mqtt_port": 8883,
+        "disable_verify": True,
+        "project": "openmoxie",
+    }
+
+
+def test_wifi_qr_returns_png_without_echoing_credentials(client) -> None:
+    response = client.post("/tts/wifi-qr", json={
+        "ssid": "Moxie-network",
+        "password": "not-logged-here",
+        "hidden": True,
+        "band": "2.4ghz",
+    })
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/png"
+    assert response.headers["cache-control"] == "no-store"
+    assert response.content.startswith(b"\x89PNG\r\n\x1a\n")
+    assert b"not-logged-here" not in response.content
+
+
+def test_wifi_qr_rejects_an_unknown_band(client) -> None:
+    response = client.post("/tts/wifi-qr", json={
+        "ssid": "network", "password": "password", "band": "6ghz",
+    })
+    assert response.status_code == 422
 
 
 def test_wakeup_publishes_mqtt_command(client, known_device, captured_publish) -> None:

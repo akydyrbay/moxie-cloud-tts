@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from src.config import REMOTE_CHAT_OPENERS
+from src.config import REMOTE_CHAT_OPENERS, settings
 from src.services.device_state import device_state
 from src.services.mqtt_service import mqtt_service
 from src.services.remote_chat import RemoteChatBrain, fallback_line, remote_chat_brain
@@ -104,15 +104,18 @@ async def test_onboard_module_gets_fallback(brain: RemoteChatBrain) -> None:
     assert payload["event_id"] == "e1"
 
 
-async def test_wakeup_start_replaces_excellent_without_launch(
-    brain: RemoteChatBrain,
+@pytest.mark.parametrize("module_id", ["WAKEUP", "ENROLLCONVO"])
+@pytest.mark.parametrize("command", ["start", "continue"])
+async def test_entrance_replaces_excellent_without_launch(
+    brain: RemoteChatBrain, monkeypatch: pytest.MonkeyPatch, module_id, command,
 ) -> None:
-    """GLOBAL_COMMAND 'Отлично!' beats English Excellent without skipping TTS via launch."""
+    """GLOBAL_COMMAND requests Kazakh without skipping Cloud TTS via launch."""
+    monkeypatch.setattr(settings, "WAKEUP_TTS_TEXT", "Сәлем! Қалайсың?")
     req = {
         "backend": "router",
-        "command": "start",
+        "command": command,
         "event_id": "wake-stt-uuid",
-        "module_id": "WAKEUP",
+        "module_id": module_id,
         "content_id": "",
         "speech": "Moxie, let's go",
     }
@@ -120,9 +123,10 @@ async def test_wakeup_start_replaces_excellent_without_launch(
     _topic, payload = brain._published[0]  # type: ignore[attr-defined]
     assert payload["event_id"] == "wake-stt-uuid"
     assert payload["response_action"]["output_type"] == "GLOBAL_COMMAND"
-    assert payload["output"]["text"] == "Отлично!"
-    assert "<usel" in payload["output"]["markup"]
-    assert "Отлично!" in payload["output"]["markup"]
+    assert payload["output"]["text"] == "Сәлем! Қалайсың?"
+    assert payload["output"]["markup"] == (
+        '<usel variant="2" genre="none">Сәлем! Қалайсың?</usel>'
+    )
     assert payload["response_action"].get("action") is None
     assert all("action" not in a for a in payload["response_actions"])
 
@@ -130,7 +134,7 @@ async def test_wakeup_start_replaces_excellent_without_launch(
 async def test_prompt_sends_opener_after_wakeup(
     brain: RemoteChatBrain,
 ) -> None:
-    """After WAKEUP confirms in Russian, OPENMOXIE_CHAT prompt voices the opener."""
+    """After WAKEUP, OPENMOXIE_CHAT gets a speakable greeting on its own volley."""
     await brain.handle_router_request(
         TEST_DEVICE_ID,
         {

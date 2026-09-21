@@ -5,14 +5,26 @@ CloudTTSRequest is decoded, markup-stripped, synthesized, and published back to
 the *requesting* device with its event_id/chunk_num echoed.
 """
 
-import pytest
+import json
+import logging
 
+import pytest
+from pydantic import ValidationError
+
+from src.config import Settings, settings
+from src.protos.embodied.perception.audio.zmqSTT_pb2 import (
+    zmqSTTRequest,
+    zmqSTTResponse,
+)
 from src.protos.embodied.unity.CloudTTS_pb2 import (
+    ROBOT_TTS_REQUEST,
     CloudTTSRequest,
     CloudTTSResponse,
 )
-from src.services import cloud_tts_request
+from src.services import cloud_tts_request, stt_request
+from src.services.device_state import device_state
 from src.services.language import detect_language
+from src.services.remote_chat import RemoteChatBrain
 from src.services.synthesis import openai_tts
 from tests.conftest import TEST_DEVICE_ID
 
@@ -164,3 +176,185 @@ def test_language_detection() -> None:
     assert detect_language("Сәлем, қалайсың") == "kk"
     # No Cyrillic is not evidence of either language -> configured default.
     assert detect_language("hello there") == "ru"
+
+
+@pytest.fixture
+def wakeup_settings(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make regression tests independent of the operator's .env choices."""
+    monkeypatch.setattr(settings, "WAKEUP_TTS_OVERRIDE_ENABLED", True)
+    monkeypatch.setattr(settings, "WAKEUP_TTS_TEXT", "Сәлем! Қалайсың?")
+    monkeypatch.setattr(settings, "CLOUD_TTS_EMIT_MARKS", True)
+    monkeypatch.setattr(settings, "CLOUD_TTS_AUDIO_RAW_PCM", True)
+    monkeypatch.setattr(settings, "CLOUD_TTS_REQUEST_SOURCE", "robot")
+
+
+@pytest.mark.parametrize("local_text", ["Good morning!", "Excellent!", 'Excellent! " "'])
+@pytest.mark.parametrize(
+    ("greeting", "language"),
+    [("Сәлем! Қалайсың?", "kk"), ("Привет! Как у тебя дела?", "ru")],
+)
+async def test_wakeup_override_preserves_slot_commands_and_lip_sync(
+    fake_openai, captured_publish, wakeup_settings, monkeypatch, caplog,
+    local_text, greeting, language,
+) -> None:
+    """Use real response assembly: only text changes, not the live audio slot."""
+    monkeypatch.setattr(settings, "WAKEUP_TTS_TEXT", greeting)
+    # One second of mock PCM, long enough to distinguish it from 200 ms silence.
+    pcm = b"\x00\x01" * 24000
+    monkeypatch.setattr(fake_openai.audio.speech, "_pcm", pcm)
+    markup = (
+        '<mark name="cmd:behaviour-tree,wake"/>'
+        f'<usel variant="2" genre="none">{local_text}</usel>'
+        '<mark name="cmd:attachment-animator,stop"/>'
+    )
+    req = CloudTTSRequest(markup=markup, event_id="wake-slot", chunk_num=3)
+    with caplog.at_level(logging.INFO):
+        summary = await cloud_tts_request.handle_cloud_tts_request(OTHER_DEVICE, req)
+
+    assert req.markup == markup
+    assert len(fake_openai.audio.speech.calls) == 1
+    assert fake_openai.audio.speech.calls[0]["input"] == greeting
+    assert fake_openai.audio.speech.calls[0]["response_format"] == "pcm"
+    assert summary["language"] == language
+    assert summary["audio_bytes"] == len(pcm)
+    assert len(captured_publish) == 1
+    topic, payload = captured_publish[0]
+    assert topic == f"/devices/{OTHER_DEVICE}/commands/zmq"
+    resp = _decode_response(payload)
+    assert (resp.event_id, resp.chunk_num) == ("wake-slot", 3)
+    assert resp.request_source == ROBOT_TTS_REQUEST
+    assert resp.audio.buffer == pcm
+    assert (resp.audio.sample_rate, resp.audio.channels) == (24000, 1)
+    commands = [(m.value, m.time) for m in resp.marks if m.type == "ssml"]
+    assert commands == [
+        ("cmd:behaviour-tree,wake", 0),
+        ("cmd:attachment-animator,stop", 1000),
+    ]
+    assert any(m.type == "viseme" and m.value != "sil" for m in resp.marks)
+    assert any(m.type == "word" and m.value == greeting.split()[0] for m in resp.marks)
+    assert resp.marks[-1].value == "sil"
+    assert "CloudTTSRequest wakeup override" in caplog.text
+    assert f"requested_text={local_text!r}" in caplog.text
+    assert f"synthesis_text={greeting!r}" in caplog.text
+    assert f"spoke event_id=wake-slot chunk=3 language={language}" in caplog.text
+
+
+@pytest.mark.parametrize("guard", ["disabled", "puppet"])
+@pytest.mark.parametrize("local_text", ["Good morning!", "Excellent!"])
+async def test_wakeup_override_respects_flag_and_live_puppet_mode(
+    fake_openai, captured_publish, wakeup_settings, monkeypatch, guard, local_text,
+) -> None:
+    if guard == "disabled":
+        monkeypatch.setattr(settings, "WAKEUP_TTS_OVERRIDE_ENABLED", False)
+    else:
+        # This must read runtime state, not just PUPPET_MODE_AUTO_ENABLE.
+        await device_state.set_puppet_mode(True)
+
+    await cloud_tts_request.handle_payload(
+        TEST_DEVICE_ID, _frame_request(markup=local_text, event_id="", chunk_num=0),
+    )
+    assert fake_openai.audio.speech.calls[0]["input"] == local_text
+    assert len(captured_publish) == 1
+    assert _decode_response(captured_publish[0][1]).event_id == ""
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["Привет!", "Сәлем!", "Excellent! Let's play.", "Good morning! How are you?"],
+)
+async def test_wakeup_override_leaves_other_lines_alone(
+    fake_openai, captured_publish, wakeup_settings, text,
+) -> None:
+    await cloud_tts_request.handle_payload(
+        TEST_DEVICE_ID, _frame_request(markup=f"<usel>{text}</usel>", event_id="e"),
+    )
+    assert fake_openai.audio.speech.calls[0]["input"] == text
+    assert len(captured_publish) == 1
+
+
+@pytest.mark.parametrize("markup", [
+    '<mark name="cmd:CereprocWarmup"/>',
+    '<mark name="cmd:CereprocWarmup"/><usel>Excellent!</usel>',
+])
+async def test_wakeup_empty_or_failed_synthesis_still_echoes_commands_once(
+    fake_openai, captured_publish, wakeup_settings, monkeypatch, markup,
+) -> None:
+    def fail_synthesis(**kwargs):
+        raise RuntimeError("TTS unavailable")
+
+    monkeypatch.setattr(fake_openai.audio.speech, "create", fail_synthesis)
+    summary = await cloud_tts_request.handle_payload(
+        TEST_DEVICE_ID, _frame_request(markup=markup, event_id="wake-fail", chunk_num=2),
+    )
+    assert summary["status"] in {"failed", "published_silence"}
+    assert len(captured_publish) == 1
+    resp = _decode_response(captured_publish[0][1])
+    assert (resp.event_id, resp.chunk_num) == ("wake-fail", 2)
+    assert resp.audio.buffer == b"\x00\x00" * 4800
+    assert [m.value for m in resp.marks if m.type == "ssml"] == ["cmd:CereprocWarmup"]
+
+
+@pytest.mark.parametrize("firmware_uses_local_line", [True, False])
+async def test_wakeup_to_audio_even_when_chat_prompt_arrives_first(
+    fake_openai, captured_publish, wakeup_settings, caplog, firmware_uses_local_line,
+) -> None:
+    """Replay the captured opener/Excellent race and the native Cyrillic path.
+
+    Robot requests are simulated; this proves server correlation, not playback.
+    """
+    brain = RemoteChatBrain()
+    await device_state.set_cloud_tts(True)
+    with caplog.at_level(logging.INFO):
+        await brain.ensure_device_bootstrapped(TEST_DEVICE_ID)
+    config = json.loads(captured_publish[0][1])
+    assert config["settings"]["props"]["cloud_tts"] == "1"
+    assert "moxie_mode" not in config
+    assert "cloud_tts=1 moxie_mode=None" in caplog.text
+    captured_publish.clear()
+
+    wake_id = "5c491ac0-73f6-41a9-b2f5-b1afe3585198"
+    prompt_id = "12283584-6239-4642-bd20-ef62906c5704"
+    req = zmqSTTRequest(uuid=wake_id, vad=zmqSTTRequest.VADState.END_OF_SPEECH)
+    await stt_request.handle_payload(
+        TEST_DEVICE_ID, stt_request.STT_REQUEST_PREFIX + req.SerializeToString(),
+    )
+    prefix = zmqSTTResponse.DESCRIPTOR.full_name.encode() + b":"
+    stt = zmqSTTResponse.FromString(captured_publish.pop()[1][len(prefix):])
+    assert stt.uuid == wake_id
+    assert stt.speech == "Moxie, let's go"
+    await brain.handle_router_request(TEST_DEVICE_ID, {
+        "backend": "router", "module_id": "WAKEUP", "command": "start",
+        "event_id": wake_id, "speech": stt.speech,
+    })
+    entrance = json.loads(captured_publish[-1][1])
+    assert entrance["event_id"] == wake_id
+    assert entrance["output"]["text"] == "Сәлем! Қалайсың?"
+    assert entrance["response_actions"] == [{"output_type": "GLOBAL_COMMAND"}]
+    await brain.handle_router_request(TEST_DEVICE_ID, {
+        "backend": "router", "module_id": "OPENMOXIE_CHAT", "content_id": "default",
+        "command": "prompt", "event_id": prompt_id,
+    })
+    # A remote-chat reply is not a licence to push audio for prompt_id.
+    assert len(captured_publish) == 2
+    assert all(t.endswith("/commands/remote_chat") for t, _ in captured_publish)
+    captured_publish.clear()
+    markup = (
+        '<usel variant="2" genre="none">Excellent!</usel> " "'
+        if firmware_uses_local_line else entrance["output"]["markup"]
+    )
+    try:
+        await cloud_tts_request.handle_payload(
+            TEST_DEVICE_ID, _frame_request(markup=markup, event_id=wake_id),
+        )
+    finally:
+        stt_request.reset_conversation_state(TEST_DEVICE_ID)
+    assert len(captured_publish) == 1
+    resp = _decode_response(captured_publish[0][1])
+    assert resp.event_id == wake_id
+    assert fake_openai.audio.speech.calls[0]["input"] == "Сәлем! Қалайсың?"
+
+
+@pytest.mark.parametrize("text", ["", "  ", "Hello!", "<usel>Сәлем!</usel>"])
+def test_invalid_wakeup_text_fails_at_startup(text) -> None:
+    with pytest.raises(ValidationError, match="WAKEUP_TTS_TEXT"):
+        Settings(_env_file=None, WAKEUP_TTS_TEXT=text)

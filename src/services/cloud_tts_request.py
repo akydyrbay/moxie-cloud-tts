@@ -6,6 +6,10 @@ markup, synthesizes with OpenAI, and replies with a `CloudTTSResponse` carrying
 the request's `event_id`/`chunk_num` — the correlation the robot requires before
 it will play anything.
 
+For the wake-up milestone, a guarded override can replace the known local
+English greeting/confirmation with WAKEUP_TTS_TEXT. Original request markup is
+still passed through for command marks; logs distinguish requested/spoken text.
+
 Every inbound request produces exactly one response. An empty markup or a failed
 synthesis publishes a short silence instead of nothing, because with cloud_tts
 enabled a missing response leaves the robot stuck in MarkingUp until it
@@ -15,8 +19,10 @@ force-idles and sleeps.
 import logging
 import re
 
+from src.config import settings
 from src.protos.embodied.unity.CloudTTS_pb2 import CloudTTSRequest
 from src.services import speak_service
+from src.services.device_state import device_state
 from src.services.language import detect_language
 
 logger = logging.getLogger(__name__)
@@ -27,6 +33,11 @@ CLOUD_TTS_REQUEST_PREFIX = CloudTTSRequest.DESCRIPTOR.full_name.encode() + b":"
 # Moxie speaks a markup language; anything tag-like must not be read aloud.
 _MARKUP_TAG_RE = re.compile(r"<[^>]*>")
 _WHITESPACE_RE = re.compile(r"\s+")
+
+# These two local lines have live, playable Cloud TTS slots in the robot logs.
+# Match the whole speakable line, never arbitrary English. Do not gate this on
+# the chat phase: OPENMOXIE_CHAT prompt can arrive BEFORE Excellent!'s request.
+_WAKEUP_LOCAL_LINES = frozenset({"good morning!", "excellent!"})
 
 
 def strip_markup(markup: str) -> str:
@@ -63,13 +74,14 @@ async def handle_cloud_tts_request(
 
     logger.info(
         "CloudTTSRequest fields device=%s event_id=%r chunk_num=%s "
-        "timestamp=%s user_id=%r markup[:80]=%r",
+        "timestamp=%s user_id=%r markup[:80]=%r speakable=%r",
         device_id,
         event_id,
         request.chunk_num,
         request.timestamp,
         request.user_id,
         (request.markup or "")[:80],
+        text,
     )
 
     if not text:
@@ -84,14 +96,35 @@ async def handle_cloud_tts_request(
             device_id, event_id, request.chunk_num, markup=request.markup or "",
         )
 
+    # Captured firmware markup strips to `Excellent! " "`. Ignore boundary
+    # quote debris only for matching; keep the original markup intact for cmd:
+    # marks. Never mutate the request or fabricate a Cyrillic inbound request.
+    if (
+        settings.WAKEUP_TTS_OVERRIDE_ENABLED
+        and text.strip(" \"'").casefold() in _WAKEUP_LOCAL_LINES
+        and not await device_state.get_puppet_mode()
+    ):
+        logger.info(
+            "CloudTTSRequest wakeup override device=%s event_id=%r chunk=%d "
+            "requested_text=%r synthesis_text=%r",
+            device_id,
+            event_id,
+            request.chunk_num,
+            text,
+            settings.WAKEUP_TTS_TEXT,
+        )
+        text = settings.WAKEUP_TTS_TEXT
+
     language = detect_language(text)
     logger.info(
-        "handling CloudTTSRequest from %s event_id=%r chunk=%d chars=%d language=%s",
+        "handling CloudTTSRequest from %s event_id=%r chunk=%d chars=%d "
+        "language=%s synthesis_text=%r",
         device_id,
         event_id,
         request.chunk_num,
         len(text),
         language,
+        text,
     )
 
     try:

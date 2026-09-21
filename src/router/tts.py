@@ -8,16 +8,25 @@ Robot-facing:
     POST     /tts/wakeup      wake a sleeping robot
     POST     /tts/sleep       put an awake robot to sleep
     GET      /tts/devices     which robots this service has seen
+    GET      /tts/endpoint-qr OpenMoxie endpoint QR for Moxie's camera
+    POST     /tts/wifi-qr     Wi-Fi credentials QR for Moxie's camera
 """
 
 import logging
 
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, Field
+from fastapi.responses import Response
+from pydantic import BaseModel, Field, SecretStr
 
 from src.config import settings
 from src.services import telehealth, tts_service
 from src.services.devices import device_registry
+from src.services.pairing_qr import (
+    endpoint_qr_config,
+    endpoint_qr_payload,
+    render_qr,
+    wifi_qr_payload,
+)
 from src.services.remote_chat import remote_chat_brain
 
 logger = logging.getLogger(__name__)
@@ -52,6 +61,15 @@ class SpeakRequest(BaseModel):
     )
 
 
+class WifiQrRequest(BaseModel):
+    """Credentials used once to render a Moxie-readable Wi-Fi QR image."""
+
+    ssid: str = Field(..., min_length=1, max_length=32)
+    password: SecretStr = Field(..., max_length=63)
+    hidden: bool = False
+    band: str = Field(default="any", pattern="^(any|2.4ghz|5ghz)$")
+
+
 def _require_device(device_id: str | None) -> str:
     target = device_id or device_registry.primary()
     if not target:
@@ -73,6 +91,67 @@ async def list_devices() -> dict:
         "primary": device_registry.primary(),
         "device_id_override": settings.DEVICE_ID or None,
     }
+
+
+@router.get("/endpoint-qr")
+async def endpoint_qr() -> Response:
+    """Render a QR that relocates Moxie to this service's MQTT broker.
+
+    Show the returned PNG fullscreen on a phone, tablet, or another display for
+    Moxie to scan. The image carries only the MQTT endpoint, not API keys.
+    """
+    try:
+        config = endpoint_qr_config()
+    except (RuntimeError, ValueError) as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+    logger.info(
+        "rendering Moxie endpoint QR host=%s port=%s disable_verify=%s",
+        config.host,
+        config.port,
+        config.disable_verify,
+    )
+    return Response(
+        content=render_qr(endpoint_qr_payload(config)),
+        media_type="image/png",
+        headers={"Cache-Control": "no-store"},
+    )
+
+
+@router.get("/endpoint-qr/info")
+async def endpoint_qr_info() -> dict:
+    """Show the non-secret endpoint encoded by ``GET /tts/endpoint-qr``."""
+    try:
+        config = endpoint_qr_config()
+    except (RuntimeError, ValueError) as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+    return {
+        "mqtt_host": config.host,
+        "mqtt_port": config.port,
+        "disable_verify": config.disable_verify,
+        "project": config.project,
+    }
+
+
+@router.post("/wifi-qr")
+async def wifi_qr(body: WifiQrRequest) -> Response:
+    """Render a Wi-Fi QR for Moxie; credentials are never logged or returned."""
+    bands = {
+        "any": 0,
+        "5ghz": 1,
+        "2.4ghz": 2,
+    }
+    logger.info("rendering Moxie Wi-Fi QR ssid=%r band=%s hidden=%s", body.ssid, body.band, body.hidden)
+    payload = wifi_qr_payload(
+        ssid=body.ssid,
+        password=body.password.get_secret_value(),
+        hidden=body.hidden,
+        band=bands[body.band],
+    )
+    return Response(
+        content=render_qr(payload),
+        media_type="image/png",
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 @router.get("/cloud-tts")

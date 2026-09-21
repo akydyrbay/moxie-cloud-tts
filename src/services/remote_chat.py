@@ -48,10 +48,9 @@ _MAX_HISTORY = 20
 # GLOBAL_COMMAND beats that line but leaves WAKEUP looping "Moxie, let's go!"
 # because the module never hears a completed confirmation. A `launch` action
 # on the *primary* response skips Cloud TTS (the robot jumps modules before
-# the renderer runs). Replace Excellent with a short Russian confirmation and
+# the renderer runs). Replace Excellent with the configured ru/kk greeting and
 # do not launch — DEFAULT_SCHEDULE already starts OPENMOXIE_CHAT after WAKEUP.
 _ENTRANCE_MODULES = frozenset({"WAKEUP", "ENROLLCONVO"})
-_ENTRANCE_OK_TEXT = "Отлично!"
 
 
 def fallback_line(language: str) -> str:
@@ -313,8 +312,8 @@ class RemoteChatBrain:
             device_id,
             _build_response(
                 request,
-                text=_ENTRANCE_OK_TEXT,
-                markup=_speech_markup(_ENTRANCE_OK_TEXT),
+                text=settings.WAKEUP_TTS_TEXT,
+                markup=_speech_markup(settings.WAKEUP_TTS_TEXT),
                 output_type="GLOBAL_COMMAND",
             ),
         )
@@ -441,8 +440,8 @@ class RemoteChatBrain:
             return
         if module_id in _ENTRANCE_MODULES:
             logger.info(
-                "entrance %s cmd=%s device=%s — replace Excellent with Russian "
-                "GLOBAL_COMMAND (no launch)",
+                "entrance %s cmd=%s device=%s — replace Excellent with "
+                "configured greeting GLOBAL_COMMAND (no launch)",
                 module_key,
                 cmd,
                 device_id,
