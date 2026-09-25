@@ -14,6 +14,8 @@ publishes on (see `src/services/devices.py`). `DEVICE_ID` remains only as an
 optional manual override for bench testing without a robot.
 """
 
+from typing import Literal
+
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -65,8 +67,8 @@ class Settings(BaseSettings):
     MODULE_NAME: str = "moxie-tts-service"
 
     # --- OpenAI speech pipeline --------------------------------------------
-    # Single provider for every stage. No translation stage: the user speaks
-    # Russian or Kazakh and OpenAI replies in the same language.
+    # Single provider for every stage. Autonomous chat replies in the configured
+    # output language, even when firmware supplies an English wake transcript.
     #
     # The API key is read from the OPENAI_API_KEY environment variable (or .env)
     # — never hardcoded, never logged.
@@ -82,18 +84,21 @@ class Settings(BaseSettings):
     OPENAI_REQUEST_TIMEOUT_S: float = 8.0
 
     OPENAI_SYSTEM_PROMPT: str = (
-        "You are Moxie, a friendly companion robot talking with a child. "
-        "Always reply in the SAME language the user used (Russian or Kazakh). "
-        "Never translate to English. Keep replies short, warm, natural and "
-        "age-appropriate."
+        "Сен — Мокси, баламен сөйлесетін мейірімді роботсың. "
+        "Әдепкі жауап тілі — қазақ тілі. Жауап тілі бөлек көрсетілсе, сол тілді қолдан. "
+        "Баланың немесе алдыңғы хабарламалардың тіліне қарап жауап тілін өзгертпе. "
+        "Қысқа, жылы, табиғи және баланың жасына сай жауап бер."
     )
 
     SUPPORTED_LANGUAGES: list[str] = ["ru", "kk"]
-    DEFAULT_TTS_LANGUAGE: str = "ru"
+    DEFAULT_TTS_LANGUAGE: Literal["ru", "kk"] = "kk"
+    # Defend actual OPENMOXIE_CHAT speech requests against stale firmware text.
+    # This applies only after a router turn enters chat, never on notify/schedule.
+    REMOTE_CHAT_LANGUAGE_GUARD_ENABLED: bool = True
 
     # --- Wake-up greeting (prompt.md Path A) -------------------------------
     # A1: use this line in the entrance GLOBAL_COMMAND and chat opener.
-    # A2: if firmware still requests its local Good morning! / Excellent!,
+    # A2: if firmware still requests its local greeting / day-start instruction,
     # voice this line in that existing Cloud TTS slot. Never applies in puppet
     # mode. Disable the override to inspect the firmware's original output.
     WAKEUP_TTS_OVERRIDE_ENABLED: bool = True

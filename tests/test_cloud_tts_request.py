@@ -171,11 +171,12 @@ async def test_handle_payload_returns_none_for_other_types(
     assert captured_publish == []
 
 
-def test_language_detection() -> None:
+def test_language_detection(monkeypatch) -> None:
+    monkeypatch.setattr(settings, "DEFAULT_TTS_LANGUAGE", "kk")
     assert detect_language("Привет, как дела") == "ru"
     assert detect_language("Сәлем, қалайсың") == "kk"
     # No Cyrillic is not evidence of either language -> configured default.
-    assert detect_language("hello there") == "ru"
+    assert detect_language("hello there") == "kk"
 
 
 @pytest.fixture
@@ -188,7 +189,14 @@ def wakeup_settings(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(settings, "CLOUD_TTS_REQUEST_SOURCE", "robot")
 
 
-@pytest.mark.parametrize("local_text", ["Good morning!", "Excellent!", 'Excellent! " "'])
+@pytest.mark.parametrize("local_text", [
+    "Good morning!", "Good morning.", "Excellent!", 'Excellent! " "',
+    "“Good morning.”", "EXCELLENT.",
+    "When you're ready to start the day, say, Moxie, let's go!",
+    "That's better. When you're ready to start the day, say, Moxie, let's go!",
+    ". I'm back on solid ground. That's better. When you're ready to start the day, "
+    "say, Moxie, let's go!",
+])
 @pytest.mark.parametrize(
     ("greeting", "language"),
     [("Сәлем! Қалайсың?", "kk"), ("Привет! Как у тебя дела?", "ru")],
@@ -240,7 +248,7 @@ async def test_wakeup_override_preserves_slot_commands_and_lip_sync(
 
 
 @pytest.mark.parametrize("guard", ["disabled", "puppet"])
-@pytest.mark.parametrize("local_text", ["Good morning!", "Excellent!"])
+@pytest.mark.parametrize("local_text", ["Good morning!", "Good morning.", "Excellent!"])
 async def test_wakeup_override_respects_flag_and_live_puppet_mode(
     fake_openai, captured_publish, wakeup_settings, monkeypatch, guard, local_text,
 ) -> None:

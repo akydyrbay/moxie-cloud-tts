@@ -15,6 +15,7 @@ from tests.conftest import TEST_DEVICE_ID
 def brain(monkeypatch: pytest.MonkeyPatch) -> RemoteChatBrain:
     """Fresh brain with MQTT publish captured; reset singleton state after."""
     b = RemoteChatBrain()
+    monkeypatch.setattr(settings, "DEFAULT_TTS_LANGUAGE", "kk")
     published: list[tuple[str, dict]] = []
 
     def _publish_command_json(device_id: str, command: str, payload: dict) -> None:
@@ -214,6 +215,7 @@ async def test_llm_failure_falls_back_in_language(
 async def test_continue_uses_openai(
     brain: RemoteChatBrain, fake_openai,
 ) -> None:
+    fake_openai.chat.completions._reply = "Сәлем! Сені көргеніме қуаныштымын!"
     req = {
         "backend": "router",
         "command": "continue",
@@ -224,7 +226,7 @@ async def test_continue_uses_openai(
     }
     await brain.handle_router_request(TEST_DEVICE_ID, req)
     _topic, payload = brain._published[0]  # type: ignore[attr-defined]
-    assert payload["output"]["text"] == "Привет! Рад тебя видеть!"
+    assert payload["output"]["text"] == "Сәлем! Сені көргеніме қуаныштымын!"
     assert payload["event_id"] == "e-cont"
 
 
@@ -283,7 +285,7 @@ async def test_sleep_tag_keeps_speak_as_primary(
     """`<sleep>` must not replace the speak block or Cloud TTS is skipped."""
     monkeypatch.setattr(
         "src.services.llm.openai_chat.respond",
-        lambda *_a, **_k: type("R", (), {"text": "Спокойной ночи <sleep>"})(),
+        lambda *_a, **_k: type("R", (), {"text": "Қайырлы түн! <sleep>"})(),
     )
     await brain.handle_router_request(
         TEST_DEVICE_ID,
@@ -297,7 +299,7 @@ async def test_sleep_tag_keeps_speak_as_primary(
         },
     )
     _topic, payload = brain._published[0]  # type: ignore[attr-defined]
-    assert payload["output"]["text"] == "Спокойной ночи"
+    assert payload["output"]["text"] == "Қайырлы түн!"
     assert payload["response_action"].get("action") is None
     assert payload["response_actions"][0].get("action") is None
     assert payload["response_actions"][1]["action"] == "sleep"

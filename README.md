@@ -39,6 +39,8 @@ CLOUD_TTS_AUTO_ENABLE=true
 CLOUD_TTS_AUDIO_RAW_PCM=true
 CLOUD_TTS_EMIT_MARKS=true
 CLOUD_TTS_REQUEST_SOURCE=robot
+DEFAULT_TTS_LANGUAGE=kk
+REMOTE_CHAT_LANGUAGE_GUARD_ENABLED=true
 WAKEUP_TTS_OVERRIDE_ENABLED=true
 WAKEUP_TTS_TEXT="Сәлем! Қалайсың?"
 ```
@@ -110,25 +112,34 @@ This uses **Path A1 + A2** from the task's `prompt.md`:
 
 - The entrance `GLOBAL_COMMAND` and `OPENMOXIE_CHAT` opener contain the configured
   greeting inside `<usel variant="2" genre="none">`.
-- If firmware requests its local `Good morning!` or `Excellent!` instead,
-  the server synthesizes the greeting **for that existing request**. `Good
-  morning!` is included so the first observed wake-up line can be Kazakh before
-  the STT gate. The confirmation remains a fallback if that greeting is skipped.
+- If firmware requests its local `Good morning.` / `Good morning!`, `Excellent!`,
+  or the captured “When you're ready to start the day…” instruction, the server
+  synthesizes the greeting **for that existing request**, before the STT gate.
+  The captured “That's better.” and “I'm back on solid ground.” prefixes on that
+  instruction are recognized too.
 - The response echoes the original `event_id`/`chunk_num`, preserves original
   `cmd:` animation marks, and derives mouth movements from the new spoken text.
-  The override is disabled in TELEHEALTH and matches only these complete lines
-  (including the captured `Excellent! " "` quote debris).
+  The wake-up override is disabled in TELEHEALTH and matches complete lines,
+  ignoring boundary punctuation and quote debris.
+- On a real `OPENMOXIE_CHAT` router turn, output language is fixed to
+  `DEFAULT_TTS_LANGUAGE` (`kk`). The system prompt, opener and failure replies
+  use Kazakh regardless of the input language. English assistant notifications
+  are excluded from chat history. A conservative script check replaces model
+  replies in another language with a Kazakh fallback. While chat is active,
+  the TTS language guard also replaces mismatched incoming text in its live slot.
+  Scheduled activities and `notify` alone do not activate this guard.
 
 If Moxie asks you to say “Moxie, let's go”, say it and pause. The existing wake
 gate answers `END_OF_SPEECH` with that trigger; the greeting is never used as
 an STT transcript. The `/tts/wakeup` command itself only unsleeps the robot.
 For this test, keep puppet off and use the wake-up flow above.
 
-To change the greeting, set `WAKEUP_TTS_TEXT` to another plain Cyrillic line
-(Russian example: `"Привет! Как у тебя дела?"`), restart the service and reboot
-Moxie. Kazakh is logged as `kk`. Set `WAKEUP_TTS_OVERRIDE_ENABLED=false` to
-disable the replacement of local English lines; the brain still requests the
-configured greeting.
+To use Russian, set `DEFAULT_TTS_LANGUAGE=ru` and
+`WAKEUP_TTS_TEXT="Привет! Как у тебя дела?"`, restart the service and reboot Moxie.
+Kazakh's language code is `kk`, not `kz`. `WAKEUP_TTS_OVERRIDE_ENABLED=false`
+disables the known wake-up replacements; `REMOTE_CHAT_LANGUAGE_GUARD_ENABLED=false`
+separately disables the active-chat TTS guard. Neither disables the chat response
+language policy. These guards do not translate all onboard content outside chat.
 
 ### Verify on the robot
 
@@ -144,7 +155,7 @@ the **same ID and chunk**. With the A2 override the incoming request still
 contains English, and the log explicitly distinguishes the replacement:
 
 ```text
-CloudTTSRequest wakeup override ... event_id='E' chunk=0 requested_text='Good morning!' synthesis_text='Сәлем! Қалайсың?'
+CloudTTSRequest wakeup override ... event_id='E' chunk=0 requested_text='Good morning.' synthesis_text='Сәлем! Қалайсың?'
 handling CloudTTSRequest ... event_id='E' chunk=0 ... language=kk synthesis_text='Сәлем! Қалайсың?'
 spoke event_id=E chunk=0 language=kk audio_bytes=... marks=... raw_pcm=True ...
 ```
@@ -241,6 +252,8 @@ Everything is environment variables or `.env`; see `src/config.py`.
 | `OPENAI_API_KEY` | — | Required. Never hardcode it. |
 | `CLOUD_TTS_AUTO_ENABLE` | `true` | Enable cloud TTS at startup. Skipped without a key. |
 | `PUPPET_MODE_AUTO_ENABLE` | `false` | Start the robot in TELEHEALTH mode. |
+| `DEFAULT_TTS_LANGUAGE` | `kk` | Autonomous chat output language; `kk` or `ru`. Input language does not change it. |
+| `REMOTE_CHAT_LANGUAGE_GUARD_ENABLED` | `true` | Replace mismatched TTS text while a real chat module is active, outside TELEHEALTH. |
 | `WAKEUP_TTS_OVERRIDE_ENABLED` | `true` | Replace known local wake-up lines with the greeting, outside TELEHEALTH only. |
 | `WAKEUP_TTS_TEXT` | `Сәлем! Қалайсың?` | Plain Cyrillic ru/kk greeting for entrance, opener, and wake-up override. Restart after changing. |
 | `CLOUD_TTS_AUDIO_RAW_PCM` | `true` | `true` sends raw PCM16 (what `AudioBuffer` is); `false` wraps WAV. |
@@ -257,6 +270,17 @@ Everything is environment variables or `.env`; see `src/config.py`.
 mise test
 ```
 
+The Sep 23 regression fixture covers the captured English wake-up requests,
+empty animation requests, and scheduled-chat/notify sequence. To replay the
+original Sep 23 log directly with mocked OpenAI/MQTT:
+
+```bash
+MOXIE_REPLAY_LOG=log/debug.log uv run pytest tests/test_wakeup_log_replay.py -q --log-file=/tmp/moxie-kz-log-replay.log --log-file-level=INFO
+```
+
+This test expects that specific capture. It verifies outgoing payloads and log
+patterns without changing `log/debug.log` or claiming robot playback.
+
 ## Roadmap
 
 Speech recognition is next. Moxie already does the hard part: it runs voice
@@ -269,6 +293,7 @@ chat listen sessions and solving opener scheduling remain separate work.
 
 ## Documents
 
+- [Kazakh wake-up diagnosis](docs/KAZAKH_WAKEUP_ANALYSIS.md) — Sep 23 failure, corrected language path, and verification evidence.
 - [AGENTS.md](docs/AGENTS.md) — architecture, MQTT topics, and remaining Cloud TTS work for development agents.
 - [Speak Live Plan](docs/SPEAK_LIVE_PLAN.md) — autonomous (non-puppet) conversation path.
 - [Speak Puppet Analysis](docs/SPEAK_PUPPET_ANALYSIS.md) — why TELEHEALTH only plays the first `/tts/speak` line.

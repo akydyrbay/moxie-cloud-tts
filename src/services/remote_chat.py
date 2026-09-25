@@ -29,7 +29,7 @@ from src.config import (
 )
 from src.services.device_state import device_state
 from src.services.devices import device_registry
-from src.services.language import detect_language, fallback_language
+from src.services.language import fallback_language, matches_output_language
 from src.services.llm import openai_chat
 from src.services.mqtt_service import mqtt_service
 from src.services.stt_request import (
@@ -147,6 +147,8 @@ class _ChatSession:
 
     def __init__(self, module_key: str) -> None:
         self.module_key = module_key
+        self.language = settings.DEFAULT_TTS_LANGUAGE
+        self.active = False
         self.history: list[dict[str, str]] = []
 
     def add(self, role: str, message: str) -> None:
@@ -164,7 +166,7 @@ class _ChatSession:
             if line.get("context_type") == "input":
                 self.add("user", line.get("text", ""))
         speech = request.get("speech") or ""
-        if speech and "animation:" not in speech and "silent:" not in speech:
+        if matches_output_language(speech, self.language):
             self.add("assistant", speech)
 
     def reset(self) -> None:
@@ -277,16 +279,27 @@ class RemoteChatBrain:
         )
         mqtt_service.publish_command_json(device_id, "query_result", payload)
 
-    def _session_for(self, device_id: str, module_key: str) -> _ChatSession:
+    def _session_for(
+        self, device_id: str, module_key: str, *, history_only: bool = False,
+    ) -> _ChatSession:
         existing = self._sessions.get(device_id)
-        if existing is not None and existing.module_key == module_key:
-            return existing
+        if existing is not None:
+            same_module = existing.module_key.split("/")[0] == module_key.split("/")[0]
+            if existing.module_key == module_key or (history_only and same_module):
+                # Notifications can omit content_id or use an alias. They do
+                # not replace the active session selected by a router turn.
+                return existing
         session = _ChatSession(module_key)
         self._sessions[device_id] = session
         return session
 
     def _clear_session(self, device_id: str) -> None:
         self._sessions.pop(device_id, None)
+
+    def output_language(self, device_id: str) -> str | None:
+        """Language of an entered chat module; notify alone is not entry."""
+        session = self._sessions.get(device_id)
+        return session.language if session and session.active else None
 
     def _send_remote_chat(self, device_id: str, response: dict) -> None:
         logger.info(
@@ -357,16 +370,30 @@ class RemoteChatBrain:
     ) -> None:
         cmd = request.get("command")
         module_key = f"{module_id}/{content_id}"
-        session = self._session_for(device_id, module_key)
+        session = self._session_for(device_id, module_key, history_only=cmd == "notify")
 
         if cmd == "notify":
             session.ingest_notify(request)
             return
+        if cmd not in {"start", "prompt", "continue", "reprompt"}:
+            logger.debug("ignoring remote module command=%r device=%s", cmd, device_id)
+            return
 
-        if cmd == "prompt" or (cmd == "reprompt" and not session.history):
-            if cmd == "prompt":
+        if not session.active or cmd in {"start", "prompt"}:
+            session.language = settings.DEFAULT_TTS_LANGUAGE
+            session.active = True
+            logger.info(
+                "remote-chat language device=%s module=%s command=%s language=%s",
+                device_id, module_key, cmd, session.language,
+            )
+        language = session.language
+
+        if cmd in {"start", "prompt"} or (cmd == "reprompt" and not session.history):
+            if cmd in {"start", "prompt"}:
                 session.reset()
             text = self._opener_for(content_id or "default")
+            if not matches_output_language(text, language):
+                text = fallback_line(language)
             self._send_remote_chat(
                 device_id,
                 _build_response(
@@ -378,26 +405,27 @@ class RemoteChatBrain:
             return
 
         speech = request.get("speech") or ""
-        if cmd == "reprompt":
-            speech = speech or "hm"
-
-        language = detect_language(speech) if speech else settings.DEFAULT_TTS_LANGUAGE
         # Tentative history for this turn; official history arrives via notify.
         history_for_inference = copy.deepcopy(session.history)
 
         try:
             chat = await run_in_threadpool(
                 openai_chat.respond,
-                speech or "hello",
+                speech or fallback_line(language),
                 language,
                 history_for_inference,
             )
             text, actions = _strip_action_tags(chat.text)
-            if not text:
+            if not matches_output_language(text, language):
+                logger.warning(
+                    "remote-chat rejected output language device=%s language=%s text=%r",
+                    device_id, language, text,
+                )
                 text = fallback_line(language)
+                actions = []
         except Exception:
             logger.exception("remote-chat LLM failed for %s", device_id)
-            text = fallback_line(fallback_language(speech))
+            text = fallback_line(language)
             actions = []
 
         response = _build_response(
@@ -434,10 +462,11 @@ class RemoteChatBrain:
         # Onboard / unknown module: drop any remote session. Notify is a
         # no-reply path. Entrance modules must not FALLBACK — that loses to the
         # local script and Cloud TTS voices English instead of the opener.
-        if device_id in self._sessions:
-            self._clear_session(device_id)
         if cmd == "notify":
+            # A delayed WAKEUP notify can follow the actual chat prompt. It
+            # does not change module ownership or clear the output language.
             return
+        self._clear_session(device_id)
         if module_id in _ENTRANCE_MODULES:
             logger.info(
                 "entrance %s cmd=%s device=%s — replace Excellent with "

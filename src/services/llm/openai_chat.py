@@ -1,9 +1,8 @@
 """OpenAI response-generation stage.
 
 Origin: new for the OpenAI speech pipeline. Takes the recognized Russian/Kazakh
-text and asks OpenAI for a reply — directly in the same language, with NO
-translation to English (steered by `OPENAI_SYSTEM_PROMPT`, reinforced per-call
-with the detected language).
+text and asks OpenAI for a reply directly in the requested output language.
+Input and history language do not select the response language.
 
 Isolated in its own module (+ `ChatResult`) so it can be tested on its own:
 feed it text, assert a non-empty reply — no STT/TTS or robot required.
@@ -19,8 +18,17 @@ from src.services.synthesis.base import UnsupportedLanguageError
 
 logger = logging.getLogger(__name__)
 
-# Human-readable language names to reinforce the "reply in this language" hint.
-_LANGUAGE_NAMES = {"ru": "Russian", "kk": "Kazakh"}
+_LANGUAGE_INSTRUCTIONS = {
+    "kk": (
+        "Жауап тілі: қазақ тілі (kk). Тек қазақ тілінде, кирилл әріптерімен жауап бер. "
+        "Кіріс мәтіні ағылшынша не орысша болса да, жауап тілін өзгертпе. "
+        "Ағылшынша немесе орысша дайын сөйлемдерді қайталама."
+    ),
+    "ru": (
+        "Язык ответа: русский (ru). Отвечай только по-русски, кириллицей, "
+        "независимо от языка входящего текста и истории разговора."
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -37,7 +45,7 @@ def respond(
     language: str,
     history: list[dict[str, str]] | None = None,
 ) -> ChatResult:
-    """Generate a reply to `text`, in the same `language` (short code).
+    """Generate a reply to `text` in the requested output `language` (short code).
 
     `history` is an optional prior turn list of `{"role","content"}` messages
     (OpenAI chat format) used by the remote-chat brain for multi-turn context.
@@ -49,14 +57,12 @@ def respond(
         msg = f"unsupported language {language!r}; supported: {supported}"
         raise UnsupportedLanguageError(msg)
 
-    language_name = _LANGUAGE_NAMES.get(language, language)
     messages: list[dict[str, str]] = [
         {
             "role": "system",
             "content": (
                 f"{settings.OPENAI_SYSTEM_PROMPT}\n"
-                f"The user is speaking {language_name}. "
-                f"You MUST reply only in {language_name}."
+                f"{_LANGUAGE_INSTRUCTIONS[language]}"
             ),
         },
     ]

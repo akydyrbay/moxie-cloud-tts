@@ -85,8 +85,10 @@ class _FakeTranscriptions:
 class _FakeCompletions:
     def __init__(self, reply: str) -> None:
         self._reply = reply
+        self.calls: list[dict] = []
 
     def create(self, **kwargs):  # noqa: ANN003, ANN201
+        self.calls.append(kwargs)
         message = type("M", (), {"content": self._reply})()
         choice = type("C", (), {"message": message})()
         return type("Comp", (), {"choices": [choice]})()

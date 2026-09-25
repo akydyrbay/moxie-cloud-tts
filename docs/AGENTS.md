@@ -19,17 +19,27 @@ Device ids look like `d_<uuid>`. They are **discovered** from MQTT topics, never
 
 **Invariant:** Moxie only plays cloud audio that answers a request it is already waiting on, matched by `event_id` / `chunk_num`. You cannot push a `CloudTTSResponse` and have it play.
 
-**Current narrow milestone (2026-09-18):** `prompt.md` Path A1 + A2 is implemented,
+**Current narrow milestone (2026-09-25):** `prompt.md` Path A1 + A2 is implemented,
 pending operator playback confirmation. `WAKEUP_TTS_TEXT` defaults to
 `Сәлем! Қалайсың?` for entrance responses and chat openers. With
-`WAKEUP_TTS_OVERRIDE_ENABLED=true`, known local `Good morning!` / `Excellent!`
-requests are voiced as that line outside TELEHEALTH, preserving the live IDs and
-original command marks. This also handles captured `Excellent! " "` text.
+`WAKEUP_TTS_OVERRIDE_ENABLED=true`, known local `Good morning.` / `Good morning!`
+/ `Excellent!` and captured day-start instructions are voiced as that line outside
+TELEHEALTH, preserving live IDs and original command marks. Matching ignores
+boundary punctuation, including captured `Excellent! " "` text.
 Do not gate the override on conversation-active state: chat prompt can arrive
 before the wake-up confirmation's Cloud TTS request. Logs show incoming
 `speakable` and effective `synthesis_text` separately. An overridden English
 request is not a native Cyrillic request; only operator-heard audio confirms
 playback. See the current [README verification steps](../README.md#verify-on-the-robot).
+`DEFAULT_TTS_LANGUAGE=kk` now fixes autonomous chat output language at entry,
+independent of input/history language. `start` and `prompt` return the greeting
+without calling the LLM. Invalid-language LLM replies get a localized fallback;
+English assistant notifications are excluded from history. The separate
+`REMOTE_CHAT_LANGUAGE_GUARD_ENABLED` flag protects TTS payloads only after an
+actual chat router turn. A delayed onboard notify must not clear that state.
+Neither schedule activity nor notify activates chat. Russian remains available
+through explicit configuration and puppet speech. See
+[the Sep 23 diagnosis and replay](KAZAKH_WAKEUP_ANALYSIS.md).
 The conversation roadmap below is later work, beyond this one-line milestone.
 
 ---
@@ -201,7 +211,7 @@ Operator ──HTTP──► FastAPI /tts/*  (control only)
 | `device_state._config` | process lifetime; overlay `cloud_tts`, `moxie_mode` |
 | `stt_request._conversation_active` | until reconnect bootstrap |
 | `stt_request._session_start_ms` | per STT `uuid` until END or answer |
-| `remote_chat._sessions` | per device, 20-turn history from `notify` |
+| `remote_chat._sessions` | per device, output language/active flag plus 20-turn history from `notify` |
 | `remote_chat._last_event_id` | last router event (for HTTP sleep) |
 | `telehealth._puppet_state` | READY/IN_SESSION/EXITING from activity-log **session** boundaries only |
 

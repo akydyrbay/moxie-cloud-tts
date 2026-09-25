@@ -22,10 +22,26 @@ def has_cyrillic(text: str) -> bool:
 
 
 def detect_language(text: str) -> str:
-    """Return "kk" if Kazakh-specific letters are present, else the default."""
+    """Infer kk/ru from Cyrillic; use the default only for ambiguous input."""
     if any(ch in _KAZAKH_ONLY for ch in text):
         return "kk"
+    if has_cyrillic(text):
+        return "ru"
     return settings.DEFAULT_TTS_LANGUAGE
+
+
+def matches_output_language(text: str, language: str) -> bool:
+    """Conservative script check for autonomous replies, not a translator.
+
+    For this one-line milestone prefer a known localized fallback over English,
+    mixed Latin/Cyrillic output, or an ambiguous Kazakh line without distinctive
+    letters. Explicit Russian speech outside autonomous chat remains supported.
+    """
+    return (
+        has_cyrillic(text)
+        and not any("a" <= ch.lower() <= "z" for ch in text)
+        and detect_language(text) == language
+    )
 
 
 def fallback_language(text: str) -> str:

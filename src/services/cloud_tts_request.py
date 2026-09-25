@@ -23,7 +23,8 @@ from src.config import settings
 from src.protos.embodied.unity.CloudTTS_pb2 import CloudTTSRequest
 from src.services import speak_service
 from src.services.device_state import device_state
-from src.services.language import detect_language
+from src.services.language import detect_language, matches_output_language
+from src.services.remote_chat import fallback_line, remote_chat_brain
 
 logger = logging.getLogger(__name__)
 
@@ -34,10 +35,25 @@ CLOUD_TTS_REQUEST_PREFIX = CloudTTSRequest.DESCRIPTOR.full_name.encode() + b":"
 _MARKUP_TAG_RE = re.compile(r"<[^>]*>")
 _WHITESPACE_RE = re.compile(r"\s+")
 
-# These two local lines have live, playable Cloud TTS slots in the robot logs.
+# These complete local lines have live Cloud TTS slots in the robot logs.
 # Match the whole speakable line, never arbitrary English. Do not gate this on
 # the chat phase: OPENMOXIE_CHAT prompt can arrive BEFORE Excellent!'s request.
-_WAKEUP_LOCAL_LINES = frozenset({"good morning!", "excellent!"})
+_DAY_START_LINE = "when you're ready to start the day, say, moxie, let's go"
+_WAKEUP_LOCAL_LINES = frozenset({
+    "good morning",
+    "excellent",
+    _DAY_START_LINE,
+    f"that's better. {_DAY_START_LINE}",
+    f"i'm back on solid ground. that's better. {_DAY_START_LINE}",
+})
+
+
+def _is_wakeup_line(text: str) -> bool:
+    # Sep 23 firmware says `Good morning.`; older firmware used `!` and left
+    # quote debris outside <usel>. Normalize only boundary punctuation so a
+    # different sentence with the same prefix is never accidentally matched.
+    normalized = text.replace("’", "'").casefold().strip(" \"'“”‘.!?…")
+    return normalized in _WAKEUP_LOCAL_LINES
 
 
 def strip_markup(markup: str) -> str:
@@ -96,13 +112,12 @@ async def handle_cloud_tts_request(
             device_id, event_id, request.chunk_num, markup=request.markup or "",
         )
 
-    # Captured firmware markup strips to `Excellent! " "`. Ignore boundary
-    # quote debris only for matching; keep the original markup intact for cmd:
-    # marks. Never mutate the request or fabricate a Cyrillic inbound request.
+    puppet = await device_state.get_puppet_mode()
+    module_language = remote_chat_brain.output_language(device_id)
     if (
         settings.WAKEUP_TTS_OVERRIDE_ENABLED
-        and text.strip(" \"'").casefold() in _WAKEUP_LOCAL_LINES
-        and not await device_state.get_puppet_mode()
+        and _is_wakeup_line(text)
+        and not puppet
     ):
         logger.info(
             "CloudTTSRequest wakeup override device=%s event_id=%r chunk=%d "
@@ -114,6 +129,22 @@ async def handle_cloud_tts_request(
             settings.WAKEUP_TTS_TEXT,
         )
         text = settings.WAKEUP_TTS_TEXT
+
+    if (
+        settings.REMOTE_CHAT_LANGUAGE_GUARD_ENABLED
+        and module_language
+        and not puppet
+        and not matches_output_language(text, module_language)
+    ):
+        replacement = settings.WAKEUP_TTS_TEXT
+        if not matches_output_language(replacement, module_language):
+            replacement = fallback_line(module_language)
+        logger.info(
+            "CloudTTSRequest chat language override device=%s event_id=%r chunk=%d "
+            "language=%s requested_text=%r synthesis_text=%r",
+            device_id, event_id, request.chunk_num, module_language, text, replacement,
+        )
+        text = replacement
 
     language = detect_language(text)
     logger.info(
