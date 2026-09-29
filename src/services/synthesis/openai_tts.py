@@ -46,7 +46,7 @@ class OpenAITTSEngine:
             msg = f"unsupported language {language!r}; supported: {supported}"
             raise UnsupportedLanguageError(msg)
 
-        client = get_client()
+        client = get_client().with_options(max_retries=0, timeout=settings.OPENAI_TTS_TIMEOUT_S)
         start = time.monotonic()
         result = client.audio.speech.create(
             model=settings.OPENAI_TTS_MODEL,
@@ -59,6 +59,8 @@ class OpenAITTSEngine:
         # The SDK returns a binary response; `.content` is the raw audio bytes —
         # here 24 kHz mono signed 16-bit little-endian samples, no header.
         pcm = result.content
+        if not pcm or len(pcm) % 2:
+            raise ValueError("TTS returned empty or incomplete PCM16 audio")
         synthesis_time_ms = int((time.monotonic() - start) * 1000)
 
         if settings.CLOUD_TTS_AUDIO_RAW_PCM:

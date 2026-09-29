@@ -21,13 +21,6 @@ from src.services.remote_chat import RemoteChatBrain
 from tests.test_cloud_tts_request import _decode_response, _frame_request
 
 DEVICE = "d_d05e3c66-dd29-4fe2-9758-7223e31511dc"
-WAKE_IDS = {
-    "296549b2-4b95-49b7-870b-09f30abeb6d3",
-    "382cd197-227c-4484-95c0-5d823a60bc18",
-    "5ecfbf60-7821-4268-8081-cca691124400",
-    "9b2c3813-cc8b-4955-9346-fc6337481c34",
-    "4d16eede-f995-4f9d-a4f0-8c446275328f",
-}
 
 
 def captured_events():
@@ -64,21 +57,20 @@ def captured_events():
     return events
 
 
-async def test_september_23_capture_reaches_kazakh_on_existing_wake_slots(
-    fake_openai, captured_publish, monkeypatch, caplog,
+async def test_september_23_capture_translates_all_english_speech_slots(
+    fake_openai, translated_lines, captured_publish, monkeypatch, caplog,
 ):
     brain = RemoteChatBrain()
-    monkeypatch.setattr(cloud_tts_request, "remote_chat_brain", brain)
     monkeypatch.setattr(settings, "DEFAULT_TTS_LANGUAGE", "kk")
-    monkeypatch.setattr(settings, "WAKEUP_TTS_OVERRIDE_ENABLED", True)
-    monkeypatch.setattr(settings, "WAKEUP_TTS_TEXT", "Сәлем! Қалайсың?")
+    monkeypatch.setattr(settings, "CLOUD_TTS_TRANSLATION_ENABLED", True)
     monkeypatch.setattr(settings, "CLOUD_TTS_AUDIO_RAW_PCM", True)
     monkeypatch.setattr(settings, "CLOUD_TTS_EMIT_MARKS", True)
     pcm = b"\x00\x01" * 24000
     fake_openai.audio.speech._pcm = pcm
     await device_state.set_cloud_tts(True)
     caplog.set_level(logging.INFO)
-    overrides = set()
+    translated_ids = set()
+    source_lines = set()
     total, silent = 0, 0
     for event in captured_events():
         captured_publish.clear()
@@ -133,19 +125,55 @@ async def test_september_23_capture_reaches_kazakh_on_existing_wake_slots(
             assert audio.audio.buffer == b"\0" * 9600
             continue
         assert len(fake_openai.audio.speech.calls) == calls_before + 1
-        expected = "Сәлем! Қалайсың?" if event_id in WAKE_IDS else text
+        expected = translated_lines[text]
         call = fake_openai.audio.speech.calls[-1]
         assert call["input"] == expected
         assert call["response_format"] == "pcm"
         assert audio.audio.buffer == pcm
-        if event_id in WAKE_IDS:
-            overrides.add(event_id)
-            assert summary["language"] == "kk"
-            assert f"spoke event_id={event_id} chunk={chunk} language=kk" in caplog.text
-            assert f"requested_text={text!r} synthesis_text='Сәлем! Қалайсың?'" in caplog.text
-            assert any(m.type == "viseme" and m.value != "sil" for m in audio.marks)
+        translated_ids.add(event_id)
+        source_lines.add(text)
+        assert summary["language"] == "kk"
+        assert f"spoke event_id={event_id} chunk={chunk} language=kk" in caplog.text
+        assert f"requested_text={text!r} synthesis_text={expected!r}" in caplog.text
+        assert any(m.type == "viseme" and m.value != "sil" for m in audio.marks)
 
     assert (total, silent) == (14, 4)
-    assert overrides == WAKE_IDS
-    assert fake_openai.chat.completions.calls == []  # capture never reached a chat turn
+    assert len(translated_ids) == 10
+    assert {c["messages"][-1]["content"] for c in fake_openai.chat.completions.calls} == source_lines
+    assert len(fake_openai.chat.completions.calls) == len(source_lines)
+    assert "synthesis failed" not in caplog.text
+    assert "translation failed" not in caplog.text
+
+
+async def test_september_25_all_tts_requests_translate_without_chat_entry(
+    fake_openai, translated_lines, captured_publish, monkeypatch, caplog,
+):
+    """The latest capture's non-wake English must also become meaningful Kazakh."""
+    fixture = Path(__file__).parent / "fixtures" / "tts_2026_09_25.json"
+    events = json.loads(fixture.read_text())["events"]
+    monkeypatch.setattr(settings, "DEFAULT_TTS_LANGUAGE", "kk")
+    monkeypatch.setattr(settings, "CLOUD_TTS_TRANSLATION_ENABLED", True)
+    caplog.set_level(logging.INFO)
+    translated, silent = 0, 0
+    for event in events:
+        captured_publish.clear()
+        text = event["text"]
+        summary = await cloud_tts_request.handle_payload(DEVICE, _frame_request(
+            markup=f'<mark name="cmd:original"/><usel>{text}</usel>',
+            event_id=event["event_id"], chunk_num=event["chunk_num"],
+        ))
+        assert len(captured_publish) == 1
+        audio = _decode_response(captured_publish[0][1])
+        assert (audio.event_id, audio.chunk_num) == (event["event_id"], event["chunk_num"])
+        assert [m.value for m in audio.marks if m.type == "ssml"] == ["cmd:original"]
+        if text:
+            translated += 1
+            assert summary["language"] == "kk"
+            assert fake_openai.audio.speech.calls[-1]["input"] == translated_lines[text]
+            assert f"requested_text={text!r} synthesis_text={translated_lines[text]!r}" in caplog.text
+        else:
+            silent += 1
+            assert summary["status"] == "published_silence"
+    assert (translated, silent) == (10, 6)
+    assert "translation failed" not in caplog.text
     assert "synthesis failed" not in caplog.text

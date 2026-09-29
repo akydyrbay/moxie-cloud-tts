@@ -22,6 +22,16 @@ class DeviceState:
         self._lock = asyncio.Lock()
         self._config: dict = deepcopy(HARDCODED_DEVICE_CONFIG)
         self._config["settings"]["props"]["cloud_tts"] = "0"
+        self._speech_revision = 0
+
+    @property
+    def speech_revision(self) -> int:
+        """Read on the asyncio loop to invalidate output across mode changes.
+
+        A counter also detects switching off and back on while a provider is
+        running. Setters update it without yielding inside the config lock.
+        """
+        return self._speech_revision
 
     async def get_config(self) -> dict:
         """Return a copy of the full current device config."""
@@ -35,6 +45,10 @@ class DeviceState:
     async def set_cloud_tts(self, enabled: bool) -> dict:
         """Update cloud_tts and return the full resulting config."""
         async with self._lock:
+            if (self._config["settings"]["props"]["cloud_tts"] == "1") != enabled:
+                self._speech_revision += 1
+                from src.services.stt_request import invalidate_mode
+                invalidate_mode()
             self._config["settings"]["props"]["cloud_tts"] = "1" if enabled else "0"
             return deepcopy(self._config)
 
@@ -45,6 +59,10 @@ class DeviceState:
     async def set_puppet_mode(self, enabled: bool) -> dict:
         """Enable/disable TELEHEALTH mode and return the full resulting config."""
         async with self._lock:
+            if (self._config.get("moxie_mode") == MOXIE_MODE_TELEHEALTH) != enabled:
+                self._speech_revision += 1
+                from src.services.stt_request import invalidate_mode
+                invalidate_mode(puppet=enabled)
             if enabled:
                 self._config["moxie_mode"] = MOXIE_MODE_TELEHEALTH
             else:

@@ -35,6 +35,7 @@ from src.services.cloud_tts_request import (
     handle_payload,
 )
 from src.services.device_state import device_state
+from src.services.devices import device_registry
 from src.services.mqtt_service import mqtt_service
 from src.services.openai_client import get_client
 from src.services.remote_chat import (
@@ -71,8 +72,8 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
     # 1b. Answer the robot's zmqSTT stream. Until OPENMOXIE_CHAT is active,
     # inject WAKEUP_TRIGGER_LINE so the onboard "start the day" gate opens.
-    # After that, canned chat injection is off; the opener is spoken via
-    # remote-chat + Cloud TTS. Real STT is M2.
+    # After chat entry, accumulate microphone PCM and transcribe it with OpenAI.
+    # Robot replies still travel via remote-chat + Cloud TTS.
     mqtt_service.register_stt_request_handler(
         loop,
         handle_stt_payload,
@@ -125,6 +126,8 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     yield
 
     # 5. Clean up MQTT on app shutdown
+    for device_id in device_registry.known():
+        remote_chat_brain.reset_device(device_id)
     mqtt_service.disconnect()
 
 

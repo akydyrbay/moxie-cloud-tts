@@ -17,6 +17,7 @@ from src.protos.embodied.perception.audio.zmqSTT_pb2 import (
     zmqSTTResponse,
 )
 from src.protos.embodied.unity.CloudTTS_pb2 import (
+    REMOTECHAT_TTS_REQUEST,
     ROBOT_TTS_REQUEST,
     CloudTTSRequest,
     CloudTTSResponse,
@@ -180,33 +181,32 @@ def test_language_detection(monkeypatch) -> None:
 
 
 @pytest.fixture
-def wakeup_settings(monkeypatch: pytest.MonkeyPatch) -> None:
+def translation_settings(monkeypatch: pytest.MonkeyPatch) -> None:
     """Make regression tests independent of the operator's .env choices."""
-    monkeypatch.setattr(settings, "WAKEUP_TTS_OVERRIDE_ENABLED", True)
-    monkeypatch.setattr(settings, "WAKEUP_TTS_TEXT", "Сәлем! Қалайсың?")
+    monkeypatch.setattr(settings, "CLOUD_TTS_TRANSLATION_ENABLED", True)
+    monkeypatch.setattr(settings, "DEFAULT_TTS_LANGUAGE", "kk")
     monkeypatch.setattr(settings, "CLOUD_TTS_EMIT_MARKS", True)
     monkeypatch.setattr(settings, "CLOUD_TTS_AUDIO_RAW_PCM", True)
     monkeypatch.setattr(settings, "CLOUD_TTS_REQUEST_SOURCE", "robot")
 
 
-@pytest.mark.parametrize("local_text", [
-    "Good morning!", "Good morning.", "Excellent!", 'Excellent! " "',
-    "“Good morning.”", "EXCELLENT.",
-    "When you're ready to start the day, say, Moxie, let's go!",
-    "That's better. When you're ready to start the day, say, Moxie, let's go!",
-    ". I'm back on solid ground. That's better. When you're ready to start the day, "
-    "say, Moxie, let's go!",
-])
 @pytest.mark.parametrize(
-    ("greeting", "language"),
-    [("Сәлем! Қалайсың?", "kk"), ("Привет! Как у тебя дела?", "ru")],
+    ("local_text", "translated", "language"),
+    [
+        ("Good morning!", "Қайырлы таң!", "kk"),
+        ("Good morning.", "Доброе утро.", "ru"),
+        ('Excellent! " "', "Тамаша!", "kk"),
+        ("What is your favorite fruit?", "Саған қандай жеміс ұнайды?", "kk"),
+        ("I'm sorry, can you repeat that please?", "Кешір, қайталап айта аласың ба?", "kk"),
+    ],
 )
-async def test_wakeup_override_preserves_slot_commands_and_lip_sync(
-    fake_openai, captured_publish, wakeup_settings, monkeypatch, caplog,
-    local_text, greeting, language,
+async def test_translation_preserves_slot_commands_and_lip_sync(
+    fake_openai, captured_publish, translation_settings, monkeypatch, caplog,
+    local_text, translated, language,
 ) -> None:
     """Use real response assembly: only text changes, not the live audio slot."""
-    monkeypatch.setattr(settings, "WAKEUP_TTS_TEXT", greeting)
+    monkeypatch.setattr(settings, "DEFAULT_TTS_LANGUAGE", language)
+    fake_openai.chat.completions._reply = translated
     # One second of mock PCM, long enough to distinguish it from 200 ms silence.
     pcm = b"\x00\x01" * 24000
     monkeypatch.setattr(fake_openai.audio.speech, "_pcm", pcm)
@@ -221,7 +221,8 @@ async def test_wakeup_override_preserves_slot_commands_and_lip_sync(
 
     assert req.markup == markup
     assert len(fake_openai.audio.speech.calls) == 1
-    assert fake_openai.audio.speech.calls[0]["input"] == greeting
+    assert fake_openai.chat.completions.calls[0]["messages"][-1]["content"] == local_text
+    assert fake_openai.audio.speech.calls[0]["input"] == translated
     assert fake_openai.audio.speech.calls[0]["response_format"] == "pcm"
     assert summary["language"] == language
     assert summary["audio_bytes"] == len(pcm)
@@ -239,21 +240,21 @@ async def test_wakeup_override_preserves_slot_commands_and_lip_sync(
         ("cmd:attachment-animator,stop", 1000),
     ]
     assert any(m.type == "viseme" and m.value != "sil" for m in resp.marks)
-    assert any(m.type == "word" and m.value == greeting.split()[0] for m in resp.marks)
+    assert any(m.type == "word" and m.value == translated.split()[0] for m in resp.marks)
     assert resp.marks[-1].value == "sil"
-    assert "CloudTTSRequest wakeup override" in caplog.text
+    assert "CloudTTSRequest translation" in caplog.text
     assert f"requested_text={local_text!r}" in caplog.text
-    assert f"synthesis_text={greeting!r}" in caplog.text
+    assert f"synthesis_text={translated!r}" in caplog.text
     assert f"spoke event_id=wake-slot chunk=3 language={language}" in caplog.text
 
 
 @pytest.mark.parametrize("guard", ["disabled", "puppet"])
 @pytest.mark.parametrize("local_text", ["Good morning!", "Good morning.", "Excellent!"])
-async def test_wakeup_override_respects_flag_and_live_puppet_mode(
-    fake_openai, captured_publish, wakeup_settings, monkeypatch, guard, local_text,
+async def test_translation_respects_flag_and_live_puppet_mode(
+    fake_openai, captured_publish, translation_settings, monkeypatch, guard, local_text,
 ) -> None:
     if guard == "disabled":
-        monkeypatch.setattr(settings, "WAKEUP_TTS_OVERRIDE_ENABLED", False)
+        monkeypatch.setattr(settings, "CLOUD_TTS_TRANSLATION_ENABLED", False)
     else:
         # This must read runtime state, not just PUPPET_MODE_AUTO_ENABLE.
         await device_state.set_puppet_mode(True)
@@ -262,21 +263,23 @@ async def test_wakeup_override_respects_flag_and_live_puppet_mode(
         TEST_DEVICE_ID, _frame_request(markup=local_text, event_id="", chunk_num=0),
     )
     assert fake_openai.audio.speech.calls[0]["input"] == local_text
+    assert fake_openai.chat.completions.calls == []
     assert len(captured_publish) == 1
     assert _decode_response(captured_publish[0][1]).event_id == ""
 
 
 @pytest.mark.parametrize(
     "text",
-    ["Привет!", "Сәлем!", "Excellent! Let's play.", "Good morning! How are you?"],
+    ["Привет!", "Сәлем!", "Мен роботпын.", "123"],
 )
-async def test_wakeup_override_leaves_other_lines_alone(
-    fake_openai, captured_publish, wakeup_settings, text,
+async def test_cyrillic_and_numbers_do_not_need_translation(
+    fake_openai, captured_publish, translation_settings, text,
 ) -> None:
     await cloud_tts_request.handle_payload(
         TEST_DEVICE_ID, _frame_request(markup=f"<usel>{text}</usel>", event_id="e"),
     )
     assert fake_openai.audio.speech.calls[0]["input"] == text
+    assert fake_openai.chat.completions.calls == []
     assert len(captured_publish) == 1
 
 
@@ -284,8 +287,8 @@ async def test_wakeup_override_leaves_other_lines_alone(
     '<mark name="cmd:CereprocWarmup"/>',
     '<mark name="cmd:CereprocWarmup"/><usel>Excellent!</usel>',
 ])
-async def test_wakeup_empty_or_failed_synthesis_still_echoes_commands_once(
-    fake_openai, captured_publish, wakeup_settings, monkeypatch, markup,
+async def test_empty_or_failed_synthesis_still_echoes_commands_once(
+    fake_openai, translated_lines, captured_publish, translation_settings, monkeypatch, markup,
 ) -> None:
     def fail_synthesis(**kwargs):
         raise RuntimeError("TTS unavailable")
@@ -304,9 +307,9 @@ async def test_wakeup_empty_or_failed_synthesis_still_echoes_commands_once(
 
 @pytest.mark.parametrize("firmware_uses_local_line", [True, False])
 async def test_wakeup_to_audio_even_when_chat_prompt_arrives_first(
-    fake_openai, captured_publish, wakeup_settings, caplog, firmware_uses_local_line,
+    fake_openai, translated_lines, captured_publish, translation_settings, caplog, firmware_uses_local_line,
 ) -> None:
-    """Replay the captured opener/Excellent race and the native Cyrillic path.
+    """Translate the live line, regardless of a later remote-chat prompt's ID.
 
     Robot requests are simulated; this proves server correlation, not playback.
     """
@@ -336,15 +339,19 @@ async def test_wakeup_to_audio_even_when_chat_prompt_arrives_first(
     })
     entrance = json.loads(captured_publish[-1][1])
     assert entrance["event_id"] == wake_id
-    assert entrance["output"]["text"] == "Сәлем! Қалайсың?"
-    assert entrance["response_actions"] == [{"output_type": "GLOBAL_COMMAND"}]
+    assert entrance["output"]["text"] == "I'm sorry. Can you repeat that?"
+    assert entrance["response_actions"] == [{"output_type": "FALLBACK"}]
     await brain.handle_router_request(TEST_DEVICE_ID, {
         "backend": "router", "module_id": "OPENMOXIE_CHAT", "content_id": "default",
         "command": "prompt", "event_id": prompt_id,
     })
-    # A remote-chat reply is not a licence to push audio for prompt_id.
-    assert len(captured_publish) == 2
-    assert all(t.endswith("/commands/remote_chat") for t, _ in captured_publish)
+    # Firmware raises no CloudTTSRequest for remote output (Sep 28): the prompt
+    # reply is voiced as REMOTECHAT on prompt_id, never on the wake request.
+    assert len(captured_publish) == 3
+    assert all(t.endswith("/commands/remote_chat") for t, _ in captured_publish[:2])
+    opener_audio = _decode_response(captured_publish[2][1])
+    assert opener_audio.request_source == REMOTECHAT_TTS_REQUEST
+    assert (opener_audio.event_id, opener_audio.chunk_num) == (prompt_id, 0)
     captured_publish.clear()
     markup = (
         '<usel variant="2" genre="none">Excellent!</usel> " "'
@@ -359,10 +366,12 @@ async def test_wakeup_to_audio_even_when_chat_prompt_arrives_first(
     assert len(captured_publish) == 1
     resp = _decode_response(captured_publish[0][1])
     assert resp.event_id == wake_id
-    assert fake_openai.audio.speech.calls[0]["input"] == "Сәлем! Қалайсың?"
+    assert resp.request_source == ROBOT_TTS_REQUEST
+    expected_source = 'Excellent! " "' if firmware_uses_local_line else entrance["output"]["text"]
+    assert fake_openai.audio.speech.calls[-1]["input"] == translated_lines[expected_source]
 
 
-@pytest.mark.parametrize("text", ["", "  ", "Hello!", "<usel>Сәлем!</usel>"])
-def test_invalid_wakeup_text_fails_at_startup(text) -> None:
-    with pytest.raises(ValidationError, match="WAKEUP_TTS_TEXT"):
-        Settings(_env_file=None, WAKEUP_TTS_TEXT=text)
+@pytest.mark.parametrize("timeout", [0, -1])
+def test_translation_timeout_must_be_positive(timeout) -> None:
+    with pytest.raises(ValidationError, match="OPENAI_TRANSLATION_TIMEOUT_S"):
+        Settings(_env_file=None, OPENAI_TRANSLATION_TIMEOUT_S=timeout)

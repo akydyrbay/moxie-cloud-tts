@@ -10,14 +10,16 @@ a `CloudTTSRequest`, and enabling `cloud_tts` alone stalls it in MarkingUp.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from collections import OrderedDict
 import copy
+from html import escape
 import json
 import logging
 import random
 import re
+import time
 from typing import Any
-
-from fastapi.concurrency import run_in_threadpool
 
 from src.config import (
     DEFAULT_REMOTE_MODULES_INFO,
@@ -27,35 +29,45 @@ from src.config import (
     REMOTE_CHAT_OPENERS,
     settings,
 )
+from src.protos.embodied.unity.CloudTTS_pb2 import REMOTECHAT_TTS_REQUEST
+from src.services import speak_service, translation
 from src.services.device_state import device_state
 from src.services.devices import device_registry
 from src.services.language import fallback_language, matches_output_language
 from src.services.llm import openai_chat
+from src.services.llm.reply_text import short_reply
 from src.services.mqtt_service import mqtt_service
+from src.services.provider_work import provider_pool
+from src.services.stt import transcripts
 from src.services.stt_request import (
     note_conversation_active,
+    note_onboard_module,
     reset_conversation_state,
 )
 from src.services.telehealth import handle_activity_log_telehealth
 
 logger = logging.getLogger(__name__)
 
-_ACTION_TAG_RE = re.compile(r"<[^>]*>")
+_ACTION_TAG_RE = re.compile(r"<(?:exit|sleep|launch:[^<>]+)>")
 _MAX_HISTORY = 20
 
-# Local brain-entrance modules. FALLBACK loses to the local scripted line
-# ("Excellent!"), which Cloud TTS then voices in English. An empty
-# GLOBAL_COMMAND beats that line but leaves WAKEUP looping "Moxie, let's go!"
-# because the module never hears a completed confirmation. A `launch` action
-# on the *primary* response skips Cloud TTS (the robot jumps modules before
-# the renderer runs). Replace Excellent with the configured ru/kk greeting and
-# do not launch — DEFAULT_SCHEDULE already starts OPENMOXIE_CHAT after WAKEUP.
+# Let native entrances finish with their own response/actions, as in OpenMoxie.
+# GLOBAL_COMMAND can discard the local transition along with "Excellent!":
+# Sep 25 scheduled chat but never entered it; Sep 7 FALLBACK reached prompt.
+# Translate English speech only in its live CloudTTSRequest.
 _ENTRANCE_MODULES = frozenset({"WAKEUP", "ENROLLCONVO"})
 
 
 def fallback_line(language: str) -> str:
     """Canned line in the child's language (never English)."""
     return FALLBACK_LINES.get(language) or FALLBACK_LINES[settings.DEFAULT_TTS_LANGUAGE]
+
+
+def generation_error_line(language: str) -> str:
+    return {
+        "kk": "Жауап дайындау қиын болып тұр. Тағы бір рет сұрап көрші.",
+        "ru": "Не получается подготовить ответ. Попробуй спросить ещё раз.",
+    }[language]
 
 
 def _build_response(
@@ -92,7 +104,9 @@ def _build_response(
             "markup": text if markup is None else markup,
         },
         "response_actions": response_actions,
-        "fallback": output_type == "FALLBACK",
+        # OpenMoxie's Volley leaves this legacy flag false even for FALLBACK.
+        # Arbitration priority is carried in both response action blocks.
+        "fallback": False,
         "response_action": primary,
     }
     if "speech" in request:
@@ -127,11 +141,10 @@ def _strip_action_tags(text: str) -> tuple[str, list[dict]]:
 def _speech_markup(text: str) -> str:
     """Wrap spoken text the way local lines arrive on CloudTTSRequest.
 
-    Plain markup is accepted in remote-chat history (notify) but the speech
-    renderer does not raise CloudTTSRequest for it. Local content uses
-    `<usel variant ...>`; matching that shape is what gets voiced.
+    Neither plain nor `<usel>` remote markup raises a CloudTTSRequest on this
+    firmware (Sep 28 captures); its audio is pushed as REMOTECHAT instead.
     """
-    return f'<usel variant="2" genre="none">{text}</usel>'
+    return f'<usel variant="2" genre="none">{escape(text, quote=False)}</usel>'
 
 
 def _is_modules_query(payload: dict) -> bool:
@@ -149,28 +162,95 @@ class _ChatSession:
         self.module_key = module_key
         self.language = settings.DEFAULT_TTS_LANGUAGE
         self.active = False
-        self.history: list[dict[str, str]] = []
+        self._prior_history: list[dict[str, str]] = []
+        self.records: OrderedDict[str, dict] = OrderedDict()
+        self._seen_notify: OrderedDict[tuple, None] = OrderedDict()
+        self.empty_reprompts = 0
+        self.turn: object | None = None
+
+    @property
+    def history(self) -> list[dict[str, str]]:
+        return self.context()
+
+    def context(self, *, exclude: str = "") -> list[dict[str, str]]:
+        history = copy.deepcopy(self._prior_history)
+        for event_id, record in self.records.items():
+            if event_id == exclude:
+                continue
+            if record["input"]:
+                history.append({"role": "user", "content": record["input"]})
+            # Text notify alone cannot establish that audio was even sent.
+            if record["status"] in {"published", "text_only"} and record["output"]:
+                history.append({"role": "assistant", "content": record["output"]})
+        return history[-_MAX_HISTORY:]
+
+    def begin(self, event_id: str, command: str, wire: str, original: str) -> bool:
+        previous = self.records.get(event_id)
+        if previous and (previous["command"], previous["wire"]) == (command, wire):
+            return False
+        self.records[event_id] = {
+            "command": command, "wire": wire, "input": original,
+            "output": "", "status": "pending", "notified": False,
+        }
+        self.records.move_to_end(event_id)
+        while len(self.records) > _MAX_HISTORY:
+            self.records.popitem(last=False)
+        return True
+
+    def finish(self, event_id: str, text: str, status: str, *, owner: dict) -> None:
+        record = self.records.get(event_id)
+        if record is owner:
+            record.update(output=text, status=status)
+
+    def reprompt(self) -> str:
+        self.empty_reprompts += 1
+        if self.empty_reprompts > 2:
+            return ""  # Complete the live turn silently; no endless monologue.
+        for message in reversed(self.context()):
+            if message["role"] == "assistant":
+                questions = re.findall(r"[^.!?]+\?", message["content"])
+                if questions:
+                    return short_reply(questions[-1].strip())
+        return fallback_line(self.language)
 
     def add(self, role: str, message: str) -> None:
         if not message:
             return
-        if self.history and self.history[-1]["role"] == role:
-            self.history[-1]["content"] += " " + message
-        else:
-            self.history.append({"role": role, "content": message})
-            if len(self.history) > _MAX_HISTORY:
-                self.history = self.history[-_MAX_HISTORY:]
+        self._prior_history.append({"role": role, "content": message[:4000]})
+        self._prior_history = self._prior_history[-_MAX_HISTORY:]
 
     def ingest_notify(self, request: dict) -> None:
-        for line in request.get("extra_lines", []):
+        # `source_event_id` should name the volley whose output was notified;
+        # compare it with the REMOTECHAT audio event_id on the next robot run.
+        logger.info(
+            "remote-chat notify module=%s source_event_id=%r notify_source=%r "
+            "response_chunks=%.200r speech=%r",
+            self.module_key, request.get("source_event_id", ""),
+            request.get("notify_source"), request.get("response_chunks"),
+            (request.get("speech") or "")[:80],
+        )
+        source = request.get("source_event_id") or ""
+        if source in self.records:
+            self.records[source]["notified"] = True
+            return
+        if self.active:
+            logger.info("remote-chat ignored uncorrelated history source_event_id=%r", source)
+            return
+        for index, line in enumerate(request.get("extra_lines", [])):
+            key = (source or request.get("event_id", ""), index, line.get("context_type"), line.get("text", ""))
+            if key in self._seen_notify:
+                continue
+            self._seen_notify[key] = None
+            while len(self._seen_notify) > 64:
+                self._seen_notify.popitem(last=False)
             if line.get("context_type") == "input":
                 self.add("user", line.get("text", ""))
-        speech = request.get("speech") or ""
-        if matches_output_language(speech, self.language):
-            self.add("assistant", speech)
 
     def reset(self) -> None:
-        self.history = []
+        self._prior_history = []
+        self.records.clear()
+        self._seen_notify.clear()
+        self.empty_reprompts = 0
 
 
 class RemoteChatBrain:
@@ -181,6 +261,7 @@ class RemoteChatBrain:
         # Last router event_id per device, so an HTTP sleep can attach a
         # `sleep` action to a volley the robot still has in flight.
         self._last_event_id: dict[str, str] = {}
+        self._unsupported_queries: OrderedDict[tuple[str, str], float] = OrderedDict()
 
     def get_modules_info(self) -> dict:
         return copy.deepcopy(DEFAULT_REMOTE_MODULES_INFO)
@@ -205,9 +286,7 @@ class RemoteChatBrain:
             return
         # New session (fresh connect or reboot): the robot is back at the WAKEUP
         # gate, so re-arm wake-trigger injection until it re-enters chat.
-        reset_conversation_state(device_id)
-        self._sessions.pop(device_id, None)
-        self._last_event_id.pop(device_id, None)
+        self.reset_device(device_id)
         config = await device_state.get_config()
         props = config.get("settings", {}).get("props", {})
         logger.info(
@@ -290,18 +369,37 @@ class RemoteChatBrain:
                 # not replace the active session selected by a router turn.
                 return existing
         session = _ChatSession(module_key)
+        if existing is not None and not history_only:
+            self._clear_session(device_id)
+            note_onboard_module(device_id, wake_gate=False)
         self._sessions[device_id] = session
         return session
 
     def _clear_session(self, device_id: str) -> None:
         self._sessions.pop(device_id, None)
+        transcripts.clear(device_id)
+
+    def reset_device(self, device_id: str) -> None:
+        """Invalidate microphone work and remote output at a session boundary."""
+        self._clear_session(device_id)
+        self._last_event_id.pop(device_id, None)
+        reset_conversation_state(device_id)
 
     def output_language(self, device_id: str) -> str | None:
         """Language of an entered chat module; notify alone is not entry."""
         session = self._sessions.get(device_id)
         return session.language if session and session.active else None
 
-    def _send_remote_chat(self, device_id: str, response: dict) -> None:
+    def _send_remote_chat(
+        self, device_id: str, response: dict, *,
+        is_current: Callable[[], bool] | None = None,
+    ) -> bool:
+        if is_current is not None and not is_current():
+            logger.info(
+                "remote-chat discarded stale response device=%s event_id=%s",
+                device_id, response.get("event_id"),
+            )
+            return False
         logger.info(
             "Tx remote_chat to %s event_id=%s output_type=%s text=%r",
             device_id,
@@ -310,24 +408,85 @@ class RemoteChatBrain:
             (response.get("output") or {}).get("text", "")[:80],
         )
         mqtt_service.publish_command_json(device_id, "remote_chat", response)
+        return True
+
+    async def _remote_audio_enabled(self) -> bool:
+        """Cloud TTS owns remote-module speech only outside TELEHEALTH."""
+        return (
+            await device_state.get_cloud_tts()
+            and not await device_state.get_puppet_mode()
+        )
+
+    async def _voice_remote_output(
+        self, device_id: str, request: dict, text: str | None, language: str,
+        markup: str, *, is_current: Callable[[], bool],
+        deadline: float | None = None,
+    ) -> str:
+        """Answer an accepted remote-module turn with REMOTECHAT audio.
+
+        The robot raises no native CloudTTSRequest for remote text. Use its
+        live router event_id and REMOTECHAT source; later Sep 28 operation
+        confirmed audible replies to English input. Text notify is not proof
+        of completed playback. `text=None` publishes correlated silence.
+        """
+        if not is_current():
+            return "discarded"
+        event_id = request.get("event_id") or ""
+        if not event_id:
+            logger.warning(
+                "remote-chat audio skipped device=%s: router turn has no event_id",
+                device_id,
+            )
+            return "failed"
+        logger.info(
+            "remote-chat audio device=%s event_id=%s chunk=0 source=REMOTECHAT "
+            "language=%s synthesis_text=%r",
+            device_id, event_id, language, text,
+        )
+        if not text or not any(char.isalnum() for char in text):
+            speak_service.publish_silence(
+                device_id, event_id, 0, REMOTECHAT_TTS_REQUEST, markup=markup,
+            )
+            return "published_silence"
+        try:
+            result = await speak_service.speak(
+                text,
+                language,
+                event_id=event_id,
+                chunk_num=0,
+                request_source=REMOTECHAT_TTS_REQUEST,
+                device_id=device_id,
+                markup=markup,
+                is_current=is_current,
+                deadline=deadline,
+            )
+            return result["status"]
+        except Exception as exc:
+            # speak() has already published correlated silence.
+            logger.info(
+                "remote-chat audio outcome device=%s event_id=%s status=failed error=%s",
+                device_id, event_id, type(exc).__name__,
+            )
+            return "failed"
 
     def _opener_for(self, content_id: str) -> str:
         openers = REMOTE_CHAT_OPENERS.get(content_id) or REMOTE_CHAT_OPENERS["default"]
         return random.choice(openers.split("|"))
 
-    def _complete_entrance(self, device_id: str, request: dict) -> None:
-        """Replace local "Excellent!" so WAKEUP can finish and the opener can run.
+    def _defer_entrance(self, device_id: str, request: dict) -> None:
+        """Preserve the native transition; Cloud TTS translates its chosen line.
 
-        Empty GLOBAL_COMMAND won the slot but did not complete WAKEUP, so the
-        robot re-asked for "Moxie, let's go!" and never sent `command=prompt`.
+        Response actions execute only if their response wins arbitration.
+        A high-priority speak-only greeting replaces the native entrance action
+        as well as its text. Use the ordinary fallback if no local reply wins.
         """
         self._send_remote_chat(
             device_id,
             _build_response(
                 request,
-                text=settings.WAKEUP_TTS_TEXT,
-                markup=_speech_markup(settings.WAKEUP_TTS_TEXT),
-                output_type="GLOBAL_COMMAND",
+                text="I'm sorry. Can you repeat that?",
+                markup=_speech_markup("I'm sorry. Can you repeat that?"),
+                output_type="FALLBACK",
             ),
         )
 
@@ -339,6 +498,8 @@ class RemoteChatBrain:
         `telehealth.sleep`) is sent alongside this from the HTTP handler.
         """
         event_id = self._last_event_id.get(device_id, "")
+        self._clear_session(device_id)
+        note_onboard_module(device_id, wake_gate=False)
         payload = {
             "command": "remote_chat",
             "result": 0,
@@ -362,23 +523,24 @@ class RemoteChatBrain:
         mqtt_service.publish_command_json(device_id, "remote_chat", payload)
 
     async def _remote_module_response(
-        self,
-        device_id: str,
-        request: dict,
-        module_id: str,
-        content_id: str,
+        self, device_id: str, request: dict, module_id: str, content_id: str,
     ) -> None:
         cmd = request.get("command")
         module_key = f"{module_id}/{content_id}"
         session = self._session_for(device_id, module_key, history_only=cmd == "notify")
-
         if cmd == "notify":
             session.ingest_notify(request)
             return
         if cmd not in {"start", "prompt", "continue", "reprompt"}:
-            logger.debug("ignoring remote module command=%r device=%s", cmd, device_id)
             return
 
+        event_id = request.get("event_id") or ""
+        wire_speech = (request.get("speech") or "").strip()
+        if not session.active:
+            logger.info(
+                "remote-chat entered device=%s module=%s command=%s event_id=%s",
+                device_id, module_key, cmd, event_id,
+            )
         if not session.active or cmd in {"start", "prompt"}:
             session.language = settings.DEFAULT_TTS_LANGUAGE
             session.active = True
@@ -386,55 +548,109 @@ class RemoteChatBrain:
                 "remote-chat language device=%s module=%s command=%s language=%s",
                 device_id, module_key, cmd, session.language,
             )
-        language = session.language
+        if cmd in {"start", "prompt"}:
+            # Suppress an exact redelivery without replaying audio or resetting
+            # history. A genuinely new opener starts a fresh dialogue.
+            prior = session.records.get(event_id)
+            if prior and (prior["command"], prior["wire"]) == (cmd, wire_speech):
+                return
+            session.reset()
+            reset_conversation_state(device_id)
+        note_conversation_active(device_id)
 
-        if cmd in {"start", "prompt"} or (cmd == "reprompt" and not session.history):
-            if cmd in {"start", "prompt"}:
-                session.reset()
-            text = self._opener_for(content_id or "default")
-            if not matches_output_language(text, language):
-                text = fallback_line(language)
-            self._send_remote_chat(
-                device_id,
-                _build_response(
-                    request,
-                    text=text,
-                    markup=_speech_markup(text),
-                ),
-            )
+        original = transcripts.find(device_id, event_id) if wire_speech else None
+        speech = original.original if original else wire_speech
+        if not session.begin(event_id, cmd, wire_speech, speech):
+            logger.info("remote-chat ignored duplicate turn device=%s event_id=%s", device_id, event_id)
             return
-
-        speech = request.get("speech") or ""
-        # Tentative history for this turn; official history arrives via notify.
-        history_for_inference = copy.deepcopy(session.history)
-
-        try:
-            chat = await run_in_threadpool(
-                openai_chat.respond,
-                speech or fallback_line(language),
-                language,
-                history_for_inference,
-            )
-            text, actions = _strip_action_tags(chat.text)
-            if not matches_output_language(text, language):
-                logger.warning(
-                    "remote-chat rejected output language device=%s language=%s text=%r",
-                    device_id, language, text,
-                )
-                text = fallback_line(language)
-                actions = []
-        except Exception:
-            logger.exception("remote-chat LLM failed for %s", device_id)
-            text = fallback_line(language)
-            actions = []
-
-        response = _build_response(
-            request,
-            text=text,
-            markup=_speech_markup(text),
-            actions=actions or None,
+        record = session.records[event_id]
+        logger.info(
+            "remote-chat input device=%s event_id=%s original_recovered=%s "
+            "original_language=%s output_language=%s",
+            device_id, event_id, original is not None,
+            original.language or "unknown" if original else "unknown", session.language,
         )
-        self._send_remote_chat(device_id, response)
+        turn = object()
+        session.turn = turn
+        revision = device_state.speech_revision
+
+        def is_current() -> bool:
+            return (self._sessions.get(device_id) is session
+                    and session.turn is turn
+                    and device_state.speech_revision == revision)
+
+        language = session.language
+        started = time.monotonic()
+        deadline = started + settings.REMOTE_REPLY_TIMEOUT_S
+        voiced = await self._remote_audio_enabled()
+        actions = []
+        failed_translation = False
+        if cmd in {"start", "prompt"}:
+            text = self._opener_for(content_id or "default")
+            if voiced and settings.CLOUD_TTS_TRANSLATION_ENABLED and translation.needs_translation(text):
+                try:
+                    text = await translation.translate(text, language, deadline=deadline)
+                except Exception as exc:
+                    logger.warning(
+                        "remote-chat opener translation failed device=%s event_id=%s error=%s",
+                        device_id, event_id, type(exc).__name__,
+                    )
+                    text = generation_error_line(language)
+                    failed_translation = True
+        elif not speech:
+            # Silence is an event, not the robot's apology spoken by the child.
+            text = session.reprompt()
+        else:
+            session.empty_reprompts = 0
+            try:
+                chat = await provider_pool.run(
+                    openai_chat.respond, speech, language, session.context(exclude=event_id),
+                    timeout=min(settings.OPENAI_CHAT_TIMEOUT_S, deadline - time.monotonic()),
+                )
+                text, actions = _strip_action_tags(chat.text)
+                if not any(c.isalnum() for c in text):
+                    raise ValueError("Chat response contains no spoken content")
+                if not any(c.isalpha() for c in text):
+                    text = ("Жауабы: " if language == "kk" else "Ответ: ") + text
+                if not matches_output_language(text, language):
+                    logger.warning(
+                        "remote-chat repairing output language device=%s event_id=%s language=%s",
+                        device_id, event_id, language,
+                    )
+                    # One faithful rewrite, bounded by the same reply budget.
+                    text = await translation.translate(text, language, deadline=deadline)
+                    actions = []
+                    if not matches_output_language(text, language):
+                        raise ValueError("Wrong-language reply after correction")
+                bounded = short_reply(text)
+                if bounded != text:
+                    actions = []  # Do not execute actions attached to omitted speech.
+                text = bounded
+            except Exception as exc:
+                logger.warning(
+                    "remote-chat generation failed device=%s event_id=%s error=%s",
+                    device_id, event_id, type(exc).__name__,
+                )
+                text, actions = generation_error_line(language), []
+
+        markup = _speech_markup(text)
+        response = _build_response(request, text=text, markup=markup, actions=actions or None)
+        if not self._send_remote_chat(device_id, response, is_current=is_current):
+            session.finish(event_id, text, "discarded", owner=record)
+            return
+        session.finish(event_id, text, "pending", owner=record)
+        if voiced:
+            status = await self._voice_remote_output(
+                device_id, request, None if failed_translation else text, language, markup,
+                is_current=is_current, deadline=deadline,
+            )
+        else:
+            status = "text_only"
+        session.finish(event_id, text, status, owner=record)
+        logger.info(
+            "remote-chat completed device=%s event_id=%s audio_status=%s elapsed_ms=%d",
+            device_id, event_id, status, int((time.monotonic() - started) * 1000),
+        )
 
     async def handle_router_request(self, device_id: str, request: dict) -> None:
         """Handle backend=router RemoteChatRequest (conversation turns)."""
@@ -452,31 +668,38 @@ class RemoteChatBrain:
             # Notify is history-only and can fire while WAKEUP is still looping.
             # Marking conversation active on that notify stopped wake-gate STT
             # inject, so the robot re-prompted English and never reached prompt.
-            if cmd in {"prompt", "continue", "reprompt", "start"}:
-                note_conversation_active(device_id)
             await self._remote_module_response(
                 device_id, request, module_id, content_id,
             )
             return
 
-        # Onboard / unknown module: drop any remote session. Notify is a
-        # no-reply path. Entrance modules must not FALLBACK — that loses to the
-        # local script and Cloud TTS voices English instead of the opener.
+        # Onboard / unknown module: let its local response/actions win. Language
+        # replacement belongs in Cloud TTS, where it cannot discard transitions.
         if cmd == "notify":
             # A delayed WAKEUP notify can follow the actual chat prompt. It
             # does not change module ownership or clear the output language.
             return
+        if self.output_language(device_id) is not None:
+            logger.info(
+                "remote-chat left device=%s next_module=%s command=%s event_id=%s",
+                device_id, module_key, cmd, event_id,
+            )
         self._clear_session(device_id)
+        note_onboard_module(device_id, wake_gate=module_id in _ENTRANCE_MODULES)
         if module_id in _ENTRANCE_MODULES:
             logger.info(
-                "entrance %s cmd=%s device=%s — replace Excellent with "
-                "configured greeting GLOBAL_COMMAND (no launch)",
-                module_key,
-                cmd,
-                device_id,
+                "entrance deferred to local response device=%s module=%s "
+                "command=%s event_id=%s output_type=FALLBACK",
+                device_id, module_key, cmd, event_id,
             )
-            self._complete_entrance(device_id, request)
+            self._defer_entrance(device_id, request)
             return
+        if not module_id:
+            logger.warning(
+                "remote-chat missing module device=%s command=%s event_id=%s "
+                "content_id=%r; wake trigger disabled",
+                device_id, cmd, event_id, content_id,
+            )
         logger.debug(
             "FALLBACK for non-remote module %s cmd=%s device=%s",
             module_key,
@@ -551,14 +774,9 @@ class RemoteChatBrain:
             return
 
         subtopic = request.get("subtopic")
-        # Always print the envelope. Previously anything that was not
-        # `telehealth` or `query` was dropped, which hid speech/output FSM
-        # reports if the firmware used another subtopic.
         logger.info(
-            "activity-log %s subtopic=%s: %s",
-            device_id,
-            subtopic,
-            request.get("message") or request,
+            "activity-log device=%s subtopic=%s query=%r request_id=%r",
+            device_id, subtopic, request.get("query"), request.get("request_id"),
         )
         if subtopic == "telehealth":
             # Robot reports READY / IN_SESSION / EXITING here.
@@ -572,16 +790,20 @@ class RemoteChatBrain:
         elif query == "mentor_behaviors":
             self.handle_mentor_behaviors_query(device_id, request)
         else:
-            # Notably `license`: OpenMoxie answers this with Google speech
-            # credentials, which is how the robot obtains cloud recognition.
-            # We don't provide one, so log it rather than dropping it silently —
-            # this is the evidence needed when wiring STT later.
-            logger.info(
-                "unanswered query %r from %s (request_id=%s)",
-                query,
-                device_id,
-                request.get("request_id"),
-            )
+            # Reference OpenMoxie omits license replies without Google keys;
+            # it provides no remote_lines schema. Do not invent either reply.
+            key = (device_id, str(query))
+            now = time.monotonic()
+            if now - self._unsupported_queries.get(key, float("-inf")) >= 60:
+                self._unsupported_queries[key] = now
+                self._unsupported_queries.move_to_end(key)
+                while len(self._unsupported_queries) > 128:
+                    self._unsupported_queries.popitem(last=False)
+                logger.warning(
+                    "protocol compatibility gap query=%r device=%s request_id=%r; "
+                    "no verified response contract configured",
+                    query, device_id, request.get("request_id"),
+                )
 
 
 remote_chat_brain = RemoteChatBrain()

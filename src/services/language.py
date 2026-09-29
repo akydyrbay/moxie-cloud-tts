@@ -10,6 +10,8 @@ evidence for either language, so it resolves to the configured default. This
 only ever picks between supported languages — it never adds a translation stage.
 """
 
+import re
+
 from src.config import settings
 
 # Kazakh-specific Cyrillic letters absent from the Russian alphabet.
@@ -31,17 +33,39 @@ def detect_language(text: str) -> str:
 
 
 def matches_output_language(text: str, language: str) -> bool:
-    """Conservative script check for autonomous replies, not a translator.
+    """Conservatively check generated assistant replies against their target.
 
-    For this one-line milestone prefer a known localized fallback over English,
-    mixed Latin/Cyrillic output, or an ambiguous Kazakh line without distinctive
-    letters. Explicit Russian speech outside autonomous chat remains supported.
+    This validates remote-chat output; English source speech is translated in
+    `translation.py` at the separate incoming-audio boundary.
     """
-    return (
-        has_cyrillic(text)
-        and not any("a" <= ch.lower() <= "z" for ch in text)
-        and detect_language(text) == language
-    )
+    if language not in {"kk", "ru"} or not any(c.isalnum() for c in text):
+        return False
+    if not any(c.isalpha() for c in text):
+        return True  # e.g. an arithmetic answer
+    if not has_cyrillic(text):
+        return False
+    latin = re.findall(r"[A-Za-z]+", text)
+    cyrillic = re.findall(r"[\u0400-\u04ff]+", text)
+    # Permit Roman numerals, acronyms and occasional proper names in otherwise
+    # Cyrillic speech; reject ordinary English phrases, including mixed ones.
+    english = {"hello", "hi", "sorry", "the", "you", "your", "is", "are", "and", "i", "my", "name", "thanks"}
+    for token in latin:
+        if re.fullmatch(r"[IVXLCDM]+", token) and (token != "I" or len(cyrillic) >= 2):
+            continue
+        if token.lower() in english:
+            return False
+        if len(cyrillic) < 2 or len(latin) > 2 or not token[0].isupper():
+            return False
+    if language == "ru":
+        return not any(c in _KAZAKH_ONLY for c in text)
+    if any(c in _KAZAKH_ONLY for c in text):
+        return True
+    # Shared Cyrillic does not identify Russian. Reject clear Russian signals,
+    # but let the requested target govern ambiguous lines such as "Алма.".
+    russian = {"привет", "здравствуй", "здравствуйте", "спасибо", "пожалуйста",
+               "меня", "тебя", "зовут", "это", "очень", "почему", "который",
+               "люблю", "хорошо", "мой", "мне", "тебе", "да", "нет"}
+    return not russian.intersection(word.lower() for word in cyrillic)
 
 
 def fallback_language(text: str) -> str:

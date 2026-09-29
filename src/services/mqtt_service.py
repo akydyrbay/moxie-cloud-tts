@@ -329,8 +329,27 @@ class MqttService:
         if self._last_robot_status.get(key) == raw:
             return
         self._last_robot_status[key] = raw
-        preview = raw if len(raw) <= 800 else raw[:800] + "…"
-        logger.info("robot-status %s: %s", device_id, preview)
+        try:
+            status = json.loads(raw)
+        except (ValueError, TypeError):
+            logger.warning("robot-status %s: invalid JSON", device_id)
+            return
+        allowed = {"mode", "state", "slot", "battery_level", "robot_firmware_version", "software_version",
+                   "local_stt", "cloud_translate", "app_language_support", "cloud_tts",
+                   "cloud_tts_use_mp3", "cloud_tts_engine", "rchat_api", "remote_transition"}
+        safe = {}
+
+        def collect(value, depth=0):
+            if not isinstance(value, dict) or depth > 6:
+                return
+            for name, item in value.items():
+                if name in allowed and isinstance(item, (str, int, float, bool)):
+                    safe[name] = item[:128] if isinstance(item, str) else item
+                elif isinstance(item, dict):
+                    collect(item, depth + 1)
+
+        collect(status)
+        logger.info("robot-status %s: %s", device_id, json.dumps(safe, sort_keys=True))
 
     def _on_broker_log(self, msg: MQTTMessage) -> None:
         """Track robot connects/disconnects from the mosquitto log topic.
@@ -349,6 +368,7 @@ class MqttService:
             device_id = connected.group(2)
             logger.info("robot %s connected to broker", device_id)
             device_registry.forget_bootstrap(device_id)
+            self._reset_robot_conversation(device_id)
             device_registry.seen(device_id)
             return
 
@@ -357,6 +377,16 @@ class MqttService:
             device_id = disconnected.group(1)
             logger.info("robot %s disconnected from broker", device_id)
             device_registry.forget_bootstrap(device_id)
+            self._reset_robot_conversation(device_id)
+
+    def _reset_robot_conversation(self, device_id: str) -> None:
+        """Invalidate pending recognition and remote output at a broker boundary."""
+        # This callback runs on paho's thread; conversation state belongs to
+        # asyncio. Import lazily because the brain publishes through this service.
+        from src.services.remote_chat import remote_chat_brain
+
+        if self._loop is not None and not self._loop.is_closed():
+            self._loop.call_soon_threadsafe(remote_chat_brain.reset_device, device_id)
 
     @staticmethod
     def _parse_device_id(topic: str) -> str | None:
@@ -447,8 +477,8 @@ class MqttService:
         """Route a framed `zmqSTTRequest` (streamed mic audio) to the STT handler.
 
         These frames are high-volume (many per utterance), so unlike the
-        CloudTTSRequest path nothing is logged per frame; the handler logs only
-        when it answers a completed listen session.
+        CloudTTSRequest path dispatch stays quiet. The handler logs frame byte
+        counts at DEBUG and utterance completion/transcription at INFO.
         """
         handler = self._stt_request_handler
         prefix = self._stt_request_prefix

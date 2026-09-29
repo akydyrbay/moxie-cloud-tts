@@ -6,10 +6,12 @@ working session instead of failing authentication, and it voices the robot with
 OpenAI text-to-speech — including Russian and Kazakh, which the original service
 never supported.
 
-Current milestone: **wake Moxie outside puppet mode and hear “Сәлем! Қалайсың?”
-with mouth movement.** The server implementation is ready for on-robot
-verification; a published response alone does not prove playback. Real speech
-recognition is not wired up yet (see [Roadmap](#roadmap)).
+Current milestone: **verify the kk/ru input compatibility bridge on the robot.**
+Kazakh wake-up and replies to English input have been heard. The server now
+translates recognized kk/ru to English for Moxie, recovers the original text for
+GPT, and bounds reply length and provider waits. Reply language remains fixed
+kk or explicitly configured ru. See [localization repair](docs/LOCALIZATION_FIXES.md)
+for the implementation, passing regressions and remaining hardware checks.
 
 ## Requirements
 
@@ -30,7 +32,7 @@ echo 'OPENAI_API_KEY=sk-...' > .env
 
 ## Run: Kazakh after wake
 
-Keep the existing `OPENAI_API_KEY` in `.env`. These are the greeting defaults;
+Keep the existing `OPENAI_API_KEY` in `.env`. These are the translation defaults;
 set them explicitly there if you have overridden them previously:
 
 ```dotenv
@@ -40,9 +42,8 @@ CLOUD_TTS_AUDIO_RAW_PCM=true
 CLOUD_TTS_EMIT_MARKS=true
 CLOUD_TTS_REQUEST_SOURCE=robot
 DEFAULT_TTS_LANGUAGE=kk
-REMOTE_CHAT_LANGUAGE_GUARD_ENABLED=true
-WAKEUP_TTS_OVERRIDE_ENABLED=true
-WAKEUP_TTS_TEXT="Сәлем! Қалайсың?"
+CLOUD_TTS_TRANSLATION_ENABLED=true
+OPENAI_TRANSLATION_TIMEOUT_S=4
 ```
 
 ```bash
@@ -108,68 +109,125 @@ Wake with the button/touch, or, once the service has discovered the robot:
 curl -X POST localhost:8000/tts/wakeup
 ```
 
-This uses **Path A1 + A2** from the task's `prompt.md`:
+All autonomous English speech now follows the translation path:
 
-- The entrance `GLOBAL_COMMAND` and `OPENMOXIE_CHAT` opener contain the configured
-  greeting inside `<usel variant="2" genre="none">`.
-- If firmware requests its local `Good morning.` / `Good morning!`, `Excellent!`,
-  or the captured “When you're ready to start the day…” instruction, the server
-  synthesizes the greeting **for that existing request**, before the STT gate.
-  The captured “That's better.” and “I'm back on solid ground.” prefixes on that
-  instruction are recognized too.
+- WAKEUP/ENROLLCONVO receive a low-priority `FALLBACK`, letting the robot accept
+  its native response and transition into scheduled chat. The previous
+  `GLOBAL_COMMAND` greeting could replace that transition along with its text.
+- Every English/Latin line in `CloudTTSRequest` goes to OpenAI for translation
+  into `DEFAULT_TTS_LANGUAGE` (`kk`), then to TTS. This includes wake-up lines,
+  activity questions, end-of-session content, and clarification requests.
+- The fixed Kazakh opener is gone. Remote chat retains ordinary English opener
+  text, which is translated only if the robot requests its audio. Native
+  `Good morning.` becomes a translation such as `Қайырлы таң.`.
 - The response echoes the original `event_id`/`chunk_num`, preserves original
   `cmd:` animation marks, and derives mouth movements from the new spoken text.
-  The wake-up override is disabled in TELEHEALTH and matches complete lines,
-  ignoring boundary punctuation and quote debris.
-- On a real `OPENMOXIE_CHAT` router turn, output language is fixed to
-  `DEFAULT_TTS_LANGUAGE` (`kk`). The system prompt, opener and failure replies
-  use Kazakh regardless of the input language. English assistant notifications
-  are excluded from chat history. A conservative script check replaces model
-  replies in another language with a Kazakh fallback. While chat is active,
-  the TTS language guard also replaces mismatched incoming text in its live slot.
-  Scheduled activities and `notify` alone do not activate this guard.
+- Translation applies before and after chat entry; there is no phrase allowlist
+  or active-chat greeting replacement. Cyrillic ru/kk lines pass through.
+  Puppet speech keeps its existing explicit text/language behavior.
+- Successful translations are cached in memory (up to 256 entries). Failures,
+  malformed translations and deadline expiry produce one correlated silence
+  response with the original command marks, never English or a canned opener.
 
 If Moxie asks you to say “Moxie, let's go”, say it and pause. The existing wake
 gate answers `END_OF_SPEECH` with that trigger; the greeting is never used as
 an STT transcript. The `/tts/wakeup` command itself only unsleeps the robot.
 For this test, keep puppet off and use the wake-up flow above.
 
-To use Russian, set `DEFAULT_TTS_LANGUAGE=ru` and
-`WAKEUP_TTS_TEXT="Привет! Как у тебя дела?"`, restart the service and reboot Moxie.
-Kazakh's language code is `kk`, not `kz`. `WAKEUP_TTS_OVERRIDE_ENABLED=false`
-disables the known wake-up replacements; `REMOTE_CHAT_LANGUAGE_GUARD_ENABLED=false`
-separately disables the active-chat TTS guard. Neither disables the chat response
-language policy. These guards do not translate all onboard content outside chat.
+To translate English into Russian, set `DEFAULT_TTS_LANGUAGE=ru` and restart.
+Kazakh's language code is `kk`, not `kz`. `CLOUD_TTS_TRANSLATION_ENABLED=false`
+disables translation for diagnostics. Old `WAKEUP_TTS_TEXT`,
+`WAKEUP_TTS_OVERRIDE_ENABLED` and `REMOTE_CHAT_LANGUAGE_GUARD_ENABLED` settings
+are removed and ignored if left in `.env`; they cannot restore the old greeting.
 
 ### Verify on the robot
 
 Watch `mise start` or filter the log:
 
 ```bash
-tail -f log/debug.log | rg --line-buffered 'bootstrapping device|CloudTTSRequest|spoke event_id|SILENT|synthesis failed'
+tail -f log/debug.log | rg --line-buffered 'bootstrapping device|entrance deferred|remote-chat|Tx remote_chat|CloudTTSRequest|spoke event_id|STT audio|STT END|STT FINAL|openai stt|SILENT|synthesis failed'
 ```
 
-For a native Cyrillic request, expect `CloudTTSRequest ... speakable='Сәлем!
-Қалайсың?'`, followed by `spoke event_id=... language=kk audio_bytes=...` for
-the **same ID and chunk**. With the A2 override the incoming request still
-contains English, and the log explicitly distinguishes the replacement:
+For an English request, expect its original text followed by translated
+`synthesis_text` and audio for the **same ID and chunk**:
 
 ```text
-CloudTTSRequest wakeup override ... event_id='E' chunk=0 requested_text='Good morning.' synthesis_text='Сәлем! Қалайсың?'
-handling CloudTTSRequest ... event_id='E' chunk=0 ... language=kk synthesis_text='Сәлем! Қалайсың?'
+CloudTTSRequest translation ... event_id='E' chunk=0 target=kk requested_text='Good morning.' synthesis_text='Қайырлы таң.'
+handling CloudTTSRequest ... event_id='E' chunk=0 ... language=kk synthesis_text='Қайырлы таң.'
 spoke event_id=E chunk=0 language=kk audio_bytes=... marks=... raw_pcm=True ...
 ```
 
-These are expected log shapes, not an on-device success claim. For A2, do not
-mistake the replacement text for Cyrillic markup received from the robot:
-the strict Cyrillic-inbound check in `prompt.md` is met only if A1 is honoured.
-The override uses a different route into the same live audio slot.
+These are expected log shapes; wording can vary. The incoming markup remains
+English, while the audio speaks its translation. Commands are never translated.
 
-Success requires **hearing the complete greeting and seeing mouth movement**.
-`notify`, `Tx remote_chat`, or a `SILENT fallback` is not success. If only
-unmatched English lines appear, record their `speakable=` text and event IDs;
-this narrow override does not translate arbitrary onboard scripts. If the FSM
-reports an empty module (`/_get_current_content_id`), reboot before retrying.
+Success requires **hearing translations of several different lines and seeing
+mouth movement**. `notify`, `Tx remote_chat`, or `SILENT fallback` alone is not
+success. Check translation timeouts/errors if a line is silent. If the FSM
+reports an empty module (`/_get_current_content_id`), reboot before retrying;
+translation changes speech, not module routing or speech recognition.
+
+### Verify the remote-chat handoff
+
+The operator confirmed translated Kazakh wake-up audio on Sep 28. That run
+also logged an actual `OPENMOXIE_CHAT` prompt and two chat listen sessions.
+Restart the service, reboot Moxie, wake it with puppet off, and look for:
+
+```text
+entrance deferred to local response ... module=WAKEUP/ ... output_type=FALLBACK
+Rx remote-chat ... command='prompt' module=OPENMOXIE_CHAT/default event_id='P'
+remote-chat entered ... module=OPENMOXIE_CHAT/default ... event_id=P
+remote-chat language ... language=kk
+Tx remote_chat ... event_id=P output_type=GLOBAL_RESPONSE text='Hi! What would you like to talk about?'
+```
+
+`start`, `continue` or `reprompt` can also establish real entry. A SCHEDULED
+activity or `notify` alone is insufficient. Confirm a subsequent robot-originated
+TTS request and its matching audio response, then audible playback. The native
+`Excellent!` request can arrive after the chat prompt using the earlier wake ID;
+its translation must still answer that original request.
+
+### Verify microphone transcription
+
+Restart with `mise start`, wake Moxie, and say “Moxie, let's go”. Wait for the
+chat opener to finish, then speak a short sentence such as “Мен алманы жақсы
+көремін” or “Я люблю яблоки”. The existing entrance shim remains in place;
+real transcription begins only after an actual `OPENMOXIE_CHAT` router turn.
+
+Expected sequence (UUID `U` must stay the same for the listen and its FINAL):
+
+```text
+STT audio started ... uuid=U phase=chat sample_rate=16000 channels=1 sample_width=2
+STT END ... uuid=U phase=chat frames=... audio_bytes=... audio_ms=...
+openai stt transcribed ... (auto) in ... ms
+STT validated/bridge ... uuid=U original='Мен алманы жақсы көремін' wire='I like apples'
+STT FINAL ... uuid=U phase=chat ... speech='I like apples'
+Rx remote-chat ... command='continue' event_id='U' speech='I like apples'
+remote-chat input ... event_id=U original_recovered=True output_language=kk
+Tx remote_chat ... event_id=U output_type=GLOBAL_RESPONSE ...
+remote-chat audio ... event_id=U source=REMOTECHAT
+spoke event_id=U language=kk ...
+```
+
+`reprompt` is also valid and now forwards nonempty first-turn speech to the LLM.
+Check that the transcript matches what you said, the reply answers it, and a
+new UUID appears when you speak again. Try at least five turns per language.
+Recognition auto-detects the spoken language; **reply language remains fixed**
+by `DEFAULT_TTS_LANGUAGE` (`kk` by default, `ru` for a Russian test). Automatic
+reply-language switching is the next milestone.
+
+`OPENAI_STT_TIMEOUT_S=6` bounds recognition plus input translation after END;
+SDK retries are disabled. Empty/silent or malformed audio, no recognized speech,
+provider failure, and deadline expiry produce one FINAL error 66 with a reason.
+The old “Robot transcription is not implemented” placeholder should no longer
+appear for chat. Onboard modules outside chat still receive an explicit error.
+Never-ending streams expire after 30 seconds; audio is capped at 30 seconds,
+with at most two pending listens per device and 16 globally. A reconnect or
+module exit discards pending work and rejects late results.
+
+The Sep 28 log contains UUIDs/errors but no microphone bytes. Accumulation and
+16 kHz format follow the copied OpenMoxie implementation; real microphone
+quality and firmware acceptance still require this operator test. See
+[STT verification](docs/STT_WIRING.md).
 
 ## Puppet speech (separate operator tool)
 
@@ -253,16 +311,25 @@ Everything is environment variables or `.env`; see `src/config.py`.
 | `CLOUD_TTS_AUTO_ENABLE` | `true` | Enable cloud TTS at startup. Skipped without a key. |
 | `PUPPET_MODE_AUTO_ENABLE` | `false` | Start the robot in TELEHEALTH mode. |
 | `DEFAULT_TTS_LANGUAGE` | `kk` | Autonomous chat output language; `kk` or `ru`. Input language does not change it. |
-| `REMOTE_CHAT_LANGUAGE_GUARD_ENABLED` | `true` | Replace mismatched TTS text while a real chat module is active, outside TELEHEALTH. |
-| `WAKEUP_TTS_OVERRIDE_ENABLED` | `true` | Replace known local wake-up lines with the greeting, outside TELEHEALTH only. |
-| `WAKEUP_TTS_TEXT` | `Сәлем! Қалайсың?` | Plain Cyrillic ru/kk greeting for entrance, opener, and wake-up override. Restart after changing. |
+| `CLOUD_TTS_TRANSLATION_ENABLED` | `true` | Translate every English/Latin autonomous speech request; puppet bypasses this. |
+| `OPENAI_CHAT_MODEL` | `gpt-4o-mini` | Existing model used for translation as well as remote chat, with separate prompts. |
+| `OPENAI_TRANSLATION_TIMEOUT_S` | `4.0` | Translation deadline, including worker wait; SDK retries disabled for this stage. |
 | `CLOUD_TTS_AUDIO_RAW_PCM` | `true` | `true` sends raw PCM16 (what `AudioBuffer` is); `false` wraps WAV. |
 | `DEVICE_ID` | — | Optional override. Normally the device is auto-discovered. |
 | `MQTT_HOST` / `MQTT_PORT` | `localhost` / `8883` | Broker address. |
 | `MQTT_PUBLIC_HOST` | auto-detected LAN IPv4 | Host encoded in `/tts/endpoint-qr`; set it if this Mac has multiple network adapters. |
 | `MQTT_PUBLIC_PORT` | `8883` | MQTT port encoded in `/tts/endpoint-qr`. |
 | `MQTT_QR_DISABLE_VERIFY` | `true` | Tells Moxie to accept the local self-signed broker certificate. |
-| `OPENAI_REQUEST_TIMEOUT_S` | `8.0` | Must stay under the robot's wait timeout. |
+| `OPENAI_REQUEST_TIMEOUT_S` | `8.0` | Shared socket timeout; operation deadlines below also bound total waits. |
+| `STT_INPUT_LANGUAGE` | `auto` | Recognition hint: auto, kk, ru or en; separate from reply language. |
+| `STT_ENGLISH_BRIDGE_ENABLED` | `true` | Translate human kk/ru to English for robot routing; preserve original text for GPT. |
+| `STT_BRIDGE_METADATA_ENABLED` | `false` | Optional protobuf language/original fields; test separately on firmware. |
+| `OPENAI_STT_TIMEOUT_S` | `6.0` | Total recognition plus bridge deadline. |
+| `OPENAI_INPUT_TRANSLATION_TIMEOUT_S` | `2.0` | Bounded by remaining STT time. |
+| `OPENAI_CHAT_TIMEOUT_S` | `4.0` | Chat generation deadline, no retries. |
+| `OPENAI_TTS_TIMEOUT_S` | `8.0` | Full synthesis deadline, no retries. |
+| `REMOTE_REPLY_TIMEOUT_S` | `12.0` | Combined translation/chat/audio budget. |
+| `OPENAI_CHAT_MAX_TOKENS` | `256` | Completion cap; spoken chat is also limited to 3 sentences/35 words. |
 
 ## Tests
 
@@ -270,29 +337,29 @@ Everything is environment variables or `.env`; see `src/config.py`.
 mise test
 ```
 
-The Sep 23 regression fixture covers the captured English wake-up requests,
-empty animation requests, and scheduled-chat/notify sequence. To replay the
-original Sep 23 log directly with mocked OpenAI/MQTT:
+The Sep 23 and Sep 25 fixtures cover 30 TTS requests, including empty animations
+and English lines outside wake-up. Translation/MQTT/TTS providers are mocked in
+the replays. Run them without needing the mutable live log:
 
 ```bash
-MOXIE_REPLAY_LOG=log/debug.log uv run pytest tests/test_wakeup_log_replay.py -q --log-file=/tmp/moxie-kz-log-replay.log --log-file-level=INFO
+uv run pytest tests/test_wakeup_log_replay.py tests/test_translation.py -q
 ```
 
-This test expects that specific capture. It verifies outgoing payloads and log
-patterns without changing `log/debug.log` or claiming robot playback.
+`MOXIE_REPLAY_LOG` is still supported for the Sep 23 test only; do not point it
+at another day's capture. Tests do not overwrite `log/debug.log` or prove playback.
 
 ## Roadmap
 
-Speech recognition is next. Moxie already does the hard part: it runs voice
-activity detection on-device and streams microphone audio as `zmqSTTRequest`
-frames (16 kHz mono PCM16), flagging `END_OF_SPEECH` itself, then expects a
-`zmqSTTResponse` with the transcript. Wiring that to OpenAI is the remaining
-work, plus confirming the robot's recognizer settings accept Russian/Kazakh.
-The current change covers one heard line after wake; completing subsequent
-chat listen sessions and solving opener scheduling remain separate work.
+Microphone STT is wired for active remote chat. Next: validate real Kazakh and
+Russian recordings on the robot, then implement automatic reply-language
+switching and sustained conversation recovery. Native English activities may
+still require translated input or intent mapping; this integration transcribes
+only active remote chat and preserves the wake shim.
 
 ## Documents
 
+- [Localization repair](docs/LOCALIZATION_FIXES.md) — input bridge, deadlines, regression evidence and robot checklist.
+- [TTS translation](docs/TTS_TRANSLATION.md) — current behavior, verification and live API results.
 - [Kazakh wake-up diagnosis](docs/KAZAKH_WAKEUP_ANALYSIS.md) — Sep 23 failure, corrected language path, and verification evidence.
 - [AGENTS.md](docs/AGENTS.md) — architecture, MQTT topics, and remaining Cloud TTS work for development agents.
 - [Speak Live Plan](docs/SPEAK_LIVE_PLAN.md) — autonomous (non-puppet) conversation path.

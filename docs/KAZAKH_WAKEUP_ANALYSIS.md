@@ -31,8 +31,10 @@ failure. The proven speech slot is the existing wake-up Cloud TTS request.
   `WAKEUP_TTS_TEXT` for the original live request, without manufacturing audio
   events. The override remains disabled in puppet mode.
 - `src/config.py`: `DEFAULT_TTS_LANGUAGE` was `ru`; the system prompt followed
-  the input language. Default is now `kk`, with a Kazakh system prompt. Only
-  `kk` and `ru` are accepted as output language configuration.
+  the input language. Default is now `kk`. Only `kk` and `ru` are accepted as
+  output language configuration. (Sep 29: the system prompt is now an English
+  persona; `openai_chat.py` appends a "Reply only in Kazakh/Russian" line
+  chosen from `DEFAULT_TTS_LANGUAGE`.)
 - `src/services/remote_chat.py`: `continue` selected the reply language from
   incoming speech and an empty turn supplied `hello`/`hm`. Actual module entry
   now sets the session output language before responding. `start` and `prompt`

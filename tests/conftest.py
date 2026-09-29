@@ -15,11 +15,12 @@ import wave
 import pytest
 
 from src.config import settings
-from src.services import openai_client
+from src.services import openai_client, stt_request, translation
 from src.services.device_state import device_state
 from src.services.devices import device_registry
 from src.services.mqtt_service import mqtt_service
 from src.services.telehealth import clear_puppet_state
+from src.services.stt import transcripts
 
 TEST_DEVICE_ID = "test-device-1"
 
@@ -77,8 +78,10 @@ class _FakeSpeech:
 class _FakeTranscriptions:
     def __init__(self, text: str) -> None:
         self._text = text
+        self.calls: list[dict] = []
 
     def create(self, **kwargs):  # noqa: ANN003, ANN201
+        self.calls.append(kwargs)
         return type("Tr", (), {"text": self._text})()
 
 
@@ -86,11 +89,15 @@ class _FakeCompletions:
     def __init__(self, reply: str) -> None:
         self._reply = reply
         self.calls: list[dict] = []
+        self.translations: dict[str, str] = {}
 
     def create(self, **kwargs):  # noqa: ANN003, ANN201
         self.calls.append(kwargs)
-        message = type("M", (), {"content": self._reply})()
-        choice = type("C", (), {"message": message})()
+        translating = kwargs["messages"][0]["content"].startswith("Translate")
+        reply = (self.translations.get(kwargs["messages"][-1]["content"], self._reply)
+                 if translating else self._reply)
+        message = type("M", (), {"content": reply})()
+        choice = type("C", (), {"message": message, "finish_reason": "stop"})()
         return type("Comp", (), {"choices": [choice]})()
 
 
@@ -103,6 +110,11 @@ class FakeOpenAI:
         self.audio.transcriptions = _FakeTranscriptions(transcript)
         self.chat = type("Chat", (), {})()
         self.chat.completions = _FakeCompletions(reply)
+        self.options: list[dict] = []
+
+    def with_options(self, **kwargs):
+        self.options.append(kwargs)
+        return self
 
 
 @pytest.fixture
@@ -131,6 +143,41 @@ def captured_publish(monkeypatch: pytest.MonkeyPatch) -> list[tuple[str, bytes]]
 
     monkeypatch.setattr(mqtt_service.client, "publish", _publish)
     return published
+
+
+@pytest.fixture(autouse=True)
+def clean_translation_cache():
+    """Cached text must not leak across fake providers or test cases."""
+    translation._translate_cached.cache_clear()
+    yield
+    translation._translate_cached.cache_clear()
+
+
+@pytest.fixture
+def translated_lines(fake_openai):
+    """Provider stubs for captured English text, never a production dictionary."""
+    import json
+    from pathlib import Path
+
+    lines = json.loads((Path(__file__).parent / "fixtures" / "english_kk_translations.json").read_text())
+    fake_openai.chat.completions.translations = lines
+    return lines
+
+
+@pytest.fixture(autouse=True)
+def clean_stt_state():
+    """Isolate router/STT lifecycle state, including tests that only send notify."""
+    for device, _ in list(stt_request._sessions):
+        stt_request.reset_conversation_state(device)
+    stt_request._conversation_phase.clear()
+    stt_request._completed.clear()
+    transcripts.clear()
+    yield
+    for device, _ in list(stt_request._sessions):
+        stt_request.reset_conversation_state(device)
+    stt_request._conversation_phase.clear()
+    stt_request._completed.clear()
+    transcripts.clear()
 
 
 @pytest.fixture(autouse=True)

@@ -1,0 +1,162 @@
+{
+  "snapshot_sha256": "c023e0f4a9e60ccc245d70322cf229b26c02f637990f4ed09297ca98968f63fb",
+  "snapshot_lines": 2792,
+  "observed_stt": [
+    {
+      "line": 360,
+      "uuid": "75004190-7ed0-4f29-9036-7cb3ebb8f69b",
+      "text": "Жемістер туралы сөйлесейік.",
+      "audio_bytes": 92160,
+      "matched_continue": false
+    },
+    {
+      "line": 447,
+      "uuid": "979d263c-050b-40c1-9b52-fc2b4cba3b00",
+      "text": "Маған қазақша сұрақ қойшы.",
+      "audio_bytes": 92160,
+      "matched_continue": false
+    },
+    {
+      "line": 480,
+      "uuid": "685cabab-71c5-4400-988b-0d0c099d7c31",
+      "text": "Қазақстан",
+      "audio_bytes": 30720,
+      "matched_continue": false
+    },
+    {
+      "line": 544,
+      "uuid": "111a19ab-05a8-4bec-8184-6b2793df1275",
+      "text": "Ask me some questions in Kazakh language",
+      "audio_bytes": 153600,
+      "matched_continue": true
+    },
+    {
+      "line": 622,
+      "uuid": "be6269ef-4ddb-44a1-bbb8-aa07fd90f985",
+      "text": "Таңертең.",
+      "audio_bytes": 30720,
+      "matched_continue": false
+    },
+    {
+      "line": 728,
+      "uuid": "1736f066-6cab-4bea-9496-63a6607983bb",
+      "text": "Қазақша түсінесің ба?",
+      "audio_bytes": 88320,
+      "matched_continue": false
+    },
+    {
+      "line": 763,
+      "uuid": "7146f814-2099-4463-b016-eb7190edacdb",
+      "text": "қазақ тілі",
+      "audio_bytes": 30720,
+      "matched_continue": false
+    },
+    {
+      "line": 806,
+      "uuid": "8b8beb9f-d97d-49b0-a985-f965db1136f4",
+      "text": "Привет.",
+      "audio_bytes": 30720,
+      "matched_continue": false
+    },
+    {
+      "line": 838,
+      "uuid": "f9fedc05-3507-489d-8084-3a7e75ea76a1",
+      "text": "Қазақстан",
+      "audio_bytes": 30720,
+      "matched_continue": false
+    },
+    {
+      "line": 892,
+      "uuid": "ba05582f-4d71-47f9-91a6-e692dc7302fc",
+      "text": "Tell me something about cars",
+      "audio_bytes": 115200,
+      "matched_continue": true
+    },
+    {
+      "line": 1001,
+      "uuid": "013a16e9-5fbf-4a14-8ceb-0e5694645b2f",
+      "text": "Do you understand English?",
+      "audio_bytes": 99840,
+      "matched_continue": true
+    },
+    {
+      "line": 1128,
+      "uuid": "0c3d6a40-4625-44be-87cc-c6b8c88b0a1b",
+      "text": "Маған қазақша ертегі айтып бер.",
+      "audio_bytes": 122880,
+      "matched_continue": false
+    },
+    {
+      "line": 1488,
+      "uuid": "77c664e2-fec5-4c8d-92f7-e35a2a4106dc",
+      "text": "Сенің атың кім?",
+      "audio_bytes": 84480,
+      "matched_continue": false
+    },
+    {
+      "line": 1533,
+      "uuid": "5963441e-3da1-4d14-95d8-ecbb1edb5976",
+      "text": "What's your name?",
+      "audio_bytes": 76800,
+      "matched_continue": true
+    },
+    {
+      "line": 1593,
+      "uuid": "5bdfb2f1-164a-4b00-9706-86647d33bd4f",
+      "text": "қазақ тілі",
+      "audio_bytes": 30720,
+      "matched_continue": false
+    },
+    {
+      "line": 1934,
+      "uuid": "ce86cc28-0177-44e8-9261-37d71acfc96c",
+      "text": "Tell me your name",
+      "audio_bytes": 99840,
+      "matched_continue": true
+    },
+    {
+      "line": 2069,
+      "uuid": "17fe2821-028d-42ec-aa42-d25f1716aced",
+      "text": "Окси, where are you?",
+      "audio_bytes": 88320,
+      "matched_continue": true
+    },
+    {
+      "line": 2156,
+      "uuid": "e1f800db-3eb3-4c8d-9f6f-b3af4d68a02a",
+      "text": "Мокси, where are you from?",
+      "audio_bytes": 96000,
+      "matched_continue": true
+    },
+    {
+      "line": 2245,
+      "uuid": "c27d6f98-2efe-4984-bbf5-33907b675042",
+      "text": "Қазақстан.",
+      "audio_bytes": 34560,
+      "matched_continue": false
+    },
+    {
+      "line": 2288,
+      "uuid": "94afdf9d-bea0-4274-862f-60672e488512",
+      "text": "###\nThe speaker uses Kazakh (қазақ тілі, Қазақстан) or Russian (русский язык). Preserve the spoken language and use Cyrillic.\n###",
+      "audio_bytes": 30720,
+      "matched_continue": true
+    },
+    {
+      "line": 2408,
+      "uuid": "9843358a-098a-4a7b-908f-5f1f40c56aa3",
+      "text": "Моқси, what will be five plus five?",
+      "audio_bytes": 126720,
+      "matched_continue": true
+    },
+    {
+      "line": 2787,
+      "uuid": "320a60b1-9f15-41cb-87a6-6a80a9883213",
+      "text": "Так, тамбар.",
+      "audio_bytes": 88320,
+      "matched_continue": false
+    }
+  ],
+  "rejected_kazakh_answer": "Көліктер туралы қызықты мәліметтер:\n\n1. Көліктердің тарихы XIX ғасырда басталған. Алғашқы двигательді көлікті 1886 жылы Карл Бенц жасаған.\n\n2. Сәбилер мен балалардың қауіпсіздігін қамтамасыз ету үшін көліктерде балалар креслосы болуы тиіс.\n\n3. Қазіргі уақытта әлемде миллиондаған түрлі көліктер бар, олардың ішінде электромобильдер де үлкен танымалдылыққа ие.\n\n4. Көлік өнеркәсібі жыл сайын жаңа технологияларды енгізіп, экологиялық таза көліктер шығаруға көңіл бөліп жатыр.\n\n5. Автокөліктер түрлі маркалар мен модельдерден тұрады, олардың әрқайсысының өзіндік ерекшеліктері мен артықшылықтары бар.\n\nСен көліктер туралы не ойлайсың?",
+  "note": "Observed routing only. Synthetic post-fix events are supplied explicitly by tests and do not prove firmware behavior."
+}

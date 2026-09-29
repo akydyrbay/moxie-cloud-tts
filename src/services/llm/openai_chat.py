@@ -18,17 +18,33 @@ from src.services.synthesis.base import UnsupportedLanguageError
 
 logger = logging.getLogger(__name__)
 
-_LANGUAGE_INSTRUCTIONS = {
-    "kk": (
-        "Жауап тілі: қазақ тілі (kk). Тек қазақ тілінде, кирилл әріптерімен жауап бер. "
-        "Кіріс мәтіні ағылшынша не орысша болса да, жауап тілін өзгертпе. "
-        "Ағылшынша немесе орысша дайын сөйлемдерді қайталама."
-    ),
-    "ru": (
-        "Язык ответа: русский (ru). Отвечай только по-русски, кириллицей, "
-        "независимо от языка входящего текста и истории разговора."
-    ),
+_LANGUAGE_NAMES = {"kk": "Kazakh (қазақ тілі)", "ru": "Russian (русский язык)"}
+# Models drift from Kazakh into Russian; say so explicitly for kk.
+_LANGUAGE_EXTRAS = {
+    "kk": " Do not use Russian words or phrases; use Kazakh vocabulary.",
+    "ru": "",
 }
+
+
+def _language_instruction(language: str) -> str:
+    return (
+        f"Reply only in {_LANGUAGE_NAMES[language]}, in Cyrillic script, "
+        "regardless of the language of the child's message or earlier turns. "
+        "Do not switch languages and do not repeat English or other-language "
+        f"sentences.{_LANGUAGE_EXTRAS[language]}"
+    )
+
+
+# Keep the spoken-response format even when OPENAI_SYSTEM_PROMPT is overridden
+# in the environment. This applies to both supported output languages.
+_RESPONSE_STYLE_INSTRUCTIONS = (
+    "You are speaking aloud to a child. Every reply must contain at most 3 "
+    "short sentences and at most 35 words in total; prefer 1 or 2 sentences. "
+    "Use simple, familiar words and explain one idea at a time. "
+    "Be warm and natural. Ask at most one short question per reply. "
+    "Do not use lists, Markdown, technical jargon, or long explanations. "
+    "Return only the words to speak in the selected response language."
+)
 
 
 @dataclass(frozen=True)
@@ -62,7 +78,8 @@ def respond(
             "role": "system",
             "content": (
                 f"{settings.OPENAI_SYSTEM_PROMPT}\n"
-                f"{_LANGUAGE_INSTRUCTIONS[language]}"
+                f"{_language_instruction(language)}\n"
+                f"{_RESPONSE_STYLE_INSTRUCTIONS}"
             ),
         },
     ]
@@ -70,15 +87,21 @@ def respond(
         messages.extend(history)
     messages.append({"role": "user", "content": text})
 
-    client = get_client()
+    client = get_client().with_options(max_retries=0, timeout=settings.OPENAI_CHAT_TIMEOUT_S)
     start = time.monotonic()
     completion = client.chat.completions.create(
         model=settings.OPENAI_CHAT_MODEL,
         messages=messages,
+        max_completion_tokens=settings.OPENAI_CHAT_MAX_TOKENS,
     )
     chat_time_ms = int((time.monotonic() - start) * 1000)
 
-    reply = (completion.choices[0].message.content or "").strip()
+    if not completion.choices or completion.choices[0].finish_reason != "stop":
+        raise ValueError("Chat response was incomplete")
+    message = completion.choices[0].message
+    reply = (message.content or "").strip()
+    if getattr(message, "refusal", None) or not reply:
+        raise ValueError("Chat response was empty or refused")
 
     logger.info(
         "openai chat replied to %d chars (%s) -> %d chars in %d ms",

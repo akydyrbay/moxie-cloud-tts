@@ -16,7 +16,7 @@ optional manual override for bench testing without a robot.
 
 from typing import Literal
 
-from pydantic import field_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -82,48 +82,41 @@ class Settings(BaseSettings):
     # Per-call timeout. Must stay well under the robot's MarkingUp timeout: once
     # the robot gives up waiting, late audio is discarded and it may force-idle.
     OPENAI_REQUEST_TIMEOUT_S: float = 8.0
+    # Extra translation stage has its own deadline and no SDK retries.
+    OPENAI_TRANSLATION_TIMEOUT_S: float = Field(default=4.0, gt=0)
+    # Total STT wait after END, including worker scheduling; no SDK retries.
+    OPENAI_STT_TIMEOUT_S: float = Field(default=6.0, gt=0, le=8.0)
+    # Recognition language, robot transport language and reply language differ.
+    STT_INPUT_LANGUAGE: Literal["auto", "kk", "ru", "en"] = "auto"
+    STT_ENGLISH_BRIDGE_ENABLED: bool = True
+    # Optional protobuf metadata is off until its firmware behavior is verified.
+    STT_BRIDGE_METADATA_ENABLED: bool = False
+    OPENAI_INPUT_TRANSLATION_TIMEOUT_S: float = Field(default=2.0, gt=0, le=6.0)
+    OPENAI_CHAT_TIMEOUT_S: float = Field(default=4.0, gt=0)
+    OPENAI_TTS_TIMEOUT_S: float = Field(default=8.0, gt=0)
+    REMOTE_REPLY_TIMEOUT_S: float = Field(default=12.0, gt=0, le=20.0)
+    OPENAI_CHAT_MAX_TOKENS: int = Field(default=256, ge=64, le=512)
 
+    # Persona only. The reply language is appended per turn from
+    # DEFAULT_TTS_LANGUAGE (see `openai_chat._language_instruction`).
     OPENAI_SYSTEM_PROMPT: str = (
-        "Сен — Мокси, баламен сөйлесетін мейірімді роботсың. "
-        "Әдепкі жауап тілі — қазақ тілі. Жауап тілі бөлек көрсетілсе, сол тілді қолдан. "
-        "Баланың немесе алдыңғы хабарламалардың тіліне қарап жауап тілін өзгертпе. "
-        "Қысқа, жылы, табиғи және баланың жасына сай жауап бер."
+        "You are Moxie, a kind physical robot talking face to face with a child. "
+        "Never call yourself a virtual robot and never invent your location or abilities."
+        "Be warm, natural and age-appropriate."
     )
 
     SUPPORTED_LANGUAGES: list[str] = ["ru", "kk"]
-    DEFAULT_TTS_LANGUAGE: Literal["ru", "kk"] = "kk"
-    # Defend actual OPENMOXIE_CHAT speech requests against stale firmware text.
-    # This applies only after a router turn enters chat, never on notify/schedule.
-    REMOTE_CHAT_LANGUAGE_GUARD_ENABLED: bool = True
-
-    # --- Wake-up greeting (prompt.md Path A) -------------------------------
-    # A1: use this line in the entrance GLOBAL_COMMAND and chat opener.
-    # A2: if firmware still requests its local greeting / day-start instruction,
-    # voice this line in that existing Cloud TTS slot. Never applies in puppet
-    # mode. Disable the override to inspect the firmware's original output.
-    WAKEUP_TTS_OVERRIDE_ENABLED: bool = True
-    WAKEUP_TTS_TEXT: str = "Сәлем! Қалайсың?"
-
-    @field_validator("WAKEUP_TTS_TEXT")
-    @classmethod
-    def validate_wakeup_tts_text(cls, value: str) -> str:
-        """Require a speakable ru/kk line, not markup or an empty greeting."""
-        value = value.strip()
-        if (
-            not any("\u0400" <= char <= "\u04ff" for char in value)
-            or "<" in value
-            or ">" in value
-        ):
-            msg = "WAKEUP_TTS_TEXT must be plain Russian or Kazakh Cyrillic text"
-            raise ValueError(msg)
-        return value
+    DEFAULT_TTS_LANGUAGE: Literal["ru", "kk"] = "ru"
+    # Translate every English/Latin autonomous TTS line to DEFAULT_TTS_LANGUAGE.
+    # No phrase allowlist, fixed greeting, or dependency on chat entry.
+    CLOUD_TTS_TRANSLATION_ENABLED: bool = True
 
     # --- STT injection (Goal 1: speak without puppet mode) ------------------
     # On wake the robot first enters its onboard WAKEUP module ("say 'Moxie,
     # let's go!' to start the day") and will not reach OPENMOXIE_CHAT until it
-    # hears that trigger. Until the robot actually enters the remote chat module,
-    # the STT handler injects THIS phrase to open the gate. After that, listen
-    # sessions are not answered with a canned transcript (real STT is M2).
+    # hears that trigger. Inject THIS phrase during the entrance phase only.
+    # Chat uses real microphone transcription. Other onboard modules still
+    # receive a FINAL error; their English-only answer matching is separate.
     WAKEUP_TRIGGER_LINE: str = "Moxie, let's go"
 
     # --- Audio --------------------------------------------------------------
@@ -217,11 +210,11 @@ REMOTE_CHAT_MODULE_IDS: frozenset[str] = frozenset(
     },
 )
 
-# Use the same short greeting whether firmware honours the entrance response,
-# asks for the chat opener, or keeps its local wake-up Cloud TTS slot.
+# Remote module source text. Translate only if the robot requests its audio;
+# these do not replace native wake-up lines with a fixed Kazakh greeting.
 REMOTE_CHAT_OPENERS: dict[str, str] = {
-    "default": settings.WAKEUP_TTS_TEXT,
-    "short": settings.WAKEUP_TTS_TEXT,
+    "default": "Hi! What would you like to talk about?",
+    "short": "Hi! What would you like to talk about?",
 }
 
 # Spoken when a turn cannot be answered (onboard module, or LLM failure).

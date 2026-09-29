@@ -5,10 +5,10 @@ import json
 import pytest
 from pydantic import ValidationError
 
-from src.config import Settings, settings
+from src.config import REMOTE_CHAT_OPENERS, Settings, settings
 from src.services import cloud_tts_request
 from src.services.device_state import device_state
-from src.services.remote_chat import RemoteChatBrain, fallback_line
+from src.services.remote_chat import RemoteChatBrain, fallback_line, generation_error_line
 from tests.conftest import TEST_DEVICE_ID
 from tests.test_cloud_tts_request import _decode_response, _frame_request
 
@@ -16,9 +16,8 @@ from tests.test_cloud_tts_request import _decode_response, _frame_request
 @pytest.fixture
 def brain(monkeypatch):
     brain = RemoteChatBrain()
-    monkeypatch.setattr(cloud_tts_request, "remote_chat_brain", brain)
     monkeypatch.setattr(settings, "DEFAULT_TTS_LANGUAGE", "kk")
-    monkeypatch.setattr(settings, "REMOTE_CHAT_LANGUAGE_GUARD_ENABLED", True)
+    monkeypatch.setattr(settings, "CLOUD_TTS_TRANSLATION_ENABLED", True)
     return brain
 
 
@@ -32,28 +31,29 @@ async def turn(brain, command, speech="", **extra):
 def test_language_defaults_and_validation():
     defaults = Settings(_env_file=None)
     assert defaults.DEFAULT_TTS_LANGUAGE == "kk"
-    assert defaults.WAKEUP_TTS_TEXT == "Сәлем! Қалайсың?"
-    assert "қазақ" in defaults.OPENAI_SYSTEM_PROMPT
+    assert defaults.CLOUD_TTS_TRANSLATION_ENABLED is True
+    assert defaults.OPENAI_SYSTEM_PROMPT.startswith("You are Moxie")
+    assert "Kazakh" not in defaults.OPENAI_SYSTEM_PROMPT
     assert "SAME language" not in defaults.OPENAI_SYSTEM_PROMPT
     with pytest.raises(ValidationError, match="DEFAULT_TTS_LANGUAGE"):
         Settings(_env_file=None, DEFAULT_TTS_LANGUAGE="kz")
 
 
-@pytest.mark.parametrize("command", ["start", "prompt", "reprompt"])
-async def test_entry_is_kazakh_before_any_llm_or_audio_request(
+@pytest.mark.parametrize("command", ["start", "prompt"])
+async def test_entry_preserves_source_opener_until_robot_requests_audio(
     brain, fake_openai, captured_publish, command,
 ):
-    await turn(brain, command, "Hello!")
+    await turn(brain, command, "")
     assert brain.output_language(TEST_DEVICE_ID) == "kk"
     assert fake_openai.chat.completions.calls == []
     assert fake_openai.audio.speech.calls == []
     assert len(captured_publish) == 1
     response = json.loads(captured_publish[0][1])
-    assert response["output"]["text"] == "Сәлем! Қалайсың?"
+    assert response["output"]["text"] == REMOTE_CHAT_OPENERS["default"]
     assert response["response_actions"] == [{"output_type": "GLOBAL_RESPONSE"}]
 
 
-@pytest.mark.parametrize("speech", ["Moxie, let's go", "Привет", "Сәлем!", ""])
+@pytest.mark.parametrize("speech", ["Moxie, let's go", "Привет", "Сәлем!"])
 async def test_input_and_notify_history_cannot_change_response_language(
     brain, fake_openai, captured_publish, speech,
 ):
@@ -65,7 +65,8 @@ async def test_input_and_notify_history_cannot_change_response_language(
     fake_openai.chat.completions._reply = "Сені көргеніме қуаныштымын!"
     await turn(brain, "continue", speech)
     messages = fake_openai.chat.completions.calls[0]["messages"]
-    assert "Тек қазақ тілінде" in messages[0]["content"]
+    assert "Reply only in Kazakh" in messages[0]["content"]
+    assert "Russian" in messages[0]["content"]  # anti-drift line for kk
     assert all(m["content"] != "Good morning!" for m in messages)
     assert {"role": "user", "content": "hello"} in messages
     assert messages[-1]["content"] == (speech or fallback_line("kk"))
@@ -87,7 +88,7 @@ async def test_invalid_model_output_becomes_kazakh_without_side_effects(
     fake_openai.chat.completions._reply = reply
     await turn(brain, "continue", "Привет")
     response = json.loads(captured_publish[0][1])
-    assert response["output"]["text"] == fallback_line("kk")
+    assert response["output"]["text"] == generation_error_line("kk")
     assert response["response_actions"] == [{"output_type": "GLOBAL_RESPONSE"}]
 
 
@@ -99,25 +100,25 @@ async def test_model_failure_with_english_input_stays_kazakh(
 
     monkeypatch.setattr(fake_openai.chat.completions, "create", fail)
     await turn(brain, "continue", "hello")
-    assert json.loads(captured_publish[0][1])["output"]["text"] == fallback_line("kk")
+    assert json.loads(captured_publish[0][1])["output"]["text"] == generation_error_line("kk")
 
 
 @pytest.mark.parametrize("mode", ["active", "notify", "puppet", "disabled", "other-device"])
-async def test_tts_guard_requires_actual_chat_entry_and_preserves_waiter(
-    brain, fake_openai, captured_publish, monkeypatch, mode,
+async def test_translation_is_independent_of_chat_entry_and_preserves_waiter(
+    brain, fake_openai, translated_lines, captured_publish, monkeypatch, mode,
 ):
     await turn(brain, "notify" if mode == "notify" else "prompt")
     if mode == "puppet":
         await device_state.set_puppet_mode(True)
     if mode == "disabled":
-        monkeypatch.setattr(settings, "REMOTE_CHAT_LANGUAGE_GUARD_ENABLED", False)
+        monkeypatch.setattr(settings, "CLOUD_TTS_TRANSLATION_ENABLED", False)
     captured_publish.clear()
     device = "another-device" if mode == "other-device" else TEST_DEVICE_ID
     summary = await cloud_tts_request.handle_payload(device, _frame_request(
         markup='<mark name="cmd:idlestate,data:{+idleState+:5}"/><usel>Hello!</usel>',
         event_id="", chunk_num=3,
     ))
-    expected = "Сәлем! Қалайсың?" if mode == "active" else "Hello!"
+    expected = "Hello!" if mode in {"puppet", "disabled"} else translated_lines["Hello!"]
     assert fake_openai.audio.speech.calls[0]["input"] == expected
     assert summary["status"] == "published"
     assert len(captured_publish) == 1
@@ -157,5 +158,6 @@ async def test_russian_can_be_explicitly_selected_for_chat(
     fake_openai.chat.completions._reply = "Привет! Как дела?"
     await turn(brain, "continue", "Сәлем!")
     messages = fake_openai.chat.completions.calls[0]["messages"]
-    assert "Отвечай только по-русски" in messages[0]["content"]
+    assert "Reply only in Russian" in messages[0]["content"]
+    assert "Kazakh" not in messages[0]["content"]
     assert json.loads(captured_publish[0][1])["output"]["text"] == "Привет! Как дела?"

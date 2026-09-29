@@ -1,9 +1,9 @@
 """Shared OpenAI client factory.
 
 Origin: new for the OpenAI speech pipeline (replaces the Google Cloud TTS
-provider). A single lazily-constructed `OpenAI` client is shared by all three
-stages (STT, chat, TTS) so credentials and timeouts are configured in exactly
-one place.
+provider). A single lazily-constructed `OpenAI` client is shared by STT, chat,
+translation and TTS. Translation uses a per-call timeout/retry override without
+changing the client used by the other stages.
 
 The API key comes from `settings.OPENAI_API_KEY` (populated from the
 OPENAI_API_KEY environment variable) — it is NEVER hardcoded and NEVER logged.

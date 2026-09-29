@@ -7,7 +7,7 @@ import pytest
 from src.config import REMOTE_CHAT_OPENERS, settings
 from src.services.device_state import device_state
 from src.services.mqtt_service import mqtt_service
-from src.services.remote_chat import RemoteChatBrain, fallback_line, remote_chat_brain
+from src.services.remote_chat import RemoteChatBrain, fallback_line, generation_error_line, remote_chat_brain
 from tests.conftest import TEST_DEVICE_ID
 
 
@@ -107,11 +107,10 @@ async def test_onboard_module_gets_fallback(brain: RemoteChatBrain) -> None:
 
 @pytest.mark.parametrize("module_id", ["WAKEUP", "ENROLLCONVO"])
 @pytest.mark.parametrize("command", ["start", "continue"])
-async def test_entrance_replaces_excellent_without_launch(
+async def test_entrance_defers_to_native_transition_without_launch(
     brain: RemoteChatBrain, monkeypatch: pytest.MonkeyPatch, module_id, command,
 ) -> None:
-    """GLOBAL_COMMAND requests Kazakh without skipping Cloud TTS via launch."""
-    monkeypatch.setattr(settings, "WAKEUP_TTS_TEXT", "Сәлем! Қалайсың?")
+    """Do not outrank WAKEUP's response: its accepted action enters chat."""
     req = {
         "backend": "router",
         "command": command,
@@ -123,10 +122,13 @@ async def test_entrance_replaces_excellent_without_launch(
     await brain.handle_router_request(TEST_DEVICE_ID, req)
     _topic, payload = brain._published[0]  # type: ignore[attr-defined]
     assert payload["event_id"] == "wake-stt-uuid"
-    assert payload["response_action"]["output_type"] == "GLOBAL_COMMAND"
-    assert payload["output"]["text"] == "Сәлем! Қалайсың?"
+    assert payload["response_action"] == {"output_type": "FALLBACK"}
+    assert payload["response_actions"] == [{"output_type": "FALLBACK"}]
+    # Match OpenMoxie's Volley: priority is output_type, not this legacy flag.
+    assert payload["fallback"] is False
+    assert payload["output"]["text"] == "I'm sorry. Can you repeat that?"
     assert payload["output"]["markup"] == (
-        '<usel variant="2" genre="none">Сәлем! Қалайсың?</usel>'
+        '<usel variant="2" genre="none">I\'m sorry. Can you repeat that?</usel>'
     )
     assert payload["response_action"].get("action") is None
     assert all("action" not in a for a in payload["response_actions"])
@@ -209,7 +211,7 @@ async def test_llm_failure_falls_back_in_language(
     }
     await brain.handle_router_request(TEST_DEVICE_ID, req)
     _topic, payload = brain._published[0]  # type: ignore[attr-defined]
-    assert payload["output"]["text"] == fallback_line("kk")
+    assert payload["output"]["text"] == generation_error_line("kk")
 
 
 async def test_continue_uses_openai(

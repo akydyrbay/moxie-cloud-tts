@@ -8,7 +8,7 @@
 The robot only plays a response whose `event_id`/`chunk_num` match a request it
 is currently waiting on, so both are echoed verbatim.
 
-Critically, a response is published *even when synthesis fails*. With cloud_tts
+For a current request, a response is published *even when synthesis fails*. With cloud_tts
 enabled the robot suppresses its onboard TTS and waits in "MarkingUp"; if
 nothing ever arrives it force-idles and goes to sleep. Publishing a short silent
 buffer releases that wait instead of hanging the robot.
@@ -18,11 +18,10 @@ declare more audio than it carries (see `src/services/audio.py`). `marks`
 drive Moxie's mouth (see `src/services/marks.py`).
 """
 
+from collections.abc import Callable
 import logging
 import time
 import uuid
-
-from fastapi.concurrency import run_in_threadpool
 
 from src.config import settings
 from src.protos.embodied.unity.CloudTTS_pb2 import (
@@ -36,6 +35,7 @@ from src.services.audio import duration_ms, pcm_to_wav, repair_wav
 from src.services.devices import device_registry
 from src.services.marks import build_marks, command_marks
 from src.services.mqtt_service import mqtt_service
+from src.services.provider_work import provider_pool
 from src.services.synthesis.base import (
     SynthesisResult,
     TTSEngine,
@@ -132,6 +132,17 @@ def _resolve_device(device_id: str | None) -> str:
     return target
 
 
+def _discard_stale_output(device_id: str, event_id: str, chunk_num: int) -> dict:
+    logger.info(
+        "discarded stale speech device=%s event_id=%s chunk=%d",
+        device_id, event_id, chunk_num,
+    )
+    return {
+        "status": "discarded", "device_id": device_id,
+        "event_id": event_id, "chunk_num": chunk_num,
+    }
+
+
 def publish_silence(
     device_id: str,
     event_id: str,
@@ -160,7 +171,7 @@ def publish_silence(
         result,
         event_id=event_id,
         chunk_num=chunk_num,
-        request_source=request_source or configured_request_source(),
+        request_source=configured_request_source() if request_source is None else request_source,
         total_time_ms=0,
         markup=markup,
     )
@@ -189,6 +200,9 @@ async def speak(
     request_source: RequestSourceType | None = None,
     device_id: str | None = None,
     markup: str | None = None,
+    *,
+    is_current: Callable[[], bool] | None = None,
+    deadline: float | None = None,
 ) -> dict:
     """Synthesize `text` and publish it to the robot; return a result summary.
 
@@ -198,6 +212,12 @@ async def speak(
     Raises `UnsupportedLanguageError` for unknown languages, `NoTargetDeviceError`
     when there is nothing to publish to, and propagates OpenAI errors after
     publishing a silent fallback so the robot is never left waiting.
+
+    Remote chat supplies `is_current` to discard expired turns, including
+    failures: neither audio nor silence may complete an invalidated request.
+    The guard runs on the asyncio loop, immediately before a publish, with no
+    await between the check and the publish. Other callers retain their usual
+    one-response behavior.
     """
     # Validated before anything is published: a bad language is a caller error,
     # not a robot stall, so it must not emit a silent fallback.
@@ -209,22 +229,31 @@ async def speak(
     target = _resolve_device(device_id)
     if event_id is None:
         event_id = str(uuid.uuid4())
-    source = request_source or configured_request_source()
+    if is_current is not None and not is_current():
+        return _discard_stale_output(target, event_id, chunk_num)
+    source = configured_request_source() if request_source is None else request_source
     start = time.monotonic()
 
     try:
         # The OpenAI client call is blocking; keep the event loop responsive.
-        result = await run_in_threadpool(_engine.synthesize, text, language)
-    except Exception:
-        logger.exception(
-            "synthesis failed for event_id=%s; publishing silence so %s "
-            "does not stall in MarkingUp",
+        timeout = settings.OPENAI_TTS_TIMEOUT_S
+        if deadline is not None:
+            timeout = min(timeout, deadline - time.monotonic())
+        result = await provider_pool.run(_engine.synthesize, text, language, timeout=timeout)
+    except Exception as exc:
+        if is_current is not None and not is_current():
+            return _discard_stale_output(target, event_id, chunk_num)
+        logger.warning(
+            "synthesis failed for event_id=%s device=%s error=%s elapsed_ms=%d; publishing silence",
             event_id,
             target,
+            type(exc).__name__, int((time.monotonic() - start) * 1000),
         )
         publish_silence(target, event_id, chunk_num, source, markup=markup or "")
         raise
 
+    if is_current is not None and not is_current():
+        return _discard_stale_output(target, event_id, chunk_num)
     total_time_ms = int((time.monotonic() - start) * 1000)
     response = _build_response(
         result,

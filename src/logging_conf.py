@@ -56,6 +56,15 @@ def configure_logging() -> None:
                     "level": logging.WARNING,
                     "propagate": False,
                 },
+                # SDK DEBUG request options include the entire uploaded WAV.
+                # Our STT logs retain UUID, byte counts, transcript and timings.
+                "openai": {
+                    "level": logging.INFO,
+                },
+                "httpx": {"level": logging.WARNING},
+                "httpcore": {"level": logging.WARNING},
+                "httpcore2": {"level": logging.WARNING},
+                "httpx2": {"level": logging.WARNING},
             },
         },
     )

@@ -17,30 +17,40 @@ This repository is a **replacement cloud backend** for the Moxie robot after Emb
 
 Device ids look like `d_<uuid>`. They are **discovered** from MQTT topics, never hardcoded.
 
-**Invariant:** Moxie only plays cloud audio that answers a request it is already waiting on, matched by `event_id` / `chunk_num`. You cannot push a `CloudTTSResponse` and have it play.
+**Invariant:** Moxie only plays cloud audio that answers a request it is already waiting on, matched by `event_id` / `chunk_num`. You cannot push an arbitrary `CloudTTSResponse` and have it play. Two live requests exist:
 
-**Current narrow milestone (2026-09-25):** `prompt.md` Path A1 + A2 is implemented,
-pending operator playback confirmation. `WAKEUP_TTS_TEXT` defaults to
-`Сәлем! Қалайсың?` for entrance responses and chat openers. With
-`WAKEUP_TTS_OVERRIDE_ENABLED=true`, known local `Good morning.` / `Good morning!`
-/ `Excellent!` and captured day-start instructions are voiced as that line outside
-TELEHEALTH, preserving live IDs and original command marks. Matching ignores
-boundary punctuation, including captured `Excellent! " "` text.
-Do not gate the override on conversation-active state: chat prompt can arrive
-before the wake-up confirmation's Cloud TTS request. Logs show incoming
-`speakable` and effective `synthesis_text` separately. An overridden English
-request is not a native Cyrillic request; only operator-heard audio confirms
-playback. See the current [README verification steps](../README.md#verify-on-the-robot).
-`DEFAULT_TTS_LANGUAGE=kk` now fixes autonomous chat output language at entry,
-independent of input/history language. `start` and `prompt` return the greeting
-without calling the LLM. Invalid-language LLM replies get a localized fallback;
-English assistant notifications are excluded from history. The separate
-`REMOTE_CHAT_LANGUAGE_GUARD_ENABLED` flag protects TTS payloads only after an
-actual chat router turn. A delayed onboard notify must not clear that state.
-Neither schedule activity nor notify activates chat. Russian remains available
-through explicit configuration and puppet speech. See
-[the Sep 23 diagnosis and replay](KAZAKH_WAKEUP_ANALYSIS.md).
-The conversation roadmap below is later work, beyond this one-line milestone.
+- Robot lines: a `CloudTTSRequest` → answer with its `event_id`/`chunk_num`, `ROBOT_TTS_REQUEST`.
+- Remote-module output (`OPENMOXIE_CHAT` GLOBAL_RESPONSE): firmware raises **no** `CloudTTSRequest` (Sep 28 captures). The server answers that live router turn with one `CloudTTSResponse`, `REMOTECHAT_TTS_REQUEST`, `event_id` = the router `event_id`, `chunk_num=0`, only when `cloud_tts=1` and puppet is off. See [remote-chat audio](REMOTE_CHAT_AUDIO.md). The later Sep 28 run and operator report confirm Kazakh replies to English input.
+
+**Current milestone (2026-09-29):** wake-up and Kazakh answers to English input
+are operator-confirmed. The evening Sep 28 capture shows 13 Cyrillic transcripts
+without router turns and 9 English-containing transcripts with them. The English
+input bridge, original-text recovery, bounded provider waits and reply validation
+are implemented with 322 passing tests. Hardware bridge acceptance remains;
+automatic output-language switching is a separate milestone. See
+[localization repair](LOCALIZATION_FIXES.md).
+
+`CLOUD_TTS_TRANSLATION_ENABLED=true` translates incoming English/Latin autonomous
+TTS through `translation.py` to `DEFAULT_TTS_LANGUAGE=kk`. Cyrillic ru/kk and
+puppet speech bypass translation. No wake phrase allowlist or chat-active gate
+is used. Removed settings `WAKEUP_TTS_TEXT`, `WAKEUP_TTS_OVERRIDE_ENABLED` and
+`REMOTE_CHAT_LANGUAGE_GUARD_ENABLED` must not be restored.
+
+WAKEUP/ENROLLCONVO keep ordinary FALLBACK, preserving native responses/actions.
+The remote opener is English source text; with `cloud_tts=1` it is translated
+before the remote-chat response and voiced as REMOTECHAT audio (no robot request
+ever carries it). Chat replies remain in the configured output language. A nonempty
+first `reprompt` now reaches the LLM even without notify history.
+
+Translation preserves original markup, IDs, chunks and command marks; failures
+produce correlated silence. STT preserves the original human transcript server-side and sends its faithful
+English translation to the robot under the same UUID. The bridge can be disabled
+for A/B comparison. `OPENAI_STT_TIMEOUT_S=6` bounds recognition plus translation,
+with no SDK retries; failures produce FINAL error 66. STT supports missing START, END audio,
+bounded buffers/expiry, deduplication and reset/exit cancellation. See
+[STT implementation and verification](STT_WIRING.md),
+[translation verification](TTS_TRANSLATION.md) and
+[conversation plan](SPEAK_LIVE_PLAN.md).
 
 ---
 
@@ -51,7 +61,7 @@ The conversation roadmap below is later work, beyond this one-line milestone.
 | Mode | How enabled | What it is | Status |
 |---|---|---|---|
 | **TELEHEALTH / puppet** | `POST /tts/puppet` or `PUPPET_MODE_AUTO_ENABLE` | Robot stays awake, **schedule empty**, speaks only `PLAY_OUTPUT` from `/tts/speak` | **Proven for first-line TTS. Dropped as the conversation path.** Code kept. **Do not modify this pipeline.** |
-| **Autonomous / remote-chat** | `PUPPET_MODE_AUTO_ENABLE=false` (default) | Robot runs `WAKEUP` then `OPENMOXIE_CHAT`; this server supplies opener + chat text; robot raises `CloudTTSRequest` | **Target path.** Mouth TTS works. Real STT not wired. Chat entry still needs on-device proof. |
+| **Autonomous / remote-chat** | `PUPPET_MODE_AUTO_ENABLE=false` (default) | Robot runs `WAKEUP` then `OPENMOXIE_CHAT`; this server supplies opener + chat text; server answers its live router turn with REMOTECHAT audio | **Target path.** Kazakh replies heard; English input bridge awaits hardware acceptance. |
 
 ### 2.2 Why puppet was dropped (conversation)
 
@@ -82,14 +92,20 @@ src/services/
   devices.py                device_registry (seen / bootstrapped / primary)
   device_state.py           in-memory config overlay (cloud_tts, moxie_mode)
   remote_chat.py            brain: modules, schedule, OPENMOXIE_CHAT, WAKEUP
-  stt_request.py            ears: wake-gate inject; M2 will transcribe here
-  cloud_tts_request.py      mouth inbound: CloudTTSRequest → speak_service
+  stt_request.py            ears: wake shim + bounded chat audio transcription
+  cloud_tts_request.py      mouth inbound: CloudTTSRequest → translation → speak_service
+  translation.py           English/Latin → kk/ru, bounded deadline and text cache
   speak_service.py          OpenAI TTS → CloudTTSResponse (shared by both modes)
   telehealth.py             puppet PLAY_OUTPUT / INTERRUPT / wakeup / sleep  [DO NOT TOUCH]
   tts_service.py            config push + puppet toggle (identity strip)
   marks.py                  viseme + cmd: echo so firmware leaves MarkingUp
   audio.py                  PCM duration; WAV repair (never ask OpenAI for wav)
-  stt/openai_stt.py         OpenAI STT engine — exists, not wired to robot
+  stt/openai_stt.py         OpenAI STT engine — auto input, no imperative prompt/retries
+  stt/input_translation.py  Human kk/ru → English compatibility text
+  stt/transcripts.py        Bounded original/wire transcript correlation
+  stt/validation.py         Prompt-echo rejection and conservative audio checks
+  provider_work.py          Bounded pure provider workers and total deadlines
+  llm/reply_text.py         Whole-sentence spoken reply limits
   llm/openai_chat.py        OpenAI chat — wired from remote_chat continue/reprompt
   synthesis/openai_tts.py   OpenAI TTS engine
 src/protos/                 generated protobuf (do not hand-edit)
@@ -158,11 +174,11 @@ Mosquitto: TLS port **8883**, `allow_anonymous true`, `log_dest topic` so `$SYS/
 
 | Channel | Messages | Meaning |
 |---|---|---|
-| **Ears** | `zmqSTTRequest` / `zmqSTTResponse` | Mic PCM in; **recognized text** out. Cannot make Moxie speak. |
+| **Ears** | `zmqSTTRequest` / `zmqSTTResponse` | Mic PCM in; faithful English translation of recognized human speech out. Original text retained for GPT. Cannot make Moxie speak. |
 | **Mouth** | `CloudTTSRequest` / `CloudTTSResponse` | Robot asks to voice markup; **audio** out. Only way ru/kk is heard. |
 | **Brain** | JSON `remote_chat` / `query_result` | Handshake, module, **text Moxie will say** (`output.markup`). |
 
-Spoken ru/kk = `RemoteChatResponse.output.markup` → robot copies it into `CloudTTSRequest.markup` → `cloud_tts_request` synthesizes. Do not put spoken lines in STT `speech`.
+Spoken ru/kk on the conversation path = `RemoteChatResponse.output.markup` plus a REMOTECHAT `CloudTTSResponse` for that router `event_id` (`remote_chat._voice_remote_output`). The robot does **not** copy remote markup into a `CloudTTSRequest`; native lines still arrive as requests and go through `cloud_tts_request`. Do not put spoken lines in STT `speech`.
 
 ### 2.7 What already works (do not re-investigate)
 
@@ -172,9 +188,9 @@ Spoken ru/kk = `RemoteChatResponse.output.markup` → robot copies it into `Clou
 - Identity strip on mid-session config toggle.
 - Wake-gate STT inject: on `END_OF_SPEECH` before chat, reply `WAKEUP_TRIGGER_LINE` = `"Moxie, let's go"`.
 - Remote-chat: modules handshake, schedule (`OPENMOXIE_CHAT/default`), mentor_behaviors `[]`.
-- WAKEUP/`ENROLLCONVO` `start|continue`: `GLOBAL_COMMAND` with `WAKEUP_TTS_TEXT` (no `launch` on primary). Empty GLOBAL_COMMAND left WAKEUP looping English; `launch` as primary skipped Cloud TTS.
-- `OPENMOXIE_CHAT` `prompt` → `REMOTE_CHAT_OPENERS` (configured greeting, kk by default) wrapped in `<usel variant="2" genre="none">`.
-- `OPENMOXIE_CHAT` `continue`/`reprompt` → `openai_chat.respond`.
+- WAKEUP/`ENROLLCONVO`: ordinary `FALLBACK`, leaving native transitions intact. English speech translation happens in Cloud TTS. Do not restore the entrance `GLOBAL_COMMAND`; see the handoff diagnosis.
+- `OPENMOXIE_CHAT` `prompt` → English source `REMOTE_CHAT_OPENERS`, translated (cloud_tts=1), wrapped in `<usel variant="2" genre="none">`, then REMOTECHAT audio on the prompt `event_id`.
+- `OPENMOXIE_CHAT` `continue`/`reprompt` → `openai_chat.respond`, then REMOTECHAT audio on that turn's `event_id`.
 - `note_conversation_active` only on remote `prompt|continue|reprompt|start`, **not** `notify`.
 - HTTP: devices, cloud-tts toggle, puppet toggle, speak, interrupt, wakeup, sleep.
 - `max_enroll="0"` + paired `child_pii` at bootstrap (enrollment skip **in tree**; prove on boot).
@@ -199,9 +215,9 @@ Operator ──HTTP──► FastAPI /tts/*  (control only)
    - `publish_settings_update` (full config **including** identity)
    - `send_proto_subscribe`
 4. Robot queries `modules` → we advertise `OPENMOXIE_CHAT`. Queries `schedule` → `DEFAULT_SCHEDULE` unless puppet (empty).
-5. Firmware still runs onboard **WAKEUP**. STT inject `"Moxie, let's go"`. Entrance volley gets `WAKEUP_TTS_TEXT` GLOBAL_COMMAND; known local English TTS requests can use the same greeting via the guarded override.
+5. Firmware still runs onboard **WAKEUP**. STT inject `"Moxie, let's go"`. Entrance volley gets FALLBACK; native actions can transition into chat. Every incoming English TTS line is translated, including Good morning, questions and clarifications.
 6. Target: `OPENMOXIE_CHAT` `command=prompt` → opener → Cloud TTS → listen.
-7. Disconnect/reboot: `$SYS` disconnect regex → `forget_bootstrap`. Next session bootstraps again.
+7. Disconnect/reboot: `$SYS` connect/disconnect logs → `forget_bootstrap` and `remote_chat_brain.reset_device` on the asyncio loop. Pending recognition and remote output are invalidated immediately; the next session bootstraps again.
 
 ### Session state (in-process, not Redis)
 
@@ -209,94 +225,92 @@ Operator ──HTTP──► FastAPI /tts/*  (control only)
 |---|---|
 | `device_registry._last_seen` / `_bootstrapped` | until disconnect or process restart |
 | `device_state._config` | process lifetime; overlay `cloud_tts`, `moxie_mode` |
-| `stt_request._conversation_active` | until reconnect bootstrap |
-| `stt_request._session_start_ms` | per STT `uuid` until END or answer |
-| `remote_chat._sessions` | per device, output language/active flag plus 20-turn history from `notify` |
+| `device_state.speech_revision` | advances on actual cloud-TTS/puppet mode changes; prevents pending remote output surviving an off/on toggle |
+| `stt_request._conversation_phase` | entrance/chat/onboard from actual router turns; reset on reconnect bootstrap |
+| `stt_request._sessions` / `_completed` | bounded PCM/pending worker per device+UUID; 120-second bounded tombstones prevent duplicate or stale replies |
+| `remote_chat._sessions` | per device, output language/active flag, current turn token and bounded event-based input/audio-outcome history; removed on module exit, sleep, reset or shutdown |
+| `stt.transcripts._entries` | original/wire text by device+UUID, 256 entries, 120-second TTL, reset and mode-revision invalidation |
 | `remote_chat._last_event_id` | last router event (for HTTP sleep) |
 | `telehealth._puppet_state` | READY/IN_SESSION/EXITING from activity-log **session** boundaries only |
 
 There is no durable robot session store. Restarting this service forgets devices until they publish again.
 
+Remote replies check session identity, turn identity and the speech revision
+before publishing text or audio. The optional `speak_service.speak(is_current=...)`
+guard also suppresses stale failure silence after synthesis. Background provider
+threads can finish, but invalidated results cannot publish. History-only notify
+messages do not replace the current turn. See [review verification](REMOTE_CHAT_AUDIO.md#review-fixes-and-verification).
+
 ---
 
 ## 4. Roadmap — remaining Cloud TTS conversation pipeline
 
-**Do not add HTTP endpoints to make the robot speak on this path.** Mouth is already `CloudTTSRequest` → `speak_service`. Remaining work is ears + proving chat entry.
+**Do not add HTTP endpoints to make the robot speak on this path.** Native requests and accepted remote turns already use their respective correlated CloudTTSResponse sources. Remaining work is hardware acceptance of the input bridge and sustained conversation.
 
-### 4.1 M1 — Prove `OPENMOXIE_CHAT` (blocker)
+### 4.1 M1 — Prove `OPENMOXIE_CHAT` on hardware
 
 **Goal:** after wakeup + `"Moxie, let's go"`, logs show:
 
 ```
-Rx remote-chat … module=OPENMOXIE_CHAT … command=prompt
-Tx remote_chat … text='Привет!…'
-spoke … language=ru
+Rx remote-chat … module=OPENMOXIE_CHAT … command=prompt event_id=<P>
+remote-chat entered … module=OPENMOXIE_CHAT/default
+translated speech … target=kk
+Tx remote_chat … event_id=<P> output_type=GLOBAL_RESPONSE text='<Kazakh opener>'
+remote-chat audio … event_id=<P> chunk=0 source=REMOTECHAT …
+spoke event_id=<P> chunk=0 language=kk …
+remote-chat notify … source_event_id='<P>' …
 ```
 
-No chocolate/strawberry `ENROLLCONVO`. One English WAKEUP “let’s go” **before** inject is expected.
+Entry and subsequent Kazakh speech were observed Sep 28. Remote output receives
+source-1 audio directly; it raises no native TTS request. See
+[remote-chat audio](REMOTE_CHAT_AUDIO.md). The server fix restores FALLBACK for entrances; English speech uses the
+translation stage. Notify/SCHEDULED alone does not establish entry. Translation
+works in other native modules even if this handoff has not completed.
 
-**If ENROLLCONVO still runs:** do **not** set `brain_entrances_available="0"`. Next lever is option B in `handle_router_request` for `ENROLLCONVO`: `exit_module` and/or `launch OPENMOXIE_CHAT` as a **second** `response_actions` entry (primary must stay speak-only). Tests: `tests/test_remote_chat.py`.
+If entry still fails, preserve the fresh capture and diagnose it before testing
+secondary launch/exit actions. Do **not** set `brain_entrances_available="0"`.
+Those actions are experiments, not an established fix. The primary response
+must stay speak-only. Tests: `test_remote_chat.py`, `test_remote_chat_handoff.py`.
 
 **Do not** mark conversation active on `OPENMOXIE_CHAT` `notify`.
 
-### 4.2 M2 — Wire OpenAI STT (after M1)
+### 4.2 M2 — OpenAI STT wired; verify the microphone
 
-**Change only** `src/services/stt_request.py`. Reuse `src/services/stt/openai_stt.py` and `audio.pcm_to_wav`.
+`stt_request.py` reuses `stt/openai_stt.py` and `audio.pcm_to_wav`. Reference
+OpenMoxie accumulates incremental chunks at 16 kHz mono PCM16. Our handler:
 
-Branch:
+- Keeps the wake shim only in the entrance phase, transcribes only in chat,
+  and completes other onboard listens with FINAL error 66.
+- Includes START, SPEECH and END audio, including missing START / END-only
+  payloads. Caps each recording at 30 seconds, two sessions/device, 16 globally,
+  and expires streams lacking END after 30 seconds.
+- Runs recognition off-loop without the former imperative prompt. Original
+  human text is validated and retained; a separate English translation is sent
+  to the robot by default, never an assistant answer. Auto-mode language is
+  unknown. An explicit STT input hint is separate from the response language.
+- Limits total recognition plus bridge wait with `OPENAI_STT_TIMEOUT_S=6`
+  (maximum 8); provider retries are disabled. Input translation uses at most
+  2 seconds and only the remaining total budget. Timeout/failure,
+  empty recognition or invalid audio returns the existing FINAL error 66.
+- Echoes UUID and valid start/end timestamps from the robot's clock. Duplicate
+  END yields one response. Reset/exit/reconnect discards audio and cancels the
+  awaiting task. Bounded short-lived UUID tombstones deliberately survive the
+  reset so late frames cannot reopen old listens. Synchronous worker completion
+  after cancellation cannot publish anything.
 
-```
-if device_id not in _conversation_active:
-    inject WAKEUP_TRIGGER_LINE          # already implemented
-else:
-    transcribe accumulated PCM          # build this
-```
+The necessary integration changes include the provider retry override, config
+validation, immediate STT reset scheduled from the broker thread, shutdown
+cleanup, and forwarding nonempty first-reprompt input. No MQTT framing or
+puppet changes are needed. Never send unsolicited TTS or introduce an HTTP
+transcription path. See [STT_WIRING](STT_WIRING.md) for regression/live checks
+and the remaining physical microphone acceptance.
 
-**Payload scheme — inbound `zmqSTTRequest` (already):**
+### 4.3 M3/M4 — Bilingual replies and repeated conversation
 
-- Topic: `/devices/{id}/events/zmq`
-- Prefix: `embodied.perception.audio.zmqSTTRequest:`
-- `vad`: START / SPEECH / END_OF_SPEECH
-- `audio_content`: 16 kHz mono PCM16 (not 24 kHz TTS)
-- `uuid`: one per utterance
-
-**Payload scheme — outbound `zmqSTTResponse` (already shaped):**
-
-```python
-resp.uuid = req.uuid                 # MUST echo
-resp.type = FINAL
-resp.speech = transcript             # what the child said, not what Moxie should say
-resp.timestamp = now_ms()
-resp.start_timestamp = session_start
-resp.end_timestamp = now_ms()
-# on failure still publish (error_code / fallback speech) so the robot does not wait
-```
-
-Publish framed on `/devices/{id}/commands/zmq` via `mqtt_service.publish_proto`.
-
-**Implementation steps:**
-
-1. Accumulate `audio_content` per `(device_id, uuid)` on START/SPEECH/END.
-2. On END: `pcm_to_wav(buffer, sample_rate=16000)` — **not** `AUDIO_SAMPLE_RATE_HZ` (24 kHz).
-3. `await run_in_threadpool(openai_stt.transcribe, wav, None, "stt.wav")` (`language=None` → auto ru/kk).
-4. Stay under robot wait (`OPENAI_REQUEST_TIMEOUT_S` is 8s). Cap buffer; drop sessions with no END.
-5. Never transcribe during wake-gate.
-
-**Retry / timeout policy (no new HTTP retries):**
-
-| Failure | Required behavior |
-|---|---|
-| OpenAI STT timeout / error | Still send a FINAL `zmqSTTResponse` (fallback speech or `error_code`) |
-| Late FINAL | Robot logs `zmqSTT: UUID has gone too long` and may force-idle — keep STT < 8s |
-| OpenAI TTS fail | Already handled: `speak_service` publishes silence |
-| Missing `CloudTTSResponse` | Robot stalls in MarkingUp — never skip the reply |
-| MQTT reconnect | `forget_bootstrap`; do not reuse STT uuid maps across sessions |
-
-No new retry loop around MQTT publish. One response per STT uuid, one response per CloudTTS `event_id`.
-
-### 4.3 M3 — Opener copy (polish)
-
-`REMOTE_CHAT_OPENERS["default"]` is already Russian. Fix typos («чём» / «Что тебя на уме»). Optional Kazakh variant. Plays only after M1 `prompt`.
+Input bridging, nonempty first reprompts, silence handling, event-based history,
+short replies and deadlines are implemented. Automatic kk/ru output selection
+and sustained on-device conversation acceptance remain.
+Follow the detailed milestones in `docs/SPEAK_LIVE_PLAN.md`.
 
 ### 4.4 HTTP — do not add
 
@@ -314,9 +328,9 @@ Existing endpoints to keep:
 | `POST /tts/sleep` | MQTT sleep + remote-chat `action:sleep` |
 | `GET /tts/devices` | discovered ids |
 
-### 4.5 Integration tests still needed
+### 4.5 Integration verification
 
-Existing unit tests mock MQTT + OpenAI (`tests/conftest.py`). Add:
+Tests mock MQTT + OpenAI (`tests/conftest.py`). Current STT coverage includes:
 
 | Test | Assert |
 |---|---|
@@ -325,8 +339,8 @@ Existing unit tests mock MQTT + OpenAI (`tests/conftest.py`). Add:
 | same | WAV passed to STT is **16 kHz** |
 | same | STT failure still publishes a response |
 | `tests/test_remote_chat.py` | notify does not call `note_conversation_active` (already) |
-| same | if option B: ENROLLCONVO continue launches/exits without primary `action` |
-| On-device (not pytest) | log sequence in §4.1; then speak ru/kk; `openai stt transcribed`; remote-chat `speech=` matches; reply TTS same language |
+| `tests/test_stt_log_replay.py` | Sep 28 UUID/phase replay with synthetic kk/ru input → brain → matching TTS |
+| On-device (not pytest) | log sequence in §4.1; then speak ru/kk; `openai stt transcribed`; English FINAL matches the router UUID; original text is recovered; reply TTS uses the configured output language |
 
 Do not require a live robot in pytest.
 
@@ -336,7 +350,7 @@ Do not require a live robot in pytest.
 
 1. **Do not modify** `src/services/telehealth.py` speak/interrupt sequencing, or the puppet `/tts/speak` path, unless the operator explicitly asks.
 2. `PUPPET_MODE_AUTO_ENABLE` stays **false** for conversation work.
-3. Do not mix ears / mouth / brain. Spoken ru/kk is only `output.markup` → `CloudTTSRequest`.
+3. Do not mix ears / mouth / brain. Spoken ru/kk is only a correlated `CloudTTSResponse`: to a robot `CloudTTSRequest`, or REMOTECHAT for an accepted remote-module router turn (never for FALLBACK/onboard turns, never from HTTP).
 4. Do not put spoken lines in `zmqSTTResponse.speech`.
 5. Do not re-push `child_pii` / `pairing_status` on live toggles.
 6. Do not set `brain_entrances_available="0"`.
@@ -345,9 +359,10 @@ Do not require a live robot in pytest.
 9. Every `CloudTTSRequest` gets exactly one `CloudTTSResponse` (audio or silence).
 10. Never ask OpenAI TTS for `response_format=wav` (0xFFFFFFFF RIFF).
 11. Do not subscribe to MQTT `#`.
-12. Do not transcribe STT until `_conversation_active`.
+12. Do not transcribe STT until the device's conversation phase is `chat`.
 13. Do not hand-edit `src/protos/`.
-14. `SUPPORTED_LANGUAGES` is `ru`, `kk` only. English transcripts will fail chat/TTS until that list is extended on purpose.
+14. Output `SUPPORTED_LANGUAGES` remains ru/kk. Recognition can accept kk/ru/en;
+    the English input bridge does not require enabling English assistant output.
 
 ---
 
@@ -368,10 +383,15 @@ discovered device d_…
 bootstrapping device d_… (cloud_tts=1 moxie_mode=None)
 injecting canned STT line … phase=wake-gate speech="Moxie, let's go"
 Rx remote-chat … command='prompt' module=OPENMOXIE_CHAT/default
-Tx remote_chat … text='Привет!
-spoke … language=ru
+remote-chat entered … module=OPENMOXIE_CHAT/default
+Tx remote_chat … output_type=GLOBAL_RESPONSE text='<Kazakh opener>'
+remote-chat audio … source=REMOTECHAT …
+spoke event_id=<prompt id> chunk=0 language=kk
 ```
 
-Then (after M2): `openai stt transcribed` and `command='continue'` / `reprompt` with child speech.
+Then: `STT END`, `openai stt transcribed`, `STT FINAL ... speech=`, `command='continue'` / `reprompt` with child speech, and REMOTECHAT audio for that turn's `event_id`.
 
-Reference plan with skip options A–D: `docs/SPEAK_LIVE_PLAN.md`. Puppet line-2 / identity-crash evidence: `docs/SPEAK_PUPPET_ANALYSIS.md`. If either conflicts with this file on current code (e.g. removed bench HTTP, removed `INJECTED_STT_LINE`), **this file wins**.
+Current conversation roadmap: `docs/SPEAK_LIVE_PLAN.md`. Handoff diagnosis and
+verification: `docs/REMOTE_CHAT_HANDOFF.md`. Remote-module audio diagnosis:
+`docs/REMOTE_CHAT_AUDIO.md`. Puppet line-2 / identity-crash evidence:
+`docs/SPEAK_PUPPET_ANALYSIS.md`. The current task brief is `prompt.md`.

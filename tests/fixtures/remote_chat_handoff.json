@@ -1,0 +1,337 @@
+{
+  "description": "Selected logged fields in original order, not full packets. Missing request fields are omitted. TTS markup is reconstructed from speakable text in tests; original markup was truncated in logs.",
+  "device_id": "d_d05e3c66-dd29-4fe2-9758-7223e31511dc",
+  "runs": [
+    {
+      "name": "historical_entry",
+      "source": "log/debug.log.2026-09-07",
+      "source_lines": [
+        232,
+        244
+      ],
+      "observed_chat_entry": true,
+      "events": [
+        {
+          "log_line": 232,
+          "timestamp": "2026-09-07 12:28:40",
+          "kind": "router",
+          "request": {
+            "backend": "router",
+            "command": "start",
+            "module_id": "WAKEUP",
+            "content_id": "",
+            "event_id": "5c491ac0-73f6-41a9-b2f5-b1afe3585198",
+            "speech": "Moxie, let's go"
+          }
+        },
+        {
+          "log_line": 237,
+          "timestamp": "2026-09-07 12:28:41",
+          "kind": "activity",
+          "request": {
+            "context": {
+              "module_id": "OPENMOXIE_CHAT",
+              "mentor_present": "true"
+            },
+            "mentor_behavior": {
+              "module_id": "OPENMOXIE_CHAT",
+              "content_day": "1",
+              "timestamp": "1788766120000",
+              "action": "SCHEDULED",
+              "instance_id": "1"
+            }
+          }
+        },
+        {
+          "log_line": 238,
+          "timestamp": "2026-09-07 12:28:41",
+          "kind": "router",
+          "request": {
+            "backend": "router",
+            "command": "notify",
+            "module_id": "OPENMOXIE_CHAT",
+            "content_id": "default",
+            "event_id": "",
+            "speech": "Excellent!"
+          }
+        },
+        {
+          "log_line": 240,
+          "timestamp": "2026-09-07 12:28:41",
+          "kind": "router",
+          "request": {
+            "backend": "router",
+            "command": "prompt",
+            "module_id": "OPENMOXIE_CHAT",
+            "content_id": "default",
+            "event_id": "12283584-6239-4642-bd20-ef62906c5704",
+            "speech": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "scheduled_then_dismount",
+      "source": "log/debug.log",
+      "source_lines": [
+        142,
+        229
+      ],
+      "observed_chat_entry": false,
+      "events": [
+        {
+          "log_line": 143,
+          "timestamp": "2026-09-25 14:06:20",
+          "kind": "router",
+          "request": {
+            "backend": "router",
+            "command": "continue",
+            "module_id": "WAKEUP",
+            "content_id": "",
+            "event_id": "7ef747c8-a387-4441-aef9-8ee1050420db",
+            "speech": "Moxie, let's go"
+          }
+        },
+        {
+          "log_line": 147,
+          "timestamp": "2026-09-25 14:06:20",
+          "kind": "activity",
+          "request": {
+            "context": {
+              "module_id": "OPENMOXIE_CHAT",
+              "mentor_present": "true"
+            },
+            "mentor_behavior": {
+              "module_id": "OPENMOXIE_CHAT",
+              "content_day": "1",
+              "timestamp": "1790327180000",
+              "action": "SCHEDULED",
+              "instance_id": "1"
+            }
+          }
+        },
+        {
+          "log_line": 148,
+          "timestamp": "2026-09-25 14:06:20",
+          "kind": "router",
+          "request": {
+            "backend": "router",
+            "command": "notify",
+            "module_id": "WAKEUP",
+            "content_id": "",
+            "event_id": "",
+            "speech": "Сәлем! Қалайсың?"
+          }
+        },
+        {
+          "log_line": 149,
+          "timestamp": "2026-09-25 14:06:20",
+          "kind": "activity",
+          "request": {
+            "context": {
+              "module_id": "SESSIONDISMOUNT",
+              "mentor_present": "true"
+            },
+            "mentor_behavior": {
+              "module_id": "SESSIONDISMOUNT",
+              "content_day": "1",
+              "timestamp": "1790327181000",
+              "action": "SCHEDULED",
+              "instance_id": "2"
+            }
+          }
+        },
+        {
+          "log_line": 150,
+          "timestamp": "2026-09-25 14:06:20",
+          "kind": "activity",
+          "request": {
+            "context": {
+              "module_id": "SESSIONDISMOUNT",
+              "mentor_present": "true"
+            },
+            "mentor_behavior": {
+              "module_id": "SESSIONDISMOUNT",
+              "content_day": "1",
+              "timestamp": "1790327181000",
+              "action": "COMPLETED",
+              "instance_id": "2"
+            }
+          }
+        },
+        {
+          "log_line": 151,
+          "timestamp": "2026-09-25 14:06:21",
+          "kind": "router",
+          "request": {
+            "backend": "router",
+            "command": "notify",
+            "module_id": "SESSIONDISMOUNT",
+            "content_id": "",
+            "event_id": "",
+            "speech": "Cool! You're a terrific mentor! So, Would you like to play some more?"
+          }
+        },
+        {
+          "log_line": 153,
+          "timestamp": "2026-09-25 14:06:21",
+          "kind": "tts",
+          "event_id": "dfc1c48a-119c-48e3-801a-429a2a6a8289",
+          "chunk_num": 0,
+          "text": "Cool! You're a terrific mentor! So, \" \" Would you like to play some more?"
+        },
+        {
+          "log_line": 183,
+          "timestamp": "2026-09-25 14:06:35",
+          "kind": "router",
+          "request": {
+            "backend": "router",
+            "command": "start",
+            "module_id": "SESSIONDISMOUNT",
+            "content_id": "",
+            "event_id": "dbe0db8d-7efb-4947-b8ee-1c161a8e4b77",
+            "speech": "Moxie, let's go"
+          }
+        },
+        {
+          "log_line": 187,
+          "timestamp": "2026-09-25 14:06:36",
+          "kind": "activity",
+          "request": {
+            "context": {
+              "module_id": "SESSIONDISMOUNT",
+              "mentor_present": "true"
+            },
+            "mentor_behavior": {
+              "module_id": "SESSIONDISMOUNT",
+              "content_day": "1",
+              "timestamp": "1790327196000",
+              "action": "QUIT",
+              "instance_id": "3"
+            }
+          }
+        },
+        {
+          "log_line": 188,
+          "timestamp": "2026-09-25 14:06:36",
+          "kind": "router",
+          "request": {
+            "backend": "router",
+            "command": "notify",
+            "module_id": "BO",
+            "content_id": "",
+            "event_id": "",
+            "speech": "Great!"
+          }
+        },
+        {
+          "log_line": 190,
+          "timestamp": "2026-09-25 14:06:36",
+          "kind": "tts",
+          "event_id": "dbe0db8d-7efb-4947-b8ee-1c161a8e4b77",
+          "chunk_num": 0,
+          "text": "Great! \" \""
+        },
+        {
+          "log_line": 218,
+          "timestamp": "2026-09-25 14:06:41",
+          "kind": "activity",
+          "request": {
+            "context": {
+              "module_id": "SUPERCHAT_RIGHTNOW",
+              "mentor_present": "true"
+            },
+            "mentor_behavior": {
+              "module_id": "SUPERCHAT_RIGHTNOW",
+              "content_day": "1",
+              "timestamp": "1790327201000",
+              "action": "SCHEDULED",
+              "instance_id": "4"
+            }
+          }
+        },
+        {
+          "log_line": 225,
+          "timestamp": "2026-09-25 14:08:32",
+          "kind": "router",
+          "request": {
+            "backend": "router",
+            "command": "start",
+            "module_id": "",
+            "content_id": "_get_current_content_id ()",
+            "event_id": "1306da05-af36-4c96-bd1e-5137a12b16a1",
+            "speech": "Moxie, let's go"
+          }
+        },
+        {
+          "log_line": 229,
+          "timestamp": "2026-09-25 14:08:33",
+          "kind": "router",
+          "request": {
+            "backend": "router",
+            "command": "notify",
+            "module_id": "",
+            "content_id": "_get_current_content_id ()",
+            "event_id": "",
+            "speech": "I don't think I heard you right! Please repeat that for me?"
+          }
+        }
+      ]
+    },
+    {
+      "name": "scheduled_without_prompt",
+      "source": "log/debug.log",
+      "source_lines": [
+        481,
+        491
+      ],
+      "observed_chat_entry": false,
+      "events": [
+        {
+          "log_line": 482,
+          "timestamp": "2026-09-25 17:14:50",
+          "kind": "router",
+          "request": {
+            "backend": "router",
+            "command": "start",
+            "module_id": "WAKEUP",
+            "content_id": "",
+            "event_id": "5c85bcb9-fb15-4795-8007-ce4c2edee14d",
+            "speech": "Moxie, let's go"
+          }
+        },
+        {
+          "log_line": 486,
+          "timestamp": "2026-09-25 17:14:51",
+          "kind": "activity",
+          "request": {
+            "context": {
+              "module_id": "OPENMOXIE_CHAT",
+              "mentor_present": "true"
+            },
+            "mentor_behavior": {
+              "module_id": "OPENMOXIE_CHAT",
+              "content_day": "1",
+              "timestamp": "1790338491000",
+              "action": "SCHEDULED",
+              "instance_id": "1"
+            }
+          }
+        },
+        {
+          "log_line": 487,
+          "timestamp": "2026-09-25 17:14:51",
+          "kind": "router",
+          "request": {
+            "backend": "router",
+            "command": "notify",
+            "module_id": "WAKEUP",
+            "content_id": "",
+            "event_id": "",
+            "speech": "Сәлем! Қалайсың?"
+          }
+        }
+      ]
+    }
+  ]
+}

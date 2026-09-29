@@ -1,0 +1,11 @@
+{
+  "source": "log/debug.log (2026-09-28 16:34:44–16:35:20)",
+  "limitations": "Only phase, router IDs and failed STT UUIDs were logged. Regression audio and kk/ru transcripts are synthetic; this is not recorded microphone evidence.",
+  "device_id": "d_d05e3c66-dd29-4fe2-9758-7223e31511dc",
+  "wake_uuid": "eea438d6-acbd-4908-be3f-dada69cfb21d",
+  "chat_prompt_event_id": "f25e74d9-a0b0-40bf-bd6d-61746c0ffb12",
+  "chat_listens": [
+    {"uuid": "39e4e130-055f-4a10-9b0e-2052946e79ae", "previous_error_code": 66, "test_transcript": "Менің сүйікті жемісім — алма."},
+    {"uuid": "5025db38-80ad-4167-9482-a782fb0f41b4", "previous_error_code": 66, "test_transcript": "Мой любимый фрукт — яблоко."}
+  ]
+}
