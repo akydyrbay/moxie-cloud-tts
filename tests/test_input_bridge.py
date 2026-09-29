@@ -194,3 +194,39 @@ async def test_stale_router_activation_cannot_enable_asr_in_puppet(fake_openai, 
     await listen("Сәлем!", fake_openai)
     assert captured_protos[0][1].error_code == 66
     assert not fake_openai.audio.transcriptions.calls
+
+
+@pytest.mark.parametrize("original", ["Мокси, как тебя зовут?", "Моқси, сенің атың кім?", "moxie what is this"])
+async def test_wake_word_speech_is_forwarded(original, fake_openai, captured_protos, monkeypatch):
+    monkeypatch.setattr(settings, "STT_WAKE_WORD_REQUIRED", True)
+    fake_openai.chat.completions.translations[original] = "Moxie, what is your name?"
+    await listen(original, fake_openai)
+    final = captured_protos[0][1]
+    assert (final.speech, final.error_code) == (
+        "Moxie, what is your name?" if not original.isascii() else original, 0,
+    )
+    assert not transcripts.was_ignored(TEST_DEVICE_ID, "listen")
+
+
+@pytest.mark.parametrize("original", ["Как тебя зовут?", "Ordu,", "Мама, где Мокси?"])
+async def test_speech_without_wake_word_is_ignored_silently(
+    original, fake_openai, captured_protos, captured_publish, monkeypatch,
+):
+    from src.services.remote_chat import RemoteChatBrain
+
+    monkeypatch.setattr(settings, "STT_WAKE_WORD_REQUIRED", True)
+    await listen(original, fake_openai)
+    final = captured_protos[0][1]
+    # An empty FINAL, not error 66: repeated errors make the robot complain.
+    assert (final.speech, final.error_code) == ("", 0)
+    assert fake_openai.chat.completions.calls == []  # no bridge translation
+    assert transcripts.was_ignored(TEST_DEVICE_ID, "listen")
+
+    captured_publish.clear()
+    brain = RemoteChatBrain()
+    await brain.handle_router_request(TEST_DEVICE_ID, {
+        "backend": "router", "module_id": "OPENMOXIE_CHAT", "content_id": "default",
+        "command": "continue", "event_id": "listen", "speech": "",
+    })
+    assert fake_openai.chat.completions.calls == []  # no LLM, no reprompt
+    assert brain._sessions[TEST_DEVICE_ID].empty_reprompts == 0

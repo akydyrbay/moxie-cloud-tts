@@ -21,7 +21,9 @@ from src.services.device_state import device_state
 from src.services.mqtt_service import mqtt_service
 from src.services.provider_work import provider_pool
 from src.services.stt import input_translation, openai_stt, transcripts
-from src.services.stt.validation import InvalidTranscript, pcm_energy, validate_transcript
+from src.services.stt.validation import (
+    InvalidTranscript, NotAddressed, pcm_energy, starts_with_wake_word, validate_transcript,
+)
 
 logger = logging.getLogger(__name__)
 STT_REQUEST_PREFIX = zmqSTTRequest.DESCRIPTOR.full_name.encode() + b":"
@@ -194,6 +196,10 @@ async def _recognize_and_bridge(wav: bytes, audio_ms: int, deadline: float):
     )
     original = result.text.strip()
     validate_transcript(original, audio_ms)
+    if settings.STT_WAKE_WORD_REQUIRED and not starts_with_wake_word(
+        original, settings.STT_WAKE_WORDS,
+    ):
+        raise NotAddressed(original)
     wire = original
     if settings.STT_ENGLISH_BRIDGE_ENABLED:
         wire = await input_translation.to_english(original, remaining_s=deadline - time.monotonic())
@@ -323,6 +329,12 @@ async def handle_stt_request(device_id: str, request: zmqSTTRequest) -> dict | N
             _discard_listens(device_id)
             raise
         return None
+    except NotAddressed as exc:
+        # Not an error: the robot keeps listening. The remembered empty wire
+        # text lets remote chat answer this listen's turn silently.
+        original = str(exc)
+        logger.info("STT ignored without wake word device=%s uuid=%s original=%.160r",
+                    device_id, request.uuid, original)
     except InvalidTranscript as exc:
         error = str(exc)
     except Exception as exc:

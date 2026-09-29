@@ -191,16 +191,16 @@ def test_wakeup_publishes_mqtt_command(client, known_device, captured_publish) -
     assert json.loads(payload) == {"command": "wakeup"}
 
 
-def test_sleep_publishes_mqtt_and_remote_chat(
+def test_sleep_publishes_mqtt_and_queues_chat_action(
     client, known_device, captured_publish,
 ) -> None:
     resp = client.post("/tts/sleep")
     assert resp.status_code == 200
-    assert resp.json() == {"status": "sleep_sent", "device_id": DEVICE}
+    assert resp.json() == {"status": "sleep_queued", "device_id": DEVICE}
     commands = {topic.rsplit("/", 1)[-1]: json.loads(payload)
                 for topic, payload in captured_publish}
-    assert commands["sleep"] == {"command": "sleep"}
-    assert commands["remote_chat"]["response_action"]["action"] == "sleep"
+    # The remote-chat action waits for the next live turn.
+    assert commands == {"sleep": {"command": "sleep"}}
 
 
 def test_sleep_without_a_robot_is_a_clear_error(client, captured_publish) -> None:

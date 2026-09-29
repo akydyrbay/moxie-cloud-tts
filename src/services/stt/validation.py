@@ -15,6 +15,15 @@ class InvalidTranscript(ValueError):
     """A local, safe-to-log transcript validation reason."""
 
 
+class NotAddressed(ValueError):
+    """Recognized speech that does not start with the wake word."""
+
+
+def starts_with_wake_word(text: str, wake_words: list[str]) -> bool:
+    words = re.findall(r"\w+", text.casefold())
+    return bool(words) and any(words[0] == w.casefold() for w in wake_words)
+
+
 def _normalized(text: str) -> str:
     return " ".join(re.findall(r"\w+", text.casefold()))
 

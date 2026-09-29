@@ -223,13 +223,14 @@ async def wakeup(device_id: str | None = None) -> dict:
 
 @router.post("/sleep")
 async def sleep(device_id: str | None = None) -> dict:
-    """Put an awake Moxie to sleep.
+    """Put an awake Moxie to sleep at its next chat turn.
 
-    Publishes the MQTT `sleep` command (mirror of `/tts/wakeup`) and a
-    remote-chat `sleep` action on the last in-flight volley, which is the
-    documented firmware path (`<sleep>` / `action: sleep`).
+    Firmware runs `action: sleep` only in the response to a live turn, so the
+    action is queued and sent with the reply to the child's next utterance or
+    the robot's silence reprompt. The MQTT `sleep` command is also published;
+    this firmware has not been seen to act on it.
     """
     target = _require_device(device_id)
     telehealth.sleep(target)
     remote_chat_brain.request_sleep(target)
-    return {"status": "sleep_sent", "device_id": target}
+    return {"status": "sleep_queued", "device_id": target}

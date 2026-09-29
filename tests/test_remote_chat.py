@@ -307,22 +307,39 @@ async def test_sleep_tag_keeps_speak_as_primary(
     assert payload["response_actions"][1]["action"] == "sleep"
 
 
-async def test_request_sleep_uses_last_event_id(brain: RemoteChatBrain) -> None:
+async def test_request_sleep_is_sent_with_next_chat_turn(
+    brain: RemoteChatBrain, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.services import stt_request
+
+    monkeypatch.setattr(settings, "DEFAULT_TTS_LANGUAGE", "kk")
+    turn = {
+        "backend": "router", "module_id": "OPENMOXIE_CHAT", "content_id": "default",
+    }
     await brain.handle_router_request(
-        TEST_DEVICE_ID,
-        {
-            "backend": "router",
-            "command": "notify",
-            "event_id": "last-volley",
-            "module_id": "OPENMOXIE_CHAT",
-            "content_id": "default",
-        },
+        TEST_DEVICE_ID, {**turn, "command": "prompt", "event_id": "opener"},
     )
     brain._published.clear()  # type: ignore[attr-defined]
     brain.request_sleep(TEST_DEVICE_ID)
+    # Nothing is sent on an answered volley, and listening stays in chat.
+    assert brain._published == []  # type: ignore[attr-defined]
+    assert stt_request._conversation_phase[TEST_DEVICE_ID] == "chat"
+
+    await brain.handle_router_request(
+        TEST_DEVICE_ID, {**turn, "command": "reprompt", "event_id": "live", "speech": ""},
+    )
     _topic, payload = brain._published[0]  # type: ignore[attr-defined]
-    assert payload["event_id"] == "last-volley"
-    assert payload["response_action"]["action"] == "sleep"
+    assert payload["event_id"] == "live"
+    assert payload["output"]["text"] == "Ұйықтайтын уақыт болды. Сау бол!"
+    assert payload["response_actions"][0].get("action") is None
+    assert payload["response_actions"][1] == {"action": "sleep", "output_type": "GLOBAL_RESPONSE"}
+
+    brain._published.clear()  # type: ignore[attr-defined]
+    await brain.handle_router_request(
+        TEST_DEVICE_ID, {**turn, "command": "reprompt", "event_id": "after", "speech": ""},
+    )
+    _topic, payload = brain._published[0]  # type: ignore[attr-defined]
+    assert all(a.get("action") != "sleep" for a in payload["response_actions"])
 
 
 async def test_mqtt_dispatches_remote_chat(monkeypatch: pytest.MonkeyPatch) -> None:

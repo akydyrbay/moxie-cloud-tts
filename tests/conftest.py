@@ -165,6 +165,12 @@ def translated_lines(fake_openai):
 
 
 @pytest.fixture(autouse=True)
+def no_wake_word(monkeypatch):
+    """Most tests model plain utterances; wake-word tests opt back in."""
+    monkeypatch.setattr(settings, "STT_WAKE_WORD_REQUIRED", False)
+
+
+@pytest.fixture(autouse=True)
 def clean_stt_state():
     """Isolate router/STT lifecycle state, including tests that only send notify."""
     for device, _ in list(stt_request._sessions):

@@ -48,3 +48,9 @@ def remember(device_id: str, uuid: str, original: str, wire: str, language: str)
 def find(device_id: str, uuid: str) -> Transcript | None:
     _prune()
     return _entries.get((device_id, uuid))
+
+
+def was_ignored(device_id: str, uuid: str) -> bool:
+    """True for recognized speech withheld from the robot (no wake word)."""
+    entry = find(device_id, uuid)
+    return entry is not None and bool(entry.original) and not entry.wire

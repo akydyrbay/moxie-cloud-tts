@@ -290,8 +290,6 @@ async def _change_state(brain, transition, monkeypatch):
     elif transition == "bootstrap":
         device_registry.forget_bootstrap(DEVICE)
         await brain.ensure_device_bootstrapped(DEVICE)
-    elif transition == "sleep":
-        brain.request_sleep(DEVICE)
     elif transition == "broker_disconnect":
         monkeypatch.setattr(remote_chat, "remote_chat_brain", brain)
         monkeypatch.setattr(mqtt_service, "_loop", asyncio.get_running_loop())
@@ -305,7 +303,7 @@ async def _change_state(brain, transition, monkeypatch):
 
 @pytest.mark.parametrize("blocked_stage", ["translation", "chat", "tts"], indirect=True)
 @pytest.mark.parametrize("transition", [
-    "module_exit", "new_prompt", "puppet", "cloud_tts", "bootstrap", "sleep",
+    "module_exit", "new_prompt", "puppet", "cloud_tts", "bootstrap",
     "broker_disconnect", "puppet_round_trip", "cloud_tts_round_trip",
 ])
 async def test_state_change_discards_pending_remote_output(

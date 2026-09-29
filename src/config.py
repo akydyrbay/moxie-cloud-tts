@@ -91,6 +91,10 @@ class Settings(BaseSettings):
     STT_ENGLISH_BRIDGE_ENABLED: bool = True
     # Optional protobuf metadata is off until its firmware behavior is verified.
     STT_BRIDGE_METADATA_ENABLED: bool = False
+    # Chat turns count only when the child starts with the wake word; other
+    # speech (TV, adults, noise) is answered with an empty FINAL and silence.
+    STT_WAKE_WORD_REQUIRED: bool = True
+    STT_WAKE_WORDS: list[str] = ["moxie", "moxy", "мокси", "моқси", "моксі", "моксы", "моқши", "макси", "мукси", "moksi", "moksy", "мокши", "мокщи", "моқщи"]  # noqa: E501
     OPENAI_INPUT_TRANSLATION_TIMEOUT_S: float = Field(default=2.0, gt=0, le=6.0)
     OPENAI_CHAT_TIMEOUT_S: float = Field(default=4.0, gt=0)
     OPENAI_TTS_TIMEOUT_S: float = Field(default=8.0, gt=0)
@@ -106,7 +110,7 @@ class Settings(BaseSettings):
     )
 
     SUPPORTED_LANGUAGES: list[str] = ["ru", "kk"]
-    DEFAULT_TTS_LANGUAGE: Literal["ru", "kk"] = "ru"
+    DEFAULT_TTS_LANGUAGE: Literal["ru", "kk"] = "kk"
     # Translate every English/Latin autonomous TTS line to DEFAULT_TTS_LANGUAGE.
     # No phrase allowlist, fixed greeting, or dependency on chat entry.
     CLOUD_TTS_TRANSLATION_ENABLED: bool = True

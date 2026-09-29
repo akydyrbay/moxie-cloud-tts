@@ -63,6 +63,10 @@ def fallback_line(language: str) -> str:
     return FALLBACK_LINES.get(language) or FALLBACK_LINES[settings.DEFAULT_TTS_LANGUAGE]
 
 
+def sleep_line(language: str) -> str:
+    return {"kk": "Ұйықтайтын уақыт болды. Сау бол!", "ru": "Пора спать. Пока!"}[language]
+
+
 def generation_error_line(language: str) -> str:
     return {
         "kk": "Жауап дайындау қиын болып тұр. Тағы бір рет сұрап көрші.",
@@ -258,9 +262,8 @@ class RemoteChatBrain:
 
     def __init__(self) -> None:
         self._sessions: dict[str, _ChatSession] = {}
-        # Last router event_id per device, so an HTTP sleep can attach a
-        # `sleep` action to a volley the robot still has in flight.
-        self._last_event_id: dict[str, str] = {}
+        # Devices whose next live chat turn is answered with a `sleep` action.
+        self._pending_sleep: set[str] = set()
         self._unsupported_queries: OrderedDict[tuple[str, str], float] = OrderedDict()
 
     def get_modules_info(self) -> dict:
@@ -382,7 +385,7 @@ class RemoteChatBrain:
     def reset_device(self, device_id: str) -> None:
         """Invalidate microphone work and remote output at a session boundary."""
         self._clear_session(device_id)
-        self._last_event_id.pop(device_id, None)
+        self._pending_sleep.discard(device_id)
         reset_conversation_state(device_id)
 
     def output_language(self, device_id: str) -> str | None:
@@ -491,36 +494,15 @@ class RemoteChatBrain:
         )
 
     def request_sleep(self, device_id: str) -> None:
-        """Ask the robot to sleep via a remote-chat `sleep` action.
+        """Queue a `sleep` action for this robot's next live chat turn.
 
-        Firmware only honours this on an accepted volley, so we reuse the last
-        router `event_id` when we have one. The MQTT `sleep` command (see
-        `telehealth.sleep`) is sent alongside this from the HTTP handler.
+        Firmware executes response actions only on the response to a turn it
+        is still waiting for; a response on an already-answered event_id is
+        dropped (Sep 23/25/29 captures). Chat state is left alone until the
+        robot actually changes module, so listening keeps working meanwhile.
         """
-        event_id = self._last_event_id.get(device_id, "")
-        self._clear_session(device_id)
-        note_onboard_module(device_id, wake_gate=False)
-        payload = {
-            "command": "remote_chat",
-            "result": 0,
-            "backend": "router",
-            "event_id": event_id,
-            "output": {"text": "", "markup": '<break time="0.01s"/>'},
-            "response_actions": [
-                {"action": "sleep", "output_type": "GLOBAL_COMMAND"},
-            ],
-            "response_action": {
-                "action": "sleep",
-                "output_type": "GLOBAL_COMMAND",
-            },
-            "fallback": False,
-        }
-        logger.info(
-            "Tx remote_chat sleep to %s event_id=%r",
-            device_id,
-            event_id,
-        )
-        mqtt_service.publish_command_json(device_id, "remote_chat", payload)
+        self._pending_sleep.add(device_id)
+        logger.info("sleep queued for next chat turn device=%s", device_id)
 
     async def _remote_module_response(
         self, device_id: str, request: dict, module_id: str, content_id: str,
@@ -585,7 +567,13 @@ class RemoteChatBrain:
         voiced = await self._remote_audio_enabled()
         actions = []
         failed_translation = False
-        if cmd in {"start", "prompt"}:
+        if device_id in self._pending_sleep:
+            self._pending_sleep.discard(device_id)
+            logger.info("remote-chat sleep device=%s event_id=%s command=%s",
+                        device_id, event_id, cmd)
+            text = sleep_line(language)
+            actions = [{"action": "sleep", "output_type": "GLOBAL_RESPONSE"}]
+        elif cmd in {"start", "prompt"}:
             text = self._opener_for(content_id or "default")
             if voiced and settings.CLOUD_TTS_TRANSLATION_ENABLED and translation.needs_translation(text):
                 try:
@@ -597,6 +585,9 @@ class RemoteChatBrain:
                     )
                     text = generation_error_line(language)
                     failed_translation = True
+        elif not speech and transcripts.was_ignored(device_id, event_id):
+            # Speech without the wake word: complete the turn silently.
+            text = ""
         elif not speech:
             # Silence is an event, not the robot's apology spoken by the child.
             text = session.reprompt()
@@ -660,8 +651,6 @@ class RemoteChatBrain:
         module_key = f"{module_id}/{content_id}"
 
         event_id = request.get("event_id") or ""
-        if event_id:
-            self._last_event_id[device_id] = event_id
 
         if self.is_remote_module(module_id, content_id):
             logger.debug("RCR:%s for remote module %s", cmd, module_key)

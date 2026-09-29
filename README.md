@@ -298,7 +298,7 @@ the robot stuck waiting until it force-idles and sleeps.
 | `POST /tts/cloud-tts` | Toggle cloud TTS on the robot |
 | `POST /tts/interrupt` | Stop current playback |
 | `POST /tts/wakeup` | Wake a sleeping robot |
-| `POST /tts/sleep` | Put an awake robot to sleep |
+| `POST /tts/sleep` | Queue sleep; sent with the reply to the robot's next chat turn (speech or silence reprompt) |
 | `GET /tts/devices` | Robots seen on the broker |
 
 ## Configuration
@@ -324,6 +324,8 @@ Everything is environment variables or `.env`; see `src/config.py`.
 | `STT_INPUT_LANGUAGE` | `auto` | Recognition hint: auto, kk, ru or en; separate from reply language. |
 | `STT_ENGLISH_BRIDGE_ENABLED` | `true` | Translate human kk/ru to English for robot routing; preserve original text for GPT. |
 | `STT_BRIDGE_METADATA_ENABLED` | `false` | Optional protobuf language/original fields; test separately on firmware. |
+| `STT_WAKE_WORD_REQUIRED` | `true` | In chat, answer only speech that starts with a wake word; other speech gets an empty FINAL and a silent turn. |
+| `STT_WAKE_WORDS` | `moxie, moxy, мокси, моқси, моксі, моксы` | First-word matches, case-insensitive (JSON list in `.env`). |
 | `OPENAI_STT_TIMEOUT_S` | `6.0` | Total recognition plus bridge deadline. |
 | `OPENAI_INPUT_TRANSLATION_TIMEOUT_S` | `2.0` | Bounded by remaining STT time. |
 | `OPENAI_CHAT_TIMEOUT_S` | `4.0` | Chat generation deadline, no retries. |
