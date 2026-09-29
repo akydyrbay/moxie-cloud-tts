@@ -20,7 +20,7 @@ Device ids look like `d_<uuid>`. They are **discovered** from MQTT topics, never
 **Invariant:** Moxie only plays cloud audio that answers a request it is already waiting on, matched by `event_id` / `chunk_num`. You cannot push an arbitrary `CloudTTSResponse` and have it play. Two live requests exist:
 
 - Robot lines: a `CloudTTSRequest` → answer with its `event_id`/`chunk_num`, `ROBOT_TTS_REQUEST`.
-- Remote-module output (`OPENMOXIE_CHAT` GLOBAL_RESPONSE): firmware raises **no** `CloudTTSRequest` (Sep 28 captures). The server answers that live router turn with one `CloudTTSResponse`, `REMOTECHAT_TTS_REQUEST`, `event_id` = the router `event_id`, `chunk_num=0`, only when `cloud_tts=1` and puppet is off. See [remote-chat audio](REMOTE_CHAT_AUDIO.md). The later Sep 28 run and operator report confirm Kazakh replies to English input.
+- Remote-module output (`OPENMOXIE_CHAT` GLOBAL_RESPONSE): firmware raises **no** `CloudTTSRequest` (Sep 28 captures). The server answers that live router turn with one `CloudTTSResponse`, `REMOTECHAT_TTS_REQUEST`, `event_id` = the router `event_id`, `chunk_num=0`, only when `cloud_tts=1` and puppet is off. The later Sep 28 run and operator report confirm Kazakh replies to English input.
 
 **Current milestone (2026-09-29):** wake-up and Kazakh answers to English input
 are operator-confirmed. The evening Sep 28 capture shows 13 Cyrillic transcripts
@@ -48,8 +48,7 @@ English translation to the robot under the same UUID. The bridge can be disabled
 for A/B comparison. `OPENAI_STT_TIMEOUT_S=6` bounds recognition plus translation,
 with no SDK retries; failures produce FINAL error 66. STT supports missing START, END audio,
 bounded buffers/expiry, deduplication and reset/exit cancellation. See
-[STT implementation and verification](STT_WIRING.md),
-[translation verification](TTS_TRANSLATION.md) and
+[STT implementation and verification](STT_WIRING.md) and
 [conversation plan](SPEAK_LIVE_PLAN.md).
 
 ---
@@ -239,7 +238,7 @@ Remote replies check session identity, turn identity and the speech revision
 before publishing text or audio. The optional `speak_service.speak(is_current=...)`
 guard also suppresses stale failure silence after synthesis. Background provider
 threads can finish, but invalidated results cannot publish. History-only notify
-messages do not replace the current turn. See [review verification](REMOTE_CHAT_AUDIO.md#review-fixes-and-verification).
+messages do not replace the current turn.
 
 ---
 
@@ -262,8 +261,7 @@ remote-chat notify … source_event_id='<P>' …
 ```
 
 Entry and subsequent Kazakh speech were observed Sep 28. Remote output receives
-source-1 audio directly; it raises no native TTS request. See
-[remote-chat audio](REMOTE_CHAT_AUDIO.md). The server fix restores FALLBACK for entrances; English speech uses the
+source-1 audio directly; it raises no native TTS request. The server fix restores FALLBACK for entrances; English speech uses the
 translation stage. Notify/SCHEDULED alone does not establish entry. Translation
 works in other native modules even if this handoff has not completed.
 
@@ -391,7 +389,5 @@ spoke event_id=<prompt id> chunk=0 language=kk
 
 Then: `STT END`, `openai stt transcribed`, `STT FINAL ... speech=`, `command='continue'` / `reprompt` with child speech, and REMOTECHAT audio for that turn's `event_id`.
 
-Current conversation roadmap: `docs/SPEAK_LIVE_PLAN.md`. Handoff diagnosis and
-verification: `docs/REMOTE_CHAT_HANDOFF.md`. Remote-module audio diagnosis:
-`docs/REMOTE_CHAT_AUDIO.md`. Puppet line-2 / identity-crash evidence:
+Current conversation roadmap: `docs/SPEAK_LIVE_PLAN.md`. Puppet line-2 / identity-crash evidence:
 `docs/SPEAK_PUPPET_ANALYSIS.md`. The current task brief is `prompt.md`.

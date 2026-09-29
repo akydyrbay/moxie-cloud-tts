@@ -219,3 +219,5 @@ __marimo__/
 
 # Generated local audio and provider-verification artifacts.
 /local/work/
+
+.DS_Store

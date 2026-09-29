@@ -99,7 +99,6 @@ The handoff fix restores that priority. The new translation stage uses the same
 audio response path for all English lines and no longer needs actual chat entry.
 This is strong evidence for a discarded native transition, but the local
 firmware action itself is not in the capture. A fresh robot run must confirm it.
-See [handoff diagnosis and regression evidence](REMOTE_CHAT_HANDOFF.md).
 
 The latest capture does not show the earlier ENROLLCONVO question sequence.
 English apologies do not establish a recognition failure; no real recognition ran.
@@ -156,7 +155,7 @@ Preserve these constraints throughout implementation:
 9. Keep spoken output as `<usel variant="2" genre="none">…</usel>`. Preserve
    Cyrillic; do not transliterate through automarkup/unidecode. Remote-module
    output raises no robot TTS request; voice it once as REMOTECHAT audio on the
-   router `event_id` ([remote-chat audio](REMOTE_CHAT_AUDIO.md)).
+   router `event_id` (see the invariant in [AGENTS.md](AGENTS.md)).
 10. Keep the primary speech response free of launch/sleep side effects.
     If a supported transition action is tested, place it after the speak action.
 11. Push identity fields only during bootstrap. Preserve identity stripping on
@@ -195,8 +194,8 @@ list can mask the symptom without advancing this milestone.
 Implemented and verified locally:
 
 1. Preserved 21 selected log events from the Sep 7 successful entry and both
-   Sep 25 failures in `tests/fixtures/remote_chat_handoff.json`. These are logged
-   fields, not full packets. Each field was checked against its source log.
+   Sep 25 failures as a replay fixture (removed Sep 29 once the handoff was
+   confirmed on hardware; recoverable from git history).
 2. Compared modules, schedule and response shapes with the copied OpenMoxie.
    Registration and schedule already matched. Restored entrance `FALLBACK` and
    the reference legacy `fallback=false` flag; both normal response envelopes
@@ -338,7 +337,7 @@ manual resets between normal turns.
 | [tests/test_remote_chat.py](../tests/test_remote_chat.py), [tests/test_chat_language.py](../tests/test_chat_language.py) | Entry/exit, first real reprompt, bilingual history, language guard and stale turns. |
 | [tests/test_stt_request.py](../tests/test_stt_request.py) | Real audio assembly, 16 kHz WAV, per-device UUIDs, empty/error/duplicate END, timeout and reconnect. Replace the temporary transcription-unavailable FINAL with actual recognition. |
 | [tests/test_cloud_tts_request.py](../tests/test_cloud_tts_request.py) | Preserve original correlation, command marks, mouth marks, PCM and single-response failure handling. |
-| [tests/test_wakeup_log_replay.py](../tests/test_wakeup_log_replay.py), [tests/test_remote_chat_handoff.py](../tests/test_remote_chat_handoff.py) | Sep 23 speech and Sep 7/25 handoff regressions exist; add a later full-turn capture. |
+| [tests/test_remote_chat_handoff.py](../tests/test_remote_chat_handoff.py) | Module exit/re-entry lifecycle; add a later full-turn capture. |
 
 Transport, bootstrap, pairing and puppet code already exist. Reuse them rather
 than creating a second MQTT service or new HTTP conversation endpoints.
@@ -391,18 +390,9 @@ Failures should retain enough context to identify which stage stopped. A
 A canned wake trigger, scheduled activity, or overridden local English line
 does not count as a real conversation turn.
 
-The existing replay test is pinned to the **Sep 23** capture (14 TTS requests
-and specific IDs). Its committed fixture remains useful. Do not point
-`MOXIE_REPLAY_LOG` at the newer Sep 25 log and expect that historical test to
-pass. The new handoff fixture is separate and has its own replay tests.
-
 ## References and handoff
 
 - [AGENTS.md](AGENTS.md): architecture, protocol invariants and current translation status.
-- [TTS translation](TTS_TRANSLATION.md): current output path, API check and regression evidence.
-- [Remote-chat handoff](REMOTE_CHAT_HANDOFF.md): Sep 27 diagnosis and local verification.
-- [Kazakh wake-up analysis](KAZAKH_WAKEUP_ANALYSIS.md): Sep 23 punctuation bug and
-  server-side replay verification; historical evidence, not the Sep 25 outcome.
 - [Puppet analysis](SPEAK_PUPPET_ANALYSIS.md): first-line success, subsequent-line
   problem and identity-update crash history.
 - [README](../README.md): setup and operator commands.

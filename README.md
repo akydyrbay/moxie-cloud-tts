@@ -337,16 +337,8 @@ Everything is environment variables or `.env`; see `src/config.py`.
 mise test
 ```
 
-The Sep 23 and Sep 25 fixtures cover 30 TTS requests, including empty animations
-and English lines outside wake-up. Translation/MQTT/TTS providers are mocked in
-the replays. Run them without needing the mutable live log:
-
-```bash
-uv run pytest tests/test_wakeup_log_replay.py tests/test_translation.py -q
-```
-
-`MOXIE_REPLAY_LOG` is still supported for the Sep 23 test only; do not point it
-at another day's capture. Tests do not overwrite `log/debug.log` or prove playback.
+Providers and MQTT are mocked. Tests do not read or overwrite `log/debug.log`
+and do not prove playback on the robot.
 
 ## Roadmap
 
@@ -359,8 +351,6 @@ only active remote chat and preserves the wake shim.
 ## Documents
 
 - [Localization repair](docs/LOCALIZATION_FIXES.md) — input bridge, deadlines, regression evidence and robot checklist.
-- [TTS translation](docs/TTS_TRANSLATION.md) — current behavior, verification and live API results.
-- [Kazakh wake-up diagnosis](docs/KAZAKH_WAKEUP_ANALYSIS.md) — Sep 23 failure, corrected language path, and verification evidence.
 - [AGENTS.md](docs/AGENTS.md) — architecture, MQTT topics, and remaining Cloud TTS work for development agents.
 - [Speak Live Plan](docs/SPEAK_LIVE_PLAN.md) — autonomous (non-puppet) conversation path.
 - [Speak Puppet Analysis](docs/SPEAK_PUPPET_ANALYSIS.md) — why TELEHEALTH only plays the first `/tts/speak` line.
