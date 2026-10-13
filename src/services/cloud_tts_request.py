@@ -23,7 +23,7 @@ from html import unescape
 
 from src.config import settings
 from src.protos.embodied.unity.CloudTTS_pb2 import CloudTTSRequest, ROBOT_TTS_REQUEST
-from src.services import speak_service, translation
+from src.services import localization_context, speak_service, translation
 from src.services.device_state import device_state
 from src.services.language import detect_language
 
@@ -68,6 +68,8 @@ async def handle_cloud_tts_request(
     # discards the audio. Telehealth PLAY_OUTPUT lines often arrive with an
     # empty event_id — that is expected; still echo it exactly.
     event_id = request.event_id
+    puppet = await device_state.get_puppet_mode()
+    context = "" if puppet else localization_context.snapshot(device_id)
 
     logger.info(
         "CloudTTSRequest fields device=%s event_id=%r chunk_num=%s "
@@ -93,7 +95,10 @@ async def handle_cloud_tts_request(
             request_source=ROBOT_TTS_REQUEST,
         )
 
-    puppet = await device_state.get_puppet_mode()
+    if not puppet:
+        from src.services.remote_chat import remote_chat_brain
+
+        remote_chat_brain.observe_native_audio(device_id, event_id)
     language = detect_language(text)
     if (
         settings.CLOUD_TTS_TRANSLATION_ENABLED
@@ -103,7 +108,8 @@ async def handle_cloud_tts_request(
         requested_text = text
         language = settings.DEFAULT_TTS_LANGUAGE
         try:
-            text = await translation.translate(requested_text, language, deadline=deadline)
+            text = await translation.translate(requested_text, language, deadline=deadline,
+                                               context=context)
         except Exception as exc:
             logger.warning(
                 "CloudTTSRequest translation failed device=%s event_id=%r chunk=%d "
@@ -132,7 +138,7 @@ async def handle_cloud_tts_request(
     )
 
     try:
-        return await speak_service.speak(
+        result = await speak_service.speak(
             text,
             language,
             event_id=event_id,
@@ -142,6 +148,10 @@ async def handle_cloud_tts_request(
             request_source=ROBOT_TTS_REQUEST,
             deadline=deadline,
         )
+        if not puppet and result["status"] == "published":
+            localization_context.remember(device_id, strip_markup(request.markup), text,
+                                          language, context=context)
+        return result
     except Exception:
         # speak() already published silence; swallow so the MQTT dispatcher logs
         # a single clear error rather than an unhandled task exception.

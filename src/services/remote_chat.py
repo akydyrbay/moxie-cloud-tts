@@ -12,7 +12,9 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from collections import OrderedDict
+import asyncio
 import copy
+from dataclasses import dataclass, field
 from html import escape
 import json
 import logging
@@ -30,7 +32,7 @@ from src.config import (
     settings,
 )
 from src.protos.embodied.unity.CloudTTS_pb2 import REMOTECHAT_TTS_REQUEST
-from src.services import speak_service, translation
+from src.services import localization_context, speak_service, translation
 from src.services.device_state import device_state
 from src.services.devices import device_registry
 from src.services.language import fallback_language, matches_output_language
@@ -40,7 +42,9 @@ from src.services.mqtt_service import mqtt_service
 from src.services.provider_work import provider_pool
 from src.services.stt import transcripts
 from src.services.stt_request import (
+    native_activity_active,
     note_conversation_active,
+    note_native_activity,
     note_onboard_module,
     reset_conversation_state,
 )
@@ -56,6 +60,17 @@ _MAX_HISTORY = 20
 # Sep 25 scheduled chat but never entered it; Sep 7 FALLBACK reached prompt.
 # Translate English speech only in its live CloudTTSRequest.
 _ENTRANCE_MODULES = frozenset({"WAKEUP", "ENROLLCONVO"})
+_SESSION_BOUNDARIES = _ENTRANCE_MODULES | {"WELCOME", "SESSIONDISMOUNT", "SLEEP", "TELEHEALTH"}
+_NON_SPEECH_NOTIFY = re.compile(r"(?:\[(?:animation|silent):[^\]]*\]\s*)+", re.IGNORECASE)
+
+
+@dataclass
+class _Selection:
+    owner: str = ""
+    native_request: tuple[str, str, str, str] | None = None
+    ready: asyncio.Event = field(default_factory=asyncio.Event)
+    created: float = field(default_factory=time.monotonic)
+    revision: int = field(default_factory=lambda: device_state.speech_revision)
 
 
 def fallback_line(language: str) -> str:
@@ -265,6 +280,8 @@ class RemoteChatBrain:
         # Devices whose next live chat turn is answered with a `sleep` action.
         self._pending_sleep: set[str] = set()
         self._unsupported_queries: OrderedDict[tuple[str, str], float] = OrderedDict()
+        self._selections: OrderedDict[tuple[str, str], _Selection] = OrderedDict()
+        self._native_turns: dict[str, object] = {}
 
     def get_modules_info(self) -> dict:
         return copy.deepcopy(DEFAULT_REMOTE_MODULES_INFO)
@@ -374,19 +391,87 @@ class RemoteChatBrain:
         session = _ChatSession(module_key)
         if existing is not None and not history_only:
             self._clear_session(device_id)
-            note_onboard_module(device_id, wake_gate=False)
         self._sessions[device_id] = session
         return session
 
     def _clear_session(self, device_id: str) -> None:
-        self._sessions.pop(device_id, None)
-        transcripts.clear(device_id)
+        session = self._sessions.pop(device_id, None)
+        if session:
+            for event_id in session.records:
+                selection = self._selections.get((device_id, event_id))
+                if selection:
+                    selection.ready.set()
 
     def reset_device(self, device_id: str) -> None:
         """Invalidate microphone work and remote output at a session boundary."""
         self._clear_session(device_id)
         self._pending_sleep.discard(device_id)
+        self._native_turns.pop(device_id, None)
+        for key in list(self._selections):
+            if key[0] == device_id:
+                self._selections.pop(key).ready.set()
+        localization_context.clear(device_id)
         reset_conversation_state(device_id)
+
+    def _selection_for(self, device_id: str, event_id: str) -> _Selection:
+        now = time.monotonic()
+        for key, selection in list(self._selections.items()):
+            if now - selection.created > 120 or selection.revision != device_state.speech_revision:
+                self._selections.pop(key).ready.set()
+        key = (device_id, event_id)
+        if key not in self._selections:
+            self._selections[key] = _Selection()
+        while len(self._selections) > 256:
+            _, retired = self._selections.popitem(last=False)
+            retired.ready.set()
+        return self._selections[key]
+
+    def observe_native_audio(self, device_id: str, event_id: str) -> None:
+        """A real ROBOT audio waiter proves native selection, even before notify."""
+        if not event_id:
+            return
+        selection = self._selection_for(device_id, event_id)
+        selection.owner = "native"
+        selection.ready.set()
+        session = self._sessions.get(device_id)
+        if session and event_id in session.records:
+            session.records[event_id]["status"] = "native_selected"
+            # Keep recognition alive until the actual native module arrives.
+            if event_id == next(reversed(session.records)):
+                note_native_activity(device_id)
+            logger.info("native owns turn device=%s event_id=%s; GPT audio cancelled",
+                        device_id, event_id)
+
+    def _observe_selection(self, device_id: str, request: dict) -> None:
+        event_id = request.get("source_event_id") or ""
+        if not event_id:
+            return  # Uncorrelated or delayed notify cannot change ownership.
+        if (request.get("notify_source") == "REMOTE_RESPONSE"
+                or (not request.get("notify_source") and request.get("response_chunks"))):
+            selection = self._selection_for(device_id, event_id)
+            if selection.owner != "native":
+                selection.owner = "remote"
+                selection.ready.set()
+            return
+        speech = (request.get("speech") or "").strip()
+        if not speech or _NON_SPEECH_NOTIFY.fullmatch(speech):
+            # October 12: curious/thinking are interim signals for the SAME
+            # UUID as the eventual GPT reply, not native speech selection.
+            return
+        module = request.get("module_id") or ""
+        content = request.get("content_id") or ""
+        session = self._sessions.get(device_id)
+        current = bool(session and session.records and event_id == next(reversed(session.records)))
+        # A local fallback within OPENMOXIE_CHAT can also beat a remote reply.
+        self.observe_native_audio(device_id, event_id)
+        if module and (current or native_activity_active(device_id)):
+            localization_context.select(device_id, module, content)
+            localization_context.observe_prompt(device_id, request.get("speech") or "")
+            if module not in _SESSION_BOUNDARIES:
+                note_native_activity(device_id)
+            elif current:
+                self._clear_session(device_id)
+                note_onboard_module(device_id, wake_gate=module in _ENTRANCE_MODULES)
 
     def output_language(self, device_id: str) -> str | None:
         """Language of an entered chat module; notify alone is not entry."""
@@ -424,6 +509,7 @@ class RemoteChatBrain:
         self, device_id: str, request: dict, text: str | None, language: str,
         markup: str, *, is_current: Callable[[], bool],
         deadline: float | None = None,
+        selection: _Selection | None = None,
     ) -> str:
         """Answer an accepted remote-module turn with REMOTECHAT audio.
 
@@ -441,6 +527,20 @@ class RemoteChatBrain:
                 device_id,
             )
             return "failed"
+        if selection is not None and not selection.owner:
+            grace = settings.REMOTE_SELECTION_GRACE_S
+            if deadline is not None:
+                grace = min(grace, max(0, deadline - time.monotonic()))
+            try:
+                await asyncio.wait_for(selection.ready.wait(), timeout=grace)
+            except TimeoutError:
+                # Actual prompt f439b0c9: remote audio at 18:37:44, notify at
+                # 18:37:45. Waiting for that notify would risk a silent opener.
+                # Keep the live remote request and guard throughout synthesis.
+                logger.debug("remote-chat selection pending device=%s event_id=%s; using live remote turn",
+                             device_id, event_id)
+        if not is_current() or (selection is not None and selection.owner == "native"):
+            return "discarded"
         logger.info(
             "remote-chat audio device=%s event_id=%s chunk=0 source=REMOTECHAT "
             "language=%s synthesis_text=%r",
@@ -518,6 +618,11 @@ class RemoteChatBrain:
 
         event_id = request.get("event_id") or ""
         wire_speech = (request.get("speech") or "").strip()
+        original = transcripts.find(device_id, event_id) if wire_speech else None
+        selection = self._selection_for(device_id, event_id)
+        if selection.owner == "native":
+            self._send_remote_chat(device_id, _build_response(request, text="", output_type="FALLBACK"))
+            return
         if not session.active:
             logger.info(
                 "remote-chat entered device=%s module=%s command=%s event_id=%s",
@@ -537,10 +642,10 @@ class RemoteChatBrain:
             if prior and (prior["command"], prior["wire"]) == (cmd, wire_speech):
                 return
             session.reset()
-            reset_conversation_state(device_id)
+        localization_context.clear(device_id)
+        self._native_turns.pop(device_id, None)
         note_conversation_active(device_id)
 
-        original = transcripts.find(device_id, event_id) if wire_speech else None
         speech = original.original if original else wire_speech
         if not session.begin(event_id, cmd, wire_speech, speech):
             logger.info("remote-chat ignored duplicate turn device=%s event_id=%s", device_id, event_id)
@@ -559,7 +664,8 @@ class RemoteChatBrain:
         def is_current() -> bool:
             return (self._sessions.get(device_id) is session
                     and session.turn is turn
-                    and device_state.speech_revision == revision)
+                    and device_state.speech_revision == revision
+                    and selection.owner != "native")
 
         language = session.language
         started = time.monotonic()
@@ -627,13 +733,16 @@ class RemoteChatBrain:
         markup = _speech_markup(text)
         response = _build_response(request, text=text, markup=markup, actions=actions or None)
         if not self._send_remote_chat(device_id, response, is_current=is_current):
+            if selection.owner == "native" and device_state.speech_revision == revision:
+                # The router may still be awaiting our side of arbitration.
+                self._send_remote_chat(device_id, _build_response(request, text="", output_type="FALLBACK"))
             session.finish(event_id, text, "discarded", owner=record)
             return
         session.finish(event_id, text, "pending", owner=record)
         if voiced:
             status = await self._voice_remote_output(
                 device_id, request, None if failed_translation else text, language, markup,
-                is_current=is_current, deadline=deadline,
+                is_current=is_current, deadline=deadline, selection=selection,
             )
         else:
             status = "text_only"
@@ -652,6 +761,9 @@ class RemoteChatBrain:
 
         event_id = request.get("event_id") or ""
 
+        if cmd == "notify":
+            self._observe_selection(device_id, request)
+
         if self.is_remote_module(module_id, content_id):
             logger.debug("RCR:%s for remote module %s", cmd, module_key)
             # Notify is history-only and can fire while WAKEUP is still looping.
@@ -668,13 +780,28 @@ class RemoteChatBrain:
             # A delayed WAKEUP notify can follow the actual chat prompt. It
             # does not change module ownership or clear the output language.
             return
+        if cmd not in {"start", "prompt", "continue", "reprompt"}:
+            return
+        selection = self._selection_for(device_id, event_id)
+        fingerprint = (cmd, module_id, content_id, request.get("speech") or "")
+        if event_id and selection.native_request == fingerprint:
+            return
+        selection.native_request = fingerprint
         if self.output_language(device_id) is not None:
             logger.info(
                 "remote-chat left device=%s next_module=%s command=%s event_id=%s",
                 device_id, module_key, cmd, event_id,
             )
         self._clear_session(device_id)
-        note_onboard_module(device_id, wake_gate=module_id in _ENTRANCE_MODULES)
+        self._native_turns.pop(device_id, None)
+        if module_id in _SESSION_BOUNDARIES or not module_id:
+            localization_context.clear(device_id)
+            note_onboard_module(device_id, wake_gate=module_id in _ENTRANCE_MODULES)
+        else:
+            note_native_activity(device_id)
+            localization_context.select(device_id, module_id, content_id)
+            logger.info("native activity active device=%s module=%s; router response=FALLBACK",
+                        device_id, module_key)
         if module_id in _ENTRANCE_MODULES:
             logger.info(
                 "entrance deferred to local response device=%s module=%s "
@@ -696,6 +823,9 @@ class RemoteChatBrain:
             device_id,
         )
         line = fallback_line(fallback_language(request.get("speech") or ""))
+        token = object()
+        self._native_turns[device_id] = token
+        revision = device_state.speech_revision
         self._send_remote_chat(
             device_id,
             _build_response(
@@ -705,6 +835,18 @@ class RemoteChatBrain:
                 output_type="FALLBACK",
             ),
         )
+        # Normally local content wins and its CloudTTSRequest owns the audio.
+        # If the robot explicitly selects our canned fallback, it still needs
+        # REMOTECHAT audio; never call conversational GPT inside a native module.
+        if await self._remote_audio_enabled():
+            await self._voice_remote_output(
+                device_id, request, line, fallback_language(request.get("speech") or ""), line,
+                is_current=lambda: (self._native_turns.get(device_id) is token
+                                    and device_state.speech_revision == revision
+                                    and selection.owner != "native"),
+                deadline=time.monotonic() + settings.REMOTE_REPLY_TIMEOUT_S,
+                selection=selection,
+            )
 
     async def handle_remote_chat_event(
         self, device_id: str, payload: bytes | str,

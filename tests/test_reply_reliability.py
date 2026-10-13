@@ -8,6 +8,8 @@ from xml.etree import ElementTree
 
 import pytest
 
+pytestmark = pytest.mark.usefixtures("robot_selection")
+
 from src.config import settings
 from src.protos.embodied.unity.CloudTTS_pb2 import ROBOT_TTS_REQUEST, REMOTECHAT_TTS_REQUEST
 from src.services import speak_service, remote_chat

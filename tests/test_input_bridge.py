@@ -6,6 +6,8 @@ from types import SimpleNamespace
 
 import pytest
 
+pytestmark = pytest.mark.usefixtures("robot_selection")
+
 from src.config import settings
 from src.services import stt_request
 from src.services.device_state import device_state
@@ -140,7 +142,7 @@ async def test_translation_uses_only_remaining_total_listen_budget(fake_openai, 
 @pytest.mark.parametrize("mode", ["reset", "exit", "puppet", "tts-toggle", "off-on"])
 async def test_mode_change_discards_pending_bridge(mode, fake_openai, captured_protos, monkeypatch):
     entered = asyncio.Event()
-    async def blocked(text, *, remaining_s):
+    async def blocked(text, *, remaining_s, context=""):
         entered.set()
         await asyncio.Event().wait()
 

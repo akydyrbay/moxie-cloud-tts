@@ -306,6 +306,7 @@ async def test_empty_or_failed_synthesis_still_echoes_commands_once(
 
 
 @pytest.mark.parametrize("firmware_uses_local_line", [True, False])
+@pytest.mark.usefixtures("robot_selection")
 async def test_wakeup_to_audio_even_when_chat_prompt_arrives_first(
     fake_openai, translated_lines, captured_publish, translation_settings, caplog, firmware_uses_local_line,
 ) -> None:

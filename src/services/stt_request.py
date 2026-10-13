@@ -1,7 +1,7 @@
 """Robot microphone chunks → bounded OpenAI transcription → correlated FINAL.
 
 OpenMoxie's zmq_stt_handler accumulates incremental 16 kHz mono PCM16 on all
-VAD frames. Only an actual remote-chat turn enables recognition here. WAKEUP
+VAD frames. Chat and native activities both use real recognition. WAKEUP
 keeps its entrance shim; other onboard modules never get fabricated transcripts.
 """
 
@@ -16,6 +16,7 @@ from google.protobuf.message import DecodeError
 
 from src.config import settings
 from src.protos.embodied.perception.audio.zmqSTT_pb2 import zmqSTTRequest, zmqSTTResponse
+from src.services import localization_context
 from src.services.audio import pcm_to_wav
 from src.services.device_state import device_state
 from src.services.mqtt_service import mqtt_service
@@ -34,12 +35,13 @@ STT_SAMPLE_WIDTH = 2
 MAX_AUDIO_BYTES = STT_SAMPLE_RATE_HZ * STT_SAMPLE_WIDTH * 30
 SESSION_MAX_AGE_S = 30.0
 MAX_PENDING_SESSIONS = 16
-MAX_DEVICE_SESSIONS = 2
+MAX_DEVICE_SESSIONS = 6
+MAX_DEVICE_RECORDINGS = 2
 COMPLETED_TTL_S = 120.0
 MAX_COMPLETED_SESSIONS = 1024
 
 SessionKey = tuple[str, str]
-Phase = Literal["wake-gate", "chat", "onboard"]
+Phase = Literal["wake-gate", "chat", "native", "onboard"]
 
 
 @dataclass
@@ -59,6 +61,9 @@ class _Listen:
 _sessions: dict[SessionKey, _Listen] = {}
 _completed: OrderedDict[SessionKey, float] = OrderedDict()
 _conversation_phase: dict[str, Phase] = {}
+# One recognition/bridge worker per robot. Pending ENDs stay bounded above;
+# recording a new utterance does not compete with its predecessor for slots.
+_recognition_locks: dict[str, asyncio.Lock] = {}
 
 
 def _now_ms() -> int:
@@ -97,6 +102,15 @@ def note_conversation_active(device_id: str) -> None:
     _conversation_phase[device_id] = "chat"
 
 
+def note_native_activity(device_id: str) -> None:
+    """Keep microphone work and transcripts alive across activity handoffs."""
+    _conversation_phase[device_id] = "native"
+
+
+def native_activity_active(device_id: str) -> bool:
+    return _conversation_phase.get(device_id) == "native"
+
+
 def note_onboard_module(device_id: str, *, wake_gate: bool) -> None:
     """Discard chat audio/work on exit; re-arm injection only for entrances."""
     phase: Phase = "wake-gate" if wake_gate else "onboard"
@@ -109,6 +123,7 @@ def reset_conversation_state(device_id: str) -> None:
     """Invalidate this robot's audio and pending results on reconnect/reboot."""
     _discard_listens(device_id)
     _conversation_phase.pop(device_id, None)
+    localization_context.clear(device_id)
 
 
 def invalidate_mode(*, puppet: bool = False) -> None:
@@ -168,7 +183,7 @@ def _finish(
             device_id, uuid, phase, session.audio_bytes, elapsed_ms, error,
         )
     else:
-        if phase == "chat":
+        if phase in {"chat", "native"}:
             # No await between remembering and publication: an immediate router
             # turn can recover the original text using exactly this UUID.
             transcripts.remember(device_id, uuid, original, speech, original_language)
@@ -188,7 +203,8 @@ def _finish(
             "error_code": response.error_code}
 
 
-async def _recognize_and_bridge(wav: bytes, audio_ms: int, deadline: float):
+async def _recognize_and_bridge(wav: bytes, audio_ms: int, deadline: float,
+                                *, require_wake_word: bool = True, context: str = ""):
     hint = settings.STT_INPUT_LANGUAGE
     result = await provider_pool.run(
         openai_stt.transcribe, wav, None if hint == "auto" else hint, "stt.wav",
@@ -196,13 +212,14 @@ async def _recognize_and_bridge(wav: bytes, audio_ms: int, deadline: float):
     )
     original = result.text.strip()
     validate_transcript(original, audio_ms)
-    if settings.STT_WAKE_WORD_REQUIRED and not starts_with_wake_word(
+    if require_wake_word and settings.STT_WAKE_WORD_REQUIRED and not starts_with_wake_word(
         original, settings.STT_WAKE_WORDS,
     ):
         raise NotAddressed(original)
     wire = original
     if settings.STT_ENGLISH_BRIDGE_ENABLED:
-        wire = await input_translation.to_english(original, remaining_s=deadline - time.monotonic())
+        wire = await input_translation.to_english(original, remaining_s=deadline - time.monotonic(),
+                                                   context=context)
     return original, wire, result.language
 
 
@@ -236,6 +253,8 @@ async def handle_stt_request(device_id: str, request: zmqSTTRequest) -> dict | N
         full = (
             len(_sessions) >= MAX_PENDING_SESSIONS
             or sum(k[0] == device_id for k in _sessions) >= MAX_DEVICE_SESSIONS
+            or sum(k[0] == device_id and not s.processing for k, s in _sessions.items())
+            >= MAX_DEVICE_RECORDINGS
         )
         timestamp = request.timestamp or _now_ms()
         session = _Listen(start_ms=timestamp, end_ms=timestamp)
@@ -284,8 +303,8 @@ async def handle_stt_request(device_id: str, request: zmqSTTRequest) -> dict | N
             device_id, request.uuid, phase, settings.WAKEUP_TRIGGER_LINE,
         )
         return _finish(key, session, speech=settings.WAKEUP_TRIGGER_LINE)
-    if phase != "chat":
-        return _finish(key, session, error="Microphone transcription requires active remote chat")
+    if phase not in {"chat", "native"}:
+        return _finish(key, session, error="Microphone transcription requires an active conversation or activity")
     if await device_state.get_puppet_mode():
         return _finish(key, session, error="Microphone transcription is disabled in puppet mode")
     if not session.audio or not any(session.audio):
@@ -309,9 +328,18 @@ async def handle_stt_request(device_id: str, request: zmqSTTRequest) -> dict | N
         session.audio.clear()
         # asyncio.to_thread lets the total deadline include worker queue wait.
         # A running sync HTTP call cannot be killed; it cannot publish either.
-        session.worker = asyncio.create_task(_recognize_and_bridge(
-            wav, audio_ms, started + settings.OPENAI_STT_TIMEOUT_S,
-        ))
+        lock = _recognition_locks.setdefault(device_id, asyncio.Lock())
+        context = localization_context.snapshot(device_id) if phase == "native" else ""
+
+        async def recognize():
+            async with lock:
+                return await _recognize_and_bridge(
+                    wav, audio_ms, started + settings.OPENAI_STT_TIMEOUT_S,
+                    require_wake_word=phase != "native",
+                    context=context,
+                )
+
+        session.worker = asyncio.create_task(recognize())
         original, speech, original_language = await asyncio.wait_for(
             session.worker, timeout=max(0.0, started + settings.OPENAI_STT_TIMEOUT_S - time.monotonic()),
         )
@@ -340,6 +368,11 @@ async def handle_stt_request(device_id: str, request: zmqSTTRequest) -> dict | N
     except Exception as exc:
         # No raw provider error bodies/credentials in the robot response.
         error = f"Microphone transcription failed ({type(exc).__name__})"
+    finally:
+        # Existing queued tasks retain the same lock until the last one ends.
+        if not any(k != key and k[0] == device_id and s.processing
+                   for k, s in _sessions.items()):
+            _recognition_locks.pop(device_id, None)
     return _finish(key, session, speech="" if error else speech, error=error,
                    original=original, original_language=original_language,
                    wire_language="en" if settings.STT_ENGLISH_BRIDGE_ENABLED else original_language,
@@ -353,6 +386,6 @@ async def handle_payload(device_id: str, payload: bytes) -> dict | None:
 
 __all__ = [
     "STT_REQUEST_PREFIX", "handle_payload", "handle_stt_request",
-    "note_conversation_active", "note_onboard_module", "parse_stt_request",
+    "note_conversation_active", "note_native_activity", "note_onboard_module", "parse_stt_request",
     "reset_conversation_state",
 ]

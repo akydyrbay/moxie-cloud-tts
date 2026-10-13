@@ -1,16 +1,29 @@
 # Moxie Cloud TTS
 
+**October 13, 2026 — free chat and native activities:** `OPENMOXIE_CHAT`
+uses GPT with normal `GLOBAL_RESPONSE` priority. The robot may select its native
+joke/story commands; their own dialogue, choices, animations and transitions
+remain intact. Native speech is localized into the configured kk/ru language,
+with activity context and recent source/translated lines. Pending GPT audio is
+cancelled when native speech wins; interim animation notifications never cancel
+a chat reply. STT and the English input bridge continue in native
+activities, including short answers without a wake word. The former
+`REMOTE_CHAT_SUPPRESS_NATIVE_CONTENT` setting and GPT-over-native replacement
+path have been removed. See [native content policy](docs/NATIVE_CONTENT_POLICY.md)
+for tests, log expectations and the robot acceptance checklist.
+
 Replacement cloud backend for the Moxie robot after Embodied Inc. shut down its
 servers. It speaks the robot's own MQTT/protobuf protocol, so Moxie boots into a
 working session instead of failing authentication, and it voices the robot with
 OpenAI text-to-speech — including Russian and Kazakh, which the original service
 never supported.
 
-Current milestone: **verify the kk/ru input compatibility bridge on the robot.**
-Kazakh wake-up and replies to English input have been heard. The server now
-translates recognized kk/ru to English for Moxie, recovers the original text for
-GPT, and bounds reply length and provider waits. Reply language remains fixed
-kk or explicitly configured ru. See [localization repair](docs/LOCALIZATION_FIXES.md)
+Current milestone: **verify free chat → native activity → free chat on the robot.**
+The operator has confirmed localized speech and conversation. The October 12
+capture exposed native activity state continuing underneath substituted GPT
+speech. The new routing retains native dialogue and localizes it while keeping
+STT active. Reply language remains configured by `DEFAULT_TTS_LANGUAGE`.
+See [native content policy](docs/NATIVE_CONTENT_POLICY.md)
 for the implementation, passing regressions and remaining hardware checks.
 
 ## Requirements
@@ -32,8 +45,8 @@ echo 'OPENAI_API_KEY=sk-...' > .env
 
 ## Run: Kazakh after wake
 
-Keep the existing `OPENAI_API_KEY` in `.env`. These are the translation defaults;
-set them explicitly there if you have overridden them previously:
+Keep the existing `OPENAI_API_KEY` in `.env`. Set the following for Kazakh
+autonomous speech; the checked-in output-language default is Russian:
 
 ```dotenv
 PUPPET_MODE_AUTO_ENABLE=false
@@ -72,7 +85,8 @@ to Moxie's face camera:
 http://localhost:8000/tts/endpoint-qr
 ```
 
-It configures Moxie to use `192.168.8.71:8883` and disables certificate
+It configures Moxie to use the detected or configured LAN address on port 8883
+and disables certificate
 verification for this local, self-signed broker. The image contains no OpenAI
 key or Wi-Fi password. If you want to show it on another screen, save or
 screenshot the PNG first; `mise start` binds the HTTP API to this Mac's
@@ -115,10 +129,11 @@ All autonomous English speech now follows the translation path:
   its native response and transition into scheduled chat. The previous
   `GLOBAL_COMMAND` greeting could replace that transition along with its text.
 - Every English/Latin line in `CloudTTSRequest` goes to OpenAI for translation
-  into `DEFAULT_TTS_LANGUAGE` (`kk`), then to TTS. This includes wake-up lines,
+  into `DEFAULT_TTS_LANGUAGE` (`kk` or `ru`), then to TTS. This includes wake-up lines,
   activity questions, end-of-session content, and clarification requests.
 - The fixed Kazakh opener is gone. Remote chat retains ordinary English opener
-  text, which is translated only if the robot requests its audio. Native
+  text, which is translated and voiced for a live remote turn unless native
+  speech takes ownership. Native
   `Good morning.` becomes a translation such as `Қайырлы таң.`.
 - The response echoes the original `event_id`/`chunk_num`, preserves original
   `cmd:` animation marks, and derives mouth movements from the new spoken text.
@@ -168,8 +183,6 @@ translation changes speech, not module routing or speech recognition.
 
 ### Verify the remote-chat handoff
 
-The operator confirmed translated Kazakh wake-up audio on Sep 28. That run
-also logged an actual `OPENMOXIE_CHAT` prompt and two chat listen sessions.
 Restart the service, reboot Moxie, wake it with puppet off, and look for:
 
 ```text
@@ -177,21 +190,26 @@ entrance deferred to local response ... module=WAKEUP/ ... output_type=FALLBACK
 Rx remote-chat ... command='prompt' module=OPENMOXIE_CHAT/default event_id='P'
 remote-chat entered ... module=OPENMOXIE_CHAT/default ... event_id=P
 remote-chat language ... language=kk
-Tx remote_chat ... event_id=P output_type=GLOBAL_RESPONSE text='Hi! What would you like to talk about?'
+Tx remote_chat ... event_id=P output_type=GLOBAL_RESPONSE text='...localized opener...'
+remote-chat audio ... event_id=P source=REMOTECHAT language=kk ...
+spoke event_id=P ... language=kk ...
 ```
 
 `start`, `continue` or `reprompt` can also establish real entry. A SCHEDULED
-activity or `notify` alone is insufficient. Confirm a subsequent robot-originated
-TTS request and its matching audio response, then audible playback. The native
+activity or `notify` alone is insufficient. Remote replies publish correlated
+REMOTECHAT audio directly; they do not wait for a separate CloudTTSRequest.
+REMOTE_RESPONSE notify may arrive before or after the audio. The native
 `Excellent!` request can arrive after the chat prompt using the earlier wake ID;
-its translation must still answer that original request.
+its translation must still answer that original request. Verify actual playback,
+not just JSON publication or a selection notification.
 
 ### Verify microphone transcription
 
 Restart with `mise start`, wake Moxie, and say “Moxie, let's go”. Wait for the
-chat opener to finish, then speak a short sentence such as “Мен алманы жақсы
-көремін” or “Я люблю яблоки”. The existing entrance shim remains in place;
-real transcription begins only after an actual `OPENMOXIE_CHAT` router turn.
+chat opener to finish, then speak a short sentence such as “Мокси, мен алманы жақсы
+көремін” or “Мокси, я люблю яблоки”. Free chat requires the configured wake word
+by default. The existing entrance shim remains in place;
+real transcription runs in `OPENMOXIE_CHAT` and in native activities.
 
 Expected sequence (UUID `U` must stay the same for the listen and its FINAL):
 
@@ -199,9 +217,9 @@ Expected sequence (UUID `U` must stay the same for the listen and its FINAL):
 STT audio started ... uuid=U phase=chat sample_rate=16000 channels=1 sample_width=2
 STT END ... uuid=U phase=chat frames=... audio_bytes=... audio_ms=...
 openai stt transcribed ... (auto) in ... ms
-STT validated/bridge ... uuid=U original='Мен алманы жақсы көремін' wire='I like apples'
-STT FINAL ... uuid=U phase=chat ... speech='I like apples'
-Rx remote-chat ... command='continue' event_id='U' speech='I like apples'
+STT validated/bridge ... uuid=U original='Мокси, мен алманы жақсы көремін' wire='Moxie, I like apples'
+STT FINAL ... uuid=U phase=chat ... speech='Moxie, I like apples'
+Rx remote-chat ... command='continue' event_id='U' speech='Moxie, I like apples'
 remote-chat input ... event_id=U original_recovered=True output_language=kk
 Tx remote_chat ... event_id=U output_type=GLOBAL_RESPONSE ...
 remote-chat audio ... event_id=U source=REMOTECHAT
@@ -212,22 +230,40 @@ spoke event_id=U language=kk ...
 Check that the transcript matches what you said, the reply answers it, and a
 new UUID appears when you speak again. Try at least five turns per language.
 Recognition auto-detects the spoken language; **reply language remains fixed**
-by `DEFAULT_TTS_LANGUAGE` (`kk` by default, `ru` for a Russian test). Automatic
-reply-language switching is the next milestone.
+by `DEFAULT_TTS_LANGUAGE` (`ru` in this checkout; set `kk` for Kazakh). Automatic
+reply-language switching is not implemented.
 
 `OPENAI_STT_TIMEOUT_S=6` bounds recognition plus input translation after END;
 SDK retries are disabled. Empty/silent or malformed audio, no recognized speech,
 provider failure, and deadline expiry produce one FINAL error 66 with a reason.
 The old “Robot transcription is not implemented” placeholder should no longer
-appear for chat. Onboard modules outside chat still receive an explicit error.
+appear in either chat or native activities. Session boundaries still disable recognition.
 Never-ending streams expire after 30 seconds; audio is capped at 30 seconds,
-with at most two pending listens per device and 16 globally. A reconnect or
-module exit discards pending work and rejects late results.
+with at most six pending listens per device, two still recording, and 16 globally.
+Recognition/bridging runs one at a time per device, including queue wait in the
+six-second budget. Chat/native handoffs preserve pending microphone work;
+reconnects, sleep/session boundaries and mode changes discard stale work.
 
-The Sep 28 log contains UUIDs/errors but no microphone bytes. Accumulation and
-16 kHz format follow the copied OpenMoxie implementation; real microphone
-quality and firmware acceptance still require this operator test. See
-[STT verification](docs/STT_WIRING.md).
+### Verify native activities and return to chat
+
+Ask “Мокси, ертегі айтып берші” or “Мокси, расскажи шутку”. The English input
+bridge lets the firmware recognize its native commands. Moxie may first enter
+EXIT for confirmation before launching STORY or JOKES. Native turns receive
+FALLBACK without conversational GPT generation; native speech is translated and
+voiced with its original event/chunk and animation commands.
+
+Answer native confirmations and choices with short replies such as “Иә”, “Да”,
+or “Екінші ертегі”; these do not require a wake word. Expect
+`STT FINAL ... phase=native`, `native activity active ... router response=FALLBACK`,
+and translated CloudTTSRequest audio. For a chat turn won by native speech,
+`native owns turn ... GPT audio cancelled` explains why pending GPT audio was
+discarded. Thinking animations alone must not cancel a free-chat reply.
+
+Finish or exit the activity using its native controls, then confirm a real
+OPENMOXIE_CHAT turn and another free-chat reply. The server does not fabricate
+a module transition or run GPT over an active story. See the complete
+[robot acceptance checklist](docs/NATIVE_CONTENT_POLICY.md) and
+[module/process guide](docs/AGENTS.md).
 
 ## Puppet speech (separate operator tool)
 
@@ -266,11 +302,28 @@ curl -X POST localhost:8000/tts/speak \
 
 ## How speaking works
 
-Moxie only plays cloud audio that answers a request it is currently waiting on,
-matched by `event_id` and `chunk_num`. The wake-up path answers that request
-directly, with the configured substitution described above. A server cannot
-simply push audio at it. In the separate puppet path, `/tts/speak`
-asks the robot to speak, and answers the request the robot raises in return:
+Autonomous conversation uses three correlated protocol paths:
+
+```text
+Microphone PCM → STT → English input bridge → robot routing
+                    └ original kk/ru text retained by UUID for GPT
+
+OPENMOXIE_CHAT → GPT → RemoteChatResponse + REMOTECHAT audio
+Native activity → CloudTTSRequest → localized text → ROBOT audio
+```
+
+The firmware chooses between remote and native responses. A native speech
+notification or speakable native TTS request cancels pending GPT audio for that
+event. A brief 0.15-second grace admits immediate selections; remote audio does
+not require a notification, which can arrive after playback starts. Native
+activities keep their own dialogue, animations and choices. Translation receives
+the activity prompt and recent source/localized lines; the English input bridge
+uses this context to preserve the child's choices. Actual OPENMOXIE_CHAT reentry
+restores free conversation.
+
+Audio must match a live event and chunk; unsolicited audio is not a speech API.
+In the separate puppet path, `/tts/speak` asks the robot to speak and answers
+the CloudTTSRequest that the robot raises in return:
 
 ```
 POST /tts/speak {"text": "Привет!"}
@@ -285,9 +338,9 @@ POST /tts/speak {"text": "Привет!"}
    └─ CloudTTSResponse{event_id=E, audio} ─────► Moxie plays it
 ```
 
-Every request gets exactly one response. If synthesis fails, a short silence is
-published instead of nothing — with `cloud_tts` on, a missing response leaves
-the robot stuck waiting until it force-idles and sleeps.
+Every native CloudTTSRequest receives correlated audio or failure silence with
+its command marks. Obsolete remote replies are discarded so they cannot compete
+with a newer turn or selected native speech. Puppet sequencing remains separate.
 
 ## Endpoints
 
@@ -310,8 +363,9 @@ Everything is environment variables or `.env`; see `src/config.py`.
 | `OPENAI_API_KEY` | — | Required. Never hardcode it. |
 | `CLOUD_TTS_AUTO_ENABLE` | `true` | Enable cloud TTS at startup. Skipped without a key. |
 | `PUPPET_MODE_AUTO_ENABLE` | `false` | Start the robot in TELEHEALTH mode. |
-| `DEFAULT_TTS_LANGUAGE` | `kk` | Autonomous chat output language; `kk` or `ru`. Input language does not change it. |
+| `DEFAULT_TTS_LANGUAGE` | `ru` | Autonomous chat output language; `kk` or `ru`. Input language does not change it. |
 | `CLOUD_TTS_TRANSLATION_ENABLED` | `true` | Translate every English/Latin autonomous speech request; puppet bypasses this. |
+| `REMOTE_SELECTION_GRACE_S` | `0.15` | Brief window for immediate native selection before remote synthesis. It never requires a remote notification, which can arrive after audio. Native takeover is checked throughout synthesis. |
 | `OPENAI_CHAT_MODEL` | `gpt-4o-mini` | Existing model used for translation as well as remote chat, with separate prompts. |
 | `OPENAI_TRANSLATION_TIMEOUT_S` | `4.0` | Translation deadline, including worker wait; SDK retries disabled for this stage. |
 | `CLOUD_TTS_AUDIO_RAW_PCM` | `true` | `true` sends raw PCM16 (what `AudioBuffer` is); `false` wraps WAV. |
@@ -325,7 +379,7 @@ Everything is environment variables or `.env`; see `src/config.py`.
 | `STT_ENGLISH_BRIDGE_ENABLED` | `true` | Translate human kk/ru to English for robot routing; preserve original text for GPT. |
 | `STT_BRIDGE_METADATA_ENABLED` | `false` | Optional protobuf language/original fields; test separately on firmware. |
 | `STT_WAKE_WORD_REQUIRED` | `true` | In chat, answer only speech that starts with a wake word; other speech gets an empty FINAL and a silent turn. |
-| `STT_WAKE_WORDS` | `moxie, moxy, мокси, моқси, моксі, моксы` | First-word matches, case-insensitive (JSON list in `.env`). |
+| `STT_WAKE_WORDS` | See `src/config.py` | First-word matches including Moxie/Мокси and recognition variants; case-insensitive JSON list in `.env`. Native answers bypass this rule. |
 | `OPENAI_STT_TIMEOUT_S` | `6.0` | Total recognition plus bridge deadline. |
 | `OPENAI_INPUT_TRANSLATION_TIMEOUT_S` | `2.0` | Bounded by remaining STT time. |
 | `OPENAI_CHAT_TIMEOUT_S` | `4.0` | Chat generation deadline, no retries. |
@@ -336,23 +390,24 @@ Everything is environment variables or `.env`; see `src/config.py`.
 ## Tests
 
 ```bash
-mise test
+DEFAULT_TTS_LANGUAGE=kk mise test
 ```
 
-Providers and MQTT are mocked. Tests do not read or overwrite `log/debug.log`
-and do not prove playback on the robot.
+The language override matches historical Kazakh fixtures without changing the
+runtime default; native handoff tests cover both kk and ru. Providers and MQTT
+are mocked. Tests do not read or overwrite `log/debug.log` and do not prove
+playback on the robot.
 
 ## Roadmap
 
-Microphone STT is wired for active remote chat. Next: validate real Kazakh and
-Russian recordings on the robot, then implement automatic reply-language
-switching and sustained conversation recovery. Native English activities may
-still require translated input or intent mapping; this integration transcribes
-only active remote chat and preserves the wake shim.
+Microphone STT and the English input bridge work in free chat and native activities.
+Next: verify sustained chat → native joke/story → chat transitions and localization
+quality on the robot. Automatic output-language switching and custom modules
+authored directly in kk/ru remain separate milestones.
 
 ## Documents
 
-- [Localization repair](docs/LOCALIZATION_FIXES.md) — input bridge, deadlines, regression evidence and robot checklist.
-- [AGENTS.md](docs/AGENTS.md) — architecture, MQTT topics, and remaining Cloud TTS work for development agents.
+- [Native content policy](docs/NATIVE_CONTENT_POLICY.md) — ownership, localization, log evidence and robot checklist.
+- [Development guide](docs/AGENTS.md) — current architecture, module lifecycle, MQTT topics and implementation rules.
 - [Speak Live Plan](docs/SPEAK_LIVE_PLAN.md) — autonomous (non-puppet) conversation path.
 - [Speak Puppet Analysis](docs/SPEAK_PUPPET_ANALYSIS.md) — why TELEHEALTH only plays the first `/tts/speak` line.

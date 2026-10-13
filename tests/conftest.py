@@ -178,12 +178,43 @@ def clean_stt_state():
     stt_request._conversation_phase.clear()
     stt_request._completed.clear()
     transcripts.clear()
+    from src.services import localization_context, remote_chat
+    localization_context._activities.clear()
+    remote_chat.remote_chat_brain._selections.clear()
     yield
     for device, _ in list(stt_request._sessions):
         stt_request.reset_conversation_state(device)
     stt_request._conversation_phase.clear()
     stt_request._completed.clear()
     transcripts.clear()
+
+
+@pytest.fixture
+def robot_selection(monkeypatch):
+    """Model the firmware's notify before audio in older chat-only tests.
+
+    Native handoff/race tests send their own notifications and do not use this.
+    A fallback loses to local content; ordinary remote chat is selected.
+    """
+    import asyncio
+    from src.services.remote_chat import RemoteChatBrain
+
+    send = RemoteChatBrain._send_remote_chat
+
+    def selected(brain, device, response, **kwargs):
+        sent = send(brain, device, response, **kwargs)
+        if sent:
+            event = response.get("event_id", "")
+            if response["response_action"]["output_type"] == "FALLBACK":
+                asyncio.get_running_loop().call_soon(brain.observe_native_audio, device, event)
+            else:
+                asyncio.get_running_loop().call_soon(brain._observe_selection, device, {
+                    "source_event_id": event, "notify_source": "REMOTE_RESPONSE",
+                    "module_id": "OPENMOXIE_CHAT", "content_id": "default",
+                })
+        return sent
+
+    monkeypatch.setattr(RemoteChatBrain, "_send_remote_chat", selected)
 
 
 @pytest.fixture(autouse=True)

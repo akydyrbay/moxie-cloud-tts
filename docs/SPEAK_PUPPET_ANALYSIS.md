@@ -4,6 +4,10 @@ Why TELEHEALTH / puppet mode (`POST /tts/speak`) could not be the conversation
 path. This is the investigation log, rewritten so the **conclusion is first**,
 the two bugs are separated, and later on-robot retries are folded in.
 
+Historical puppet findings are retained below. For the current autonomous
+pipeline and module handling, see [the development guide](AGENTS.md) and
+[the live conversation plan](SPEAK_LIVE_PLAN.md).
+
 Device: `d_d05e3c66-dd29-4fe2-9758-7223e31511dc`. Sources restored from git:
 `PUPPET_SPEAK_SILENCE_ANALYSIS.md` (last full version, 2026-08-27) and
 `PUPPET_LINE2_SLOT_WORKAROUND.md` (2026-09-04 retries). Puppet HTTP is **kept**
@@ -25,9 +29,11 @@ unless asked. Conversation work is `SPEAK_LIVE_PLAN.md`.
 | `CloudTTSSupplement` as end-of-utterance | Tried (bundled 2026-08-25 and isolated 2026-09-04), **failed** |
 | TELEHEALTH empty schedule parks the brain — no `OPENMOXIE_CHAT` | By design of puppet |
 
-**Product decision:** drop puppet as the ru/kk listen→chat→speak path. Spoken
-text on that path must be `remote_chat` `output.markup` → robot `CloudTTSRequest`,
-never `/tts/speak`. Keep `/tts/puppet`, `/tts/speak`, `/tts/interrupt`.
+**Product decision:** drop puppet as the ru/kk listen→chat→speak path. Current
+autonomous free chat uses a live RemoteChatResponse and correlated REMOTECHAT
+audio directly; ordinary remote replies do not raise CloudTTSRequest. Native
+activities use CloudTTSRequest → localized ROBOT audio. Neither path uses
+`/tts/speak`. Keep `/tts/puppet`, `/tts/speak`, `/tts/interrupt` as operator tools.
 
 **Working model of line 2:** the TELEHEALTH output path has **one speech slot**.
 Line 1 acquires it and plays. Nothing we send is recognized as “utterance done”,
@@ -138,7 +144,7 @@ as **real other bugs**; they are not the line-2 fix.
 | Empty schedule while puppet is on | Stops `OPENMOXIE_CHAT` stealing the slot; does not explain line 2 | **Yes** |
 | Echo request `timestamp` + `CloudTTSSupplement` after every frame (2026-08-25 13:34) | Line 1 heard, line 2 silent | Reverted |
 | Fake a **response** `event_id` while the request is `''` | Wrong pairing; would break conversation-path UUIDs | Never shipped |
-| Automarkup `AUTO_GESTURE_TALK`/`NONE` + `ssml` marks | Gestures; not line 2 | **Yes** |
+| Automarkup `AUTO_GESTURE_TALK`/`NONE` + `ssml` marks | Gestures; not line 2 | Historical wrapper removed; current marks are handled in `marks.py` |
 | Telehealth `START_SESSION` / `session_id` / `output.event_id` | Robot `IN_SESSION`, STT timeouts, request `event_id` still `''` | Reverted |
 | Strip identity from mid-session config (Bug A) | Crash gone; line 2 still silent (2026-09-04) | **Yes** |
 | Drain → standalone `INTERRUPT` → settle → `PLAY_OUTPUT` | Failed 2026-09-04: operator sends line 2 **after** line 1 finished, so drain is elapsed and this **is** INTERRUPT-then-play | Reverted |
@@ -213,7 +219,6 @@ Keep puppet code for operator first-line TTS. Finish speech in
 |---|---|
 | `src/services/audio.py` (truthful WAV / never ask OpenAI for `wav`) | Real `0xFFFFFFFF` header defect |
 | `src/services/marks.py` | Lip-sync on the heard line |
-| `src/services/moxie_markup.py` wrap + `ssml` | Gestures / OpenMoxie parity |
 | `CLOUD_TTS_AUDIO_RAW_PCM=true` | Matches `AudioBuffer`; both formats fail line 2 equally |
 | `/tts/speak` → `PLAY_OUTPUT` | Operator path; empty `event_id` |
 | Puppet `moxie_mode=TELEHEALTH` | Keeps the robot awake |
@@ -232,6 +237,6 @@ Keep puppet code for operator first-line TTS. Finish speech in
 - Response assembly: `src/services/speak_service.py`
 - Inbound `CloudTTSRequest`: `src/services/cloud_tts_request.py`
 - Config push + identity strip: `src/services/tts_service.py`, `HARDCODED_DEVICE_CONFIG` in `src/config.py`
-- Marks / markup / audio: `src/services/marks.py`, `moxie_markup.py`, `audio.py`
+- Marks / markup / audio: `src/services/marks.py`, `src/services/cloud_tts_request.py`, `src/services/audio.py`
 - MQTT + robot logs: `src/services/mqtt_service.py`
 - Conversation plan (not this mode): `SPEAK_LIVE_PLAN.md`

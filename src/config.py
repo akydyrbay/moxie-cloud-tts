@@ -110,17 +110,20 @@ class Settings(BaseSettings):
     )
 
     SUPPORTED_LANGUAGES: list[str] = ["ru", "kk"]
-    DEFAULT_TTS_LANGUAGE: Literal["ru", "kk"] = "kk"
+    DEFAULT_TTS_LANGUAGE: Literal["ru", "kk"] = "ru"
     # Translate every English/Latin autonomous TTS line to DEFAULT_TTS_LANGUAGE.
     # No phrase allowlist, fixed greeting, or dependency on chat entry.
     CLOUD_TTS_TRANSLATION_ENABLED: bool = True
+    # Briefly admit immediate native selections; never require a notify before
+    # audio, since this firmware also notifies after remote audio publication.
+    REMOTE_SELECTION_GRACE_S: float = Field(default=0.15, ge=0, le=1)
 
     # --- STT injection (Goal 1: speak without puppet mode) ------------------
     # On wake the robot first enters its onboard WAKEUP module ("say 'Moxie,
     # let's go!' to start the day") and will not reach OPENMOXIE_CHAT until it
     # hears that trigger. Inject THIS phrase during the entrance phase only.
-    # Chat uses real microphone transcription. Other onboard modules still
-    # receive a FINAL error; their English-only answer matching is separate.
+    # Chat and native activities use real transcription plus the English bridge.
+    # Session boundaries keep recognition disabled.
     WAKEUP_TRIGGER_LINE: str = "Moxie, let's go"
 
     # --- Audio --------------------------------------------------------------
@@ -214,7 +217,7 @@ REMOTE_CHAT_MODULE_IDS: frozenset[str] = frozenset(
     },
 )
 
-# Remote module source text. Translate only if the robot requests its audio;
+# Remote module source text. Translate for the live cloud-enabled router turn;
 # these do not replace native wake-up lines with a fixed Kazakh greeting.
 REMOTE_CHAT_OPENERS: dict[str, str] = {
     "default": "Hi! What would you like to talk about?",
