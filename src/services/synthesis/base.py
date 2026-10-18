@@ -38,6 +38,9 @@ class SynthesisResult:
 class TTSEngine(Protocol):
     """Minimal contract a synthesis provider must satisfy."""
 
-    def synthesize(self, text: str, language: str) -> SynthesisResult:
-        """Synthesize `text` in `language` (short code, e.g. "ru"/"kk")."""
+    def synthesize(self, text: str, language: str, timeout: float | None = None) -> SynthesisResult:
+        """Synthesize `text` in `language` (short code, e.g. "ru"/"kk").
+
+        `timeout` (seconds) bounds the provider call to the caller's remaining budget.
+        """
         ...

@@ -75,8 +75,15 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
 
     OPENAI_STT_MODEL: str = "gpt-4o-transcribe"
-    OPENAI_CHAT_MODEL: str = "gpt-4o-mini"
-    OPENAI_TTS_MODEL: str = "gpt-4o-mini-tts"
+    # Chat, output translation and input translation. gpt-4.1-nano is newer and
+    # cheaper than gpt-4o-mini and stays inside the 2 s/4 s stage deadlines.
+    # Do not use reasoning models (e.g. gpt-5-nano): their hidden reasoning
+    # times out every translation and truncates replies at the token limit.
+    OPENAI_CHAT_MODEL: str = "gpt-4.1-nano"
+    # Pinned snapshot. The bare "gpt-4o-mini-tts" alias moved to the 2025-12-15
+    # snapshot, which on October 16 timed out on every call (15 s+) while this
+    # one answered in 1.2–3.6 s (tts-1: 1.3–4.2 s, tts-1-hd: 2.8–4.3 s).
+    OPENAI_TTS_MODEL: str = "gpt-4o-mini-tts-2025-03-20"
     OPENAI_TTS_VOICE: str = "alloy"
 
     # Per-call timeout. Must stay well under the robot's MarkingUp timeout: once
@@ -98,6 +105,12 @@ class Settings(BaseSettings):
     OPENAI_INPUT_TRANSLATION_TIMEOUT_S: float = Field(default=2.0, gt=0, le=6.0)
     OPENAI_CHAT_TIMEOUT_S: float = Field(default=4.0, gt=0)
     OPENAI_TTS_TIMEOUT_S: float = Field(default=8.0, gt=0)
+    # OpenAI TTS intermittently stalls until the deadline (October 14: 29 of 38
+    # started calls hit 8 s, while all 9 successes took 1.3–2.7 s).
+    # A call still running after this long gets one parallel attempt inside the
+    # same OPENAI_TTS_TIMEOUT_S budget; the first audio wins. Healthy calls can
+    # take ~5 s, so the first attempt is never abandoned for being slow.
+    OPENAI_TTS_HEDGE_AFTER_S: float = Field(default=3.0, gt=0)
     REMOTE_REPLY_TIMEOUT_S: float = Field(default=12.0, gt=0, le=20.0)
     OPENAI_CHAT_MAX_TOKENS: int = Field(default=256, ge=64, le=512)
 

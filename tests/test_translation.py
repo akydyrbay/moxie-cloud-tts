@@ -36,10 +36,12 @@ async def test_translates_question_without_answering_or_sending_markup(
     assert "do not answer" in call["messages"][0]["content"]
     assert call["messages"][1]["content"] == source
     assert "cmd:" not in str(call["messages"])
+    # TTS gets what remains of its budget, never more than OPENAI_TTS_TIMEOUT_S.
     assert fake_openai.options == [
         {"timeout": settings.OPENAI_TRANSLATION_TIMEOUT_S, "max_retries": 0},
-        {"timeout": settings.OPENAI_TTS_TIMEOUT_S, "max_retries": 0},
+        {"timeout": pytest.approx(settings.OPENAI_TTS_TIMEOUT_S, abs=0.5), "max_retries": 0},
     ]
+    assert fake_openai.options[1]["timeout"] <= settings.OPENAI_TTS_TIMEOUT_S
     assert fake_openai.audio.speech.calls[0]["input"] == translated_lines[source]
     assert result["language"] == "kk"
 

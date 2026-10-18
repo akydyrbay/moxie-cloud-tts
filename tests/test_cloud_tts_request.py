@@ -109,9 +109,9 @@ async def test_markup_tags_are_not_spoken(fake_openai, captured_publish) -> None
     seen: list[str] = []
     original = openai_tts.openai_tts_engine.synthesize
 
-    def _spy(text: str, language: str):  # noqa: ANN202
+    def _spy(text: str, language: str, timeout: float | None = None):  # noqa: ANN202
         seen.append(text)
-        return original(text, language)
+        return original(text, language, timeout)
 
     openai_tts.openai_tts_engine.synthesize = _spy
     try:
@@ -144,7 +144,7 @@ async def test_synthesis_failure_publishes_silence(
 ) -> None:
     original = openai_tts.openai_tts_engine.synthesize
 
-    def _boom(text: str, language: str):  # noqa: ANN202
+    def _boom(text: str, language: str, timeout: float | None = None):  # noqa: ANN202
         msg = "openai exploded"
         raise RuntimeError(msg)
 

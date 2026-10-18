@@ -18,6 +18,7 @@ declare more audio than it carries (see `src/services/audio.py`). `marks`
 drive Moxie's mouth (see `src/services/marks.py`).
 """
 
+import asyncio
 from collections.abc import Callable
 import logging
 import time
@@ -143,6 +144,84 @@ def _discard_stale_output(device_id: str, event_id: str, chunk_num: int) -> dict
     }
 
 
+def _consume_attempt(task: asyncio.Task) -> None:
+    """Retrieve a finished attempt's exception so a losing attempt never warns."""
+    if not task.cancelled():
+        task.exception()
+
+
+def _start_attempt(text: str, language: str, deadline: float, *, spare: int = 0) -> asyncio.Task:
+    timeout = deadline - time.monotonic()
+    task = asyncio.ensure_future(
+        provider_pool.run(_engine.synthesize, text, language, timeout, timeout=timeout, spare=spare),
+    )
+    task.add_done_callback(_consume_attempt)
+    return task
+
+
+async def _synthesize(
+    text: str,
+    language: str,
+    deadline: float,
+    *,
+    event_id: str,
+    may_hedge: Callable[[], bool],
+) -> SynthesisResult:
+    """Synthesize within `deadline`, hedging a stalled first attempt once.
+
+    OpenAI TTS either answers within a few seconds or stalls until the deadline.
+    If the first attempt is still running after OPENAI_TTS_HEDGE_AFTER_S, one
+    more attempt starts beside it and the first successful audio wins; the
+    first attempt is never abandoned, because a slow call can still succeed.
+    Both attempts share the original deadline, so the robot waits no longer.
+
+    The hedge needs at least OPENAI_TTS_HEDGE_AFTER_S of remaining budget and
+    keeps one provider slot free for recognition and translation; otherwise it
+    is skipped. Fast failures are raised unchanged: only a stall is hedged. If
+    both attempts fail, the first attempt's error is raised.
+    """
+    start = time.monotonic()
+    first = _start_attempt(text, language, deadline)
+    attempts = [first]
+    try:
+        hedge_at = start + settings.OPENAI_TTS_HEDGE_AFTER_S
+        # A hedge gets at least as long as the first attempt had before it was
+        # judged stalled; a shorter remaining budget cannot usefully finish.
+        if deadline - hedge_at < settings.OPENAI_TTS_HEDGE_AFTER_S:
+            return await first
+        await asyncio.wait([first], timeout=hedge_at - time.monotonic())
+        if first.done() or not may_hedge():
+            return await first
+
+        logger.warning(
+            "tts attempt still running event_id=%s after %d ms; starting hedged attempt",
+            event_id, int((time.monotonic() - start) * 1000),
+        )
+        attempts.append(_start_attempt(text, language, deadline, spare=1))
+        pending = set(attempts)
+        while pending:
+            done, pending = await asyncio.wait(pending, return_when=asyncio.FIRST_COMPLETED)
+            for task in done:
+                if task.exception() is None:
+                    logger.info(
+                        "tts hedge result event_id=%s winner=attempt%d elapsed_ms=%d",
+                        event_id, attempts.index(task) + 1,
+                        int((time.monotonic() - start) * 1000),
+                    )
+                    return task.result()
+        logger.warning(
+            "tts hedge result event_id=%s winner=none errors=%s",
+            event_id, ",".join(type(task.exception()).__name__ for task in attempts),
+        )
+        return first.result()
+    finally:
+        # A losing worker keeps its provider slot until its HTTP call ends;
+        # cancelling only stops awaiting it, and it can never publish.
+        for task in attempts:
+            if not task.done():
+                task.cancel()
+
+
 def publish_silence(
     device_id: str,
     event_id: str,
@@ -236,10 +315,15 @@ async def speak(
 
     try:
         # The OpenAI client call is blocking; keep the event loop responsive.
-        timeout = settings.OPENAI_TTS_TIMEOUT_S
+        tts_deadline = start + settings.OPENAI_TTS_TIMEOUT_S
         if deadline is not None:
-            timeout = min(timeout, deadline - time.monotonic())
-        result = await provider_pool.run(_engine.synthesize, text, language, timeout=timeout)
+            tts_deadline = min(tts_deadline, deadline)
+        result = await _synthesize(
+            text, language, tts_deadline, event_id=event_id,
+            # Never hedge a turn that has already lost, e.g. a remote
+            # fallback after native content took over.
+            may_hedge=lambda: is_current is None or is_current(),
+        )
     except Exception as exc:
         if is_current is not None and not is_current():
             return _discard_stale_output(target, event_id, chunk_num)

@@ -366,7 +366,7 @@ Everything is environment variables or `.env`; see `src/config.py`.
 | `DEFAULT_TTS_LANGUAGE` | `ru` | Autonomous chat output language; `kk` or `ru`. Input language does not change it. |
 | `CLOUD_TTS_TRANSLATION_ENABLED` | `true` | Translate every English/Latin autonomous speech request; puppet bypasses this. |
 | `REMOTE_SELECTION_GRACE_S` | `0.15` | Brief window for immediate native selection before remote synthesis. It never requires a remote notification, which can arrive after audio. Native takeover is checked throughout synthesis. |
-| `OPENAI_CHAT_MODEL` | `gpt-4o-mini` | Existing model used for translation as well as remote chat, with separate prompts. |
+| `OPENAI_CHAT_MODEL` | `gpt-4.1-nano` | Model used for translation as well as remote chat, with separate prompts. Must be a fast non-reasoning model: reasoning models such as `gpt-5-nano` exceed the stage deadlines. |
 | `OPENAI_TRANSLATION_TIMEOUT_S` | `4.0` | Translation deadline, including worker wait; SDK retries disabled for this stage. |
 | `CLOUD_TTS_AUDIO_RAW_PCM` | `true` | `true` sends raw PCM16 (what `AudioBuffer` is); `false` wraps WAV. |
 | `DEVICE_ID` | — | Optional override. Normally the device is auto-discovered. |

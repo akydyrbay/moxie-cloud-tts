@@ -131,7 +131,7 @@ async def test_malformed_engine_audio_is_repaired_before_publishing(
     """
     broken = make_streaming_wav(FAKE_PCM)
 
-    def _broken_synthesize(text: str, language: str) -> SynthesisResult:
+    def _broken_synthesize(text: str, language: str, timeout: float | None = None) -> SynthesisResult:
         return SynthesisResult(
             audio=broken,
             sample_rate=settings.AUDIO_SAMPLE_RATE_HZ,
