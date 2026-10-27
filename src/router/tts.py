@@ -10,8 +10,12 @@ Robot-facing:
     GET      /tts/devices     which robots this service has seen
     GET      /tts/endpoint-qr OpenMoxie endpoint QR for Moxie's camera
     POST     /tts/wifi-qr     Wi-Fi credentials QR for Moxie's camera
+    GET      /tts/face        saved face customization + asset catalog
+    POST     /tts/face        save face assets (applied on next robot connect)
+    DELETE   /tts/face        back to the default face (on next robot connect)
 """
 
+import asyncio
 import logging
 
 from fastapi import APIRouter, HTTPException, status
@@ -19,7 +23,8 @@ from fastapi.responses import Response
 from pydantic import BaseModel, Field, SecretStr
 
 from src.config import settings
-from src.services import telehealth, tts_service
+from src.services import face, telehealth, tts_service
+from src.services.device_state import device_state
 from src.services.devices import device_registry
 from src.services.pairing_qr import (
     endpoint_qr_config,
@@ -68,6 +73,57 @@ class WifiQrRequest(BaseModel):
     password: SecretStr = Field(..., max_length=63)
     hidden: bool = False
     band: str = Field(default="any", pattern="^(any|2.4ghz|5ghz)$")
+
+
+class FaceRequest(BaseModel):
+    face_options: list[str] = Field(
+        ...,
+        max_length=len(face.FACE_LAYERS),
+        description="Asset labels from GET /tts/face, at most one per layer. [] is the default face.",
+        examples=[["MX_010_Eyes_Purple", "MX_120_Glasses_RedCat"]],
+    )
+    reset_child_id: bool = Field(
+        default=False,
+        description=(
+            "OpenMoxie's emergency recovery: a new child_pii.id makes Moxie drop "
+            "its cached face textures. Use only if a face change leaves Moxie broken."
+        ),
+    )
+
+
+# Serializes save-to-file + in-memory update so they cannot disagree.
+_face_lock = asyncio.Lock()
+
+_FACE_APPLY_NOTE = (
+    "Saved. Moxie receives it with its config the next time it connects to the "
+    "broker (reboot Moxie). It is never pushed mid-session: face options live "
+    "in child_pii, whose live re-push crashes Moxie's brain."
+)
+
+
+async def _store_face(options: list[str], reset_child_id: bool) -> dict:
+    async with _face_lock:
+        child_id = (await device_state.get_face())["child_id"]
+        if reset_child_id:
+            child_id = face.new_child_id()
+        try:
+            face.save(options, child_id)
+        except OSError as exc:
+            logger.error("could not save face file %s: %s", settings.MOXIE_FACE_FILE, exc)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="could not save the face; nothing was changed",
+            ) from exc
+        await device_state.set_face(options, child_id)
+    logger.info("saved Moxie face options %s (reset_child_id=%s); applies on next robot connect",
+                options, reset_child_id)
+    return {
+        "face_options": options,
+        "child_id_reset": reset_child_id,
+        "untested": face.untested(options),
+        "applies": "next robot connect",
+        "note": _FACE_APPLY_NOTE,
+    }
 
 
 def _require_device(device_id: str | None) -> str:
@@ -234,3 +290,35 @@ async def sleep(device_id: str | None = None) -> dict:
     telehealth.sleep(target)
     remote_chat_brain.request_sleep(target)
     return {"status": "sleep_queued", "device_id": target}
+
+
+@router.get("/face")
+async def get_face() -> dict:
+    """Saved face options and every asset label you can choose from."""
+    saved = await device_state.get_face()
+    return {
+        "face_options": saved["face_options"],
+        "applies": "next robot connect",
+        "layers": face.catalog(),
+    }
+
+
+@router.post("/face")
+async def set_face(body: FaceRequest) -> dict:
+    """Save Moxie's face; it is applied the next time Moxie connects.
+
+    Replaces the whole face: layers you leave out return to default. Only Eyes
+    and Face_Colors are well tested (OpenMoxie); other layers are returned in
+    `untested` and may make Moxie unstable.
+    """
+    try:
+        options = face.normalize(body.face_options)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
+    return await _store_face(options, body.reset_child_id)
+
+
+@router.delete("/face")
+async def reset_face() -> dict:
+    """Return to the default face on the next robot connect."""
+    return await _store_face([], reset_child_id=False)

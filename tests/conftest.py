@@ -250,3 +250,13 @@ def clean_device_state() -> None:
     clear_puppet_state()
     device_state._config["settings"]["props"]["cloud_tts"] = "0"  # noqa: SLF001
     device_state._config.pop("moxie_mode", None)  # noqa: SLF001
+    device_state._config["child_pii"].pop("face_options", None)  # noqa: SLF001
+    device_state._config["child_pii"].pop("id", None)  # noqa: SLF001
+
+
+@pytest.fixture(autouse=True)
+def face_file(tmp_path, monkeypatch):
+    """Never read or write the operator's saved face file."""
+    path = tmp_path / "moxie_face.json"
+    monkeypatch.setattr(settings, "MOXIE_FACE_FILE", str(path))
+    return path

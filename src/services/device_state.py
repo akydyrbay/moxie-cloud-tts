@@ -7,7 +7,8 @@ Holds the hardcoded device config plus the two dynamic fields:
 - `moxie_mode` — "TELEHEALTH" puts the robot into puppet mode: awake, ignoring
   the schedule, speaking only what we push. Absent means normal operation.
 
-Both start disabled; `main.py` may enable them at startup. An asyncio.Lock
+Both start disabled; `main.py` may enable them at startup. It also restores
+the saved face (`child_pii.face_options`), which only bootstrap sends. An asyncio.Lock
 guards mutation since HTTP handlers and MQTT callbacks both touch this.
 """
 
@@ -68,6 +69,26 @@ class DeviceState:
             else:
                 self._config.pop("moxie_mode", None)
             return deepcopy(self._config)
+
+    async def get_face(self) -> dict:
+        """Face options/child id the next bootstrap will send."""
+        async with self._lock:
+            child = self._config["child_pii"]
+            return {"face_options": list(child.get("face_options", [])), "child_id": child.get("id")}
+
+    async def set_face(self, options: list[str], child_id: str | None) -> None:
+        """Store validated face options for the next bootstrap only.
+
+        child_pii is never pushed mid-session (tts_service strips it), so this
+        does not touch the live robot or the speech revision.
+        """
+        async with self._lock:
+            child = self._config["child_pii"]
+            child["face_options"] = list(options)
+            if child_id is None:
+                child.pop("id", None)
+            else:
+                child["id"] = child_id
 
 
 device_state = DeviceState()

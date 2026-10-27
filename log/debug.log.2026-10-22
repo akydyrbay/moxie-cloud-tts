@@ -1,0 +1,990 @@
+2026-10-22 11:34:51 | Will watch for changes in these directories: ['/Users/bake.72/Desktop/git/moxie-cloud-tts/src']
+2026-10-22 11:34:51 | Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-10-22 11:34:51 | Started reloader process [47009] using WatchFiles
+2026-10-22 11:34:53 | Started server process [47013]
+2026-10-22 11:34:53 | Waiting for application startup.
+2026-10-22 11:34:53 | registered inbound CloudTTSRequest handler (prefix=b'embodied.unity.CloudTTSRequest:')
+2026-10-22 11:34:53 | registered inbound zmqSTTRequest handler (prefix=b'embodied.perception.audio.zmqSTTRequest:')
+2026-10-22 11:34:53 | registered remote-chat + activity-log MQTT handlers
+2026-10-22 11:34:53 | CLOUD_TTS_AUTO_ENABLE: cloud_tts set to 1 (will push when the robot connects)
+2026-10-22 11:34:55 | constructed OpenAI client (timeout=8.0s)
+2026-10-22 11:34:55 | connecting to mqtt localhost:8883
+2026-10-22 11:34:55 | Application startup complete.
+2026-10-22 11:34:55 | mqtt connected (reason_code=Success)
+2026-10-22 11:40:10 | rendering Moxie Wi-Fi QR ssid='ALTEL 5G_A78A' band=any hidden=False
+2026-10-22 11:42:13 | rendering Moxie endpoint QR host=192.168.8.128 port=8883 disable_verify=True
+2026-10-22 11:42:26 | robot d_d05e3c66-dd29-4fe2-9758-7223e31511dc connected to broker
+2026-10-22 11:42:26 | discovered device d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-10-22 11:42:26 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=None)
+2026-10-22 11:42:26 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/cloud_tts_gain_db payload[:512]: b'{"embodied_robot_id":"d05e3c66-dd29-4fe2-9758-7223e31511dc","last_updated_at":"2026-10-21T23:42:27-0700","robot_firmware_version":"v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot","android_version":"Pie (9.0)","battery_level":0.62,"mode":"sleep","public_key":"OOB3qtRPzvwO9G7BOTq8LrdVNoWh/bE86mIRShk8fUs=","user_id_encrypted":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOxGHriOTw8z2cvmKw4kP42+EGQ4ROURwgp97b4fJOdXkOOHEer0x7mFPK1mRoBKqyqO/HA==","screen_brightness":1,"settings":{"props":{"max_enroll":"0","gcp_u' (1282 bytes)
+2026-10-22 11:42:26 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-10-22 11:42:26 | topic: /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/cloud_tts_speech_rate payload[:512]: b'{"timestamp":"1792651348175","subtopic":"query","auid":"374fdcb1-207c-484c-8907-b4773e6f4ccd","query":"license","request_id":" Y \\u0004\\u0001\\u0000\\u0000`\\u0014Y \\u0010","child_id":"eb0cd1ef-01da-453a-aae9-17aed91f3bfc"}' (220 bytes)
+2026-10-22 11:42:26 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest', 'embodied.perception.audio.zmqSTTRequest']
+2026-10-22 11:42:30 | robot d_d05e3c66-dd29-4fe2-9758-7223e31511dc connected to broker
+2026-10-22 11:42:30 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.62, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "sleep", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:42:30 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=None)
+2026-10-22 11:42:30 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=None)
+2026-10-22 11:42:30 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest', 'embodied.perception.audio.zmqSTTRequest']
+2026-10-22 11:42:30 | activity-log device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query query='license' request_id='LicenseUpdate'
+2026-10-22 11:42:30 | protocol compatibility gap query='license' device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id='LicenseUpdate'; no verified response contract configured
+2026-10-22 11:42:30 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.62, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "sleep", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:42:31 | robot-log [W] ServiceMetrics: Restarting dead service: ComponentInfo{com.embodied.bo_unity/me.embodied.services.BoLogger} (launcher restart)
+2026-10-22 11:42:31 | robot-log [W] ServiceMetrics: Service had to be restarted: me.embodied.services.BoLogger
+2026-10-22 11:42:31 | robot-log [F] libc: /buildbot/src/android/ndk-release-r18/external/libcxx/../../external/libcxxabi/src/abort_message.cpp:73: abort_message: assertion "terminating" failed
+2026-10-22 11:42:31 | robot-log [F] libc: Fatal signal 6 (SIGABRT), code -6 (SI_TKILL) in tid 3344 (Main-bo-logger), pid 3320 (_unity:bologger)
+2026-10-22 11:42:31 | robot-log [F] libc: /buildbot/src/android/ndk-release-r18/external/libcxx/../../external/libcxxabi/src/abort_message.cpp:73: abort_message: assertion "terminating with uncaught exception of type std::__ndk1::regex_error: Unknown error type" failed
+2026-10-22 11:42:31 | robot-log [F] DEBUG: *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+2026-10-22 11:42:31 | robot-log [F] DEBUG: Build fingerprint: 'rockchip/rk3288/rk3288:9/PQ2A.190305.002/cloud12282012:user/release-keys'
+2026-10-22 11:42:31 | robot-log [F] DEBUG: Revision: '0'
+2026-10-22 11:42:31 | robot-log [F] DEBUG: ABI: 'arm'
+2026-10-22 11:42:31 | robot-log [F] DEBUG: pid: 3320, tid: 3344, name: Main-bo-logger  >>> com.embodied.bo_unity:bologger <<<
+2026-10-22 11:42:31 | robot-log [F] DEBUG: signal 6 (SIGABRT), code -6 (SI_TKILL), fault addr --------
+2026-10-22 11:42:31 | robot-log [F] DEBUG: Abort message: '/buildbot/src/android/ndk-release-r18/external/libcxx/../../external/libcxxabi/src/abort_message.cpp:73: abort_message: assertion "terminating" failed'
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     r0  00000000  r1  00000d10  r2  00000006  r3  00000008
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     r4  00000cf8  r5  00000d10  r6  8deae72c  r7  0000010c
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     r8  a9c28d8c  r9  a9c29450  r10 ac7db1c0  r11 00000026
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     ip  00000041  sp  8deae718  lr  a9ba501d  pc  a9b9cd42
+2026-10-22 11:42:31 | robot-log [F] DEBUG: {}
+2026-10-22 11:42:31 | robot-log [F] DEBUG: backtrace:
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #00 pc 0001cd42  /system/lib/libc.so (abort+58)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #01 pc 0001cfab  /system/lib/libc.so (__assert2+22)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #02 pc 007803fd  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (abort_message+80)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #03 pc 00780483  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (demangling_terminate_handler()+22)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #04 pc 0077e8bd  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (std::__terminate(void (*)())+4)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #05 pc 0077e841  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (std::terminate()+28)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #06 pc 0077d059  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (std::__ndk1::thread::~thread()+10)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #07 pc 0043409b  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (ZMQEventBroadcaster::~ZMQEventBroadcaster()+446)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #08 pc 004340f1  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (ZMQEventBroadcaster::~ZMQEventBroadcaster()+4)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #09 pc 0043391d  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (std::__ndk1::unique_ptr<embodied::core::EventBroadcaster, std::__ndk1::default_delete<embodied::core::EventBroadcaster>>::~unique_ptr()+20)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #10 pc 0006661f  /system/lib/libc.so (__cxa_finalize+134)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #11 pc 0001825b  /system/lib/libc.so (exit+10)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #12 pc 0046c679  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (embodied::logging::cloud::RightPoint::on_QRCommand(embodied::ProtoEventArgs<embodied::unity::QRCommand> const&)+1844)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #13 pc 00487b07  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (_ZNSt6__ndk128__invoke_void_return_wrapperIvE6__callIJRZN8embodied4core5EventINS3_14ProtoEventArgsINS3_5unity9QRCommandEEEvE11AddListenerIS9_vEEyNS_8functionIFvRKT_EEEEUlNS_10shared_ptrINS4_9EventArgsEEEE_SK_EEEvDpOT_+30)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #14 pc 004337c9  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (embodied::core::EventBase::NonThreadedWorker::Fire(std::__ndk1::shared_ptr<embodied::core::EventArgs>)+44)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #15 pc 00433765  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (embodied::core::EventBase::Fire(std::__ndk1::shared_ptr<embodied::core::EventArgs>)+68)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #16 pc 0048080d  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (_ZN8embodied4core5EventINS_14ProtoEventArgsINS_5unity9QRCommandEEEvE4FireIJRS5_EEEvDpOT_+64)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #17 pc 00480611  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (embodied::ProtoEventArgs<embodied::unity::QRCommand>::SubscriberCallback(std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>> const&)+88)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #18 pc 0043491b  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (ZMQEventBroadcaster::SubscriberThread()+438)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #19 pc 00434e55  /system/priv-app/bo-android/bo-android.apk (offset 0x1ef5f000) (_ZNSt6__ndk114__thread_proxyINS_5tupleIJNS_10unique_ptrINS_15__thread_structENS_14default_deleteIS3_EEEEM19ZMQEventBroadcasterFvvEPS7_EEEEEPvSC_+40)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #20 pc 000642f3  /system/lib/libc.so (__pthread_start(void*)+22)
+2026-10-22 11:42:31 | robot-log [F] DEBUG:     #21 pc 0001df59  /system/lib/libc.so (__start_thread+32)
+2026-10-22 11:42:31 | robot-log [I] BO-LOGGER: Started GCP Uploader
+2026-10-22 11:42:31 | robot-log [I] EBUploader: Work cycle 1 starting.  Attempting to process 8 files. [NO UPLOAD]
+2026-10-22 11:42:31 | robot-log [I] EBUploader: Upload work cycle 1.  Processed 8 files (uploaded 0 bytes) since last report.
+2026-10-22 11:42:31 | robot-log [W] ServiceMetrics: Restarting dead service: ComponentInfo{com.embodied.bo_unity/me.embodied.services.BoLogger} (launcher restart)
+2026-10-22 11:42:31 | robot-log [W] ServiceMetrics: Service had to be restarted: me.embodied.services.BoLogger
+2026-10-22 11:42:31 | robot-log [I] BO-LOGGER: Started GCP Uploader
+2026-10-22 11:42:31 | robot-log [I] EBUploader: Work cycle 1 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 11:42:31 | robot-log [I] EBUploader: Upload work cycle 1.  Processed 2 files (uploaded 0 bytes) since last report.
+2026-10-22 11:42:42 | robot-log [I] EBUploader: Work cycle 2 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 11:42:47 | robot-log [I] Unity: [FIRMWARE_VERSION] [LizardInfoEvent] Detected lizard firmware version: Lizard Firmware: v9.11, for Hardware: FEP2, Origin: FLASH
+2026-10-22 11:42:49 | robot-log [I] Unity: [LOCAL_ASSETBUNDLES] [RobotAssetBundleManager] Available local asset bundles (65): adult-moxie,animal-breathing,anxiety,attachments,bed-time,behaviours,being-different,birthday,board-game,bullying,celebration,characters,circuit-animation,confertti-attachment,dance-music,drawing,dynamic-assetbundle-test,episodic-006-personal-space,exercise,feeling-mad,ftue,general,global-narrative,icon-present,icons-12-15-20,imaginative-play,learning-about-family,meditation,microexp,missions,module-stingers,module_icons,month-two,motorcalibration,moxie-life,orchestra,reading-000-general,reading-click-clack,reading-oh-the-places,reading-waiting-is-not-easy,reading-wild-things,rock-paper-scissors,scavenger-hunt,sign-off,sounds-12-16-20,sounds12-14,space,standalone-001-sea-turtles,standalone-003-floyd,startup,startup-audio,startup-icons,startup-shaders,startup-sysicons,startup-textures,stories,storytime,talking,testassetbundlename1,testassetbundlename2,truthfulness,underwater-adventure,whimsy,xotd,yes-chief
+2026-10-22 11:42:49 | robot-log [I] Unity: [REMOTE_ASSETBUNDLES] [RobotAssetBundleManager] Available remote asset bundles (0): 
+2026-10-22 11:43:03 | robot-log [W] Unity: [ASSETBUNDLE_GENERAL] [EBLocalAssetBundleRuntimeState] Duplicated asset filename bht_stop_talking.asset in bundle behaviours
+2026-10-22 11:43:04 | robot-log [W] Unity: [ASSETBUNDLE_GENERAL] [RobotAssetBundleManager] [RecordAssetsInBundle] The file 'bht_stop_talking.asset' in the asset bundle 'behaviours' has been previously found in found in the asset bundles 'behaviours'
+2026-10-22 11:43:34 | robot-log [I] EBUploader: Upload work cycle 2.  Processed 1 files (uploaded 0 bytes) since last report.
+2026-10-22 11:45:27 | robot-log [W] Unity: [ASSETBUNDLE_GENERAL] [RobotAssetBundleManager] [RecordAssetsInBundle] The file 'brain_twister_icon.png' in the asset bundle 'startup-shaders' has been previously found in found in the asset bundles 'module_icons'
+2026-10-22 11:45:27 | robot-log [W] Unity: [ASSETBUNDLE_GENERAL] [RobotAssetBundleManager] [RecordAssetsInBundle] The file 'mindfulness_icon.png' in the asset bundle 'startup-shaders' has been previously found in found in the asset bundles 'module_icons'
+2026-10-22 11:45:27 | robot-log [W] Unity: [ASSETBUNDLE_GENERAL] [RobotAssetBundleManager] [RecordAssetsInBundle] The file 'moxie_thinking_icon.png' in the asset bundle 'startup-shaders' has been previously found in found in the asset bundles 'module_icons'
+2026-10-22 11:45:45 | robot-log [W] Unity: [ASSETBUNDLE_GENERAL] [RobotAssetBundleManager] [RecordAssetsInBundle] The file 'sfxwhi_sparkleexist.ogg' in the asset bundle 'whimsy' has been previously found in found in the asset bundles 'sounds-12-16-20'
+2026-10-22 11:45:50 | robot-log [W] Unity: [ROBOTACTOR_ERROR] [RobotActorComponent] AnimatorController does not contain animation state named 'I_001_01_Idles_Sleep'.
+2026-10-22 11:45:54 | robot-log [I] Unity: [ROBOT_VERSION_INFO] [Embodied.Robot.Logging.LoggingManager] App Version: 24.10.803
+2026-10-22 11:45:54 | robot-log [I] Unity: [ROBOT_VERSION_INFO] [Embodied.Robot.Logging.LoggingManager] Unity Version: 2020.3.48f1
+2026-10-22 11:45:54 | robot-log [I] Unity: [ROBOT_VERSION_INFO] [Embodied.Robot.Logging.LoggingManager] Version Information: Branch "refs/heads/master" at commit "a90cfdee72bc0b2e73bc4ddfac8f7877c5be9990" last built at "12/28/2024 18:32:27" (UNIX: 1735410747974)
+2026-10-22 11:45:54 | robot-log [I] BO-LIZZERFACE: [LIZZERFACE_VERSION] [BO-LIZZERFACE] COMMIT: b384982386bd7d04360ede01e06fda3ea8bc97a4, COMMIT_DATE: Tue May 11 18:56:59 2021 -0700
+2026-10-22 11:45:54 | robot-log [I] Unity: [LIZZERFACE_VERSION] [Lizzerface] Detected Lizard Board Revision REVISION_F2_MoxieFEP2, reply from Lizard was 242.
+2026-10-22 11:46:56 | robot-log [I] Unity: [CHARGING_EVENT] [LizardInfoEvent] New battery level: 64% (BATTERY_OK), and charging.
+2026-10-22 11:46:56 | robot-log [I] Unity: [CHARGING_EVENT] [LizardInfoEvent] Charger plugged in.  Current battery level is 64%
+2026-10-22 11:46:56 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.64, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "sleep", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:46:56 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (3554 bytes)
+2026-10-22 11:46:56 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='CereprocWarmup-ignore-me' chunk_num=0 timestamp=1792651580350 markup[:80]='<mark name="cmd:idlestate,data:{+idleState+:7}"/><mark name="cmd:behaviour-tree,' speakable="I'm so excited. I had no idea the human world would belike this !"
+2026-10-22 11:46:57 | activity-log device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query query='remote_lines' request_id='c969ca45-c0b0-444a-a5f1-0b02fb0b5181'
+2026-10-22 11:46:57 | protocol compatibility gap query='remote_lines' device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id='c969ca45-c0b0-444a-a5f1-0b02fb0b5181'; no verified response contract configured
+2026-10-22 11:46:57 | robot-log [I] XMOS: Audio startup, wake word previously detected: NO
+2026-10-22 11:46:58 | activity-log device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query query='schedule' request_id='c93642e9-9ef1-4a1b-86e3-cbf04a041ff5'
+2026-10-22 11:46:58 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=c93642e9-9ef1-4a1b-86e3-cbf04a041ff5 puppet=False
+2026-10-22 11:46:58 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (271 bytes)
+2026-10-22 11:46:58 | activity-log device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query query='mentor_behaviors' request_id='6d74ee3a-cbdb-4f0c-8cca-30021447beca'
+2026-10-22 11:46:58 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=6d74ee3a-cbdb-4f0c-8cca-30021447beca
+2026-10-22 11:46:59 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-10-22 11:46:59 | Rx remote-chat from d_d05e3c66-dd29-4fe2-9758-7223e31511dc backend='data' command=None module=/ event_id='f028b2f9-0479-4f40-a034-9045b0fb845d' speech='' keys=['timestamp', 'event_id', 'backend', 'api_version', 'user_id', 'settings', 'query', 'family', 'timezone_id', 'nickname', 'software_version', 'module_name']
+2026-10-22 11:46:59 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=f028b2f9-0479-4f40-a034-9045b0fb845d (1 modules)
+2026-10-22 11:46:59 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-10-22 11:47:00 | translated speech chars=65 target=ru output_chars=66 elapsed_ms=3999
+2026-10-22 11:47:00 | CloudTTSRequest translation device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='CereprocWarmup-ignore-me' chunk=0 target=ru requested_text="I'm so excited. I had no idea the human world would belike this !" synthesis_text='Я так взволнована. Я и не знала, что человеческий мир будет таким!'
+2026-10-22 11:47:00 | handling CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='CereprocWarmup-ignore-me' chunk=0 chars=66 language=ru synthesis_text='Я так взволнована. Я и не знала, что человеческий мир будет таким!'
+2026-10-22 11:47:03 | openai tts synthesized 66 chars (ru) -> 240000 bytes in 2724 ms (container=pcm, 240000 pcm bytes ≈ 5.00s)
+2026-10-22 11:47:03 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id=CereprocWarmup-ignore-me chunk=0, 240000 audio bytes)
+2026-10-22 11:47:03 | spoke event_id=CereprocWarmup-ignore-me chunk=0 language=ru audio_bytes=240000 marks=83 raw_pcm=True total_ms=2726 device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc
+2026-10-22 11:47:12 | robot-log [I] EBUploader: Work cycle 3 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:47:12 | robot-log [I] EBUploader: Upload work cycle 3.  Processed 4 files (uploaded 0 bytes) since last report.
+2026-10-22 11:47:16 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.64, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:47:17 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (2067 bytes)
+2026-10-22 11:47:17 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='f820f12b-06ea-4b5a-87a3-5e6d6d70e64b' chunk_num=0 timestamp=1792651638531 markup[:80]='<mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,' speakable=''
+2026-10-22 11:47:17 | CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc has no speakable text (event_id='f820f12b-06ea-4b5a-87a3-5e6d6d70e64b' markup='<mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,'); publishing silence
+2026-10-22 11:47:17 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id=f820f12b-06ea-4b5a-87a3-5e6d6d70e64b chunk=0, 9600 audio bytes)
+2026-10-22 11:47:17 | published SILENT fallback to d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=f820f12b-06ea-4b5a-87a3-5e6d6d70e64b chunk=0 (9600 bytes)
+2026-10-22 11:47:22 | robot-log [I] EBUploader: Work cycle 4 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:47:27 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.65, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:47:33 | robot-log [I] EBUploader: Work cycle 5 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:47:43 | robot-log [I] EBUploader: Work cycle 6 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:47:50 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_STANDBY
+2026-10-22 11:47:50 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.65, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "sleep", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:47:54 | robot-log [I] EBUploader: Work cycle 7 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 11:48:04 | robot-log [I] EBUploader: Work cycle 8 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:48:09 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.65, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:48:11 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.65, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:48:11 | activity-log device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query query='mentor_behaviors' request_id='067736cd-adc1-40a7-85f0-4fb590b06967'
+2026-10-22 11:48:11 | answering mentor_behaviors query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=067736cd-adc1-40a7-85f0-4fb590b06967
+2026-10-22 11:48:11 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (134 bytes)
+2026-10-22 11:48:11 | activity-log device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query query='remote_lines' request_id='488d459b-20ed-44c0-8997-40f01e162621'
+2026-10-22 11:48:11 | protocol compatibility gap query='remote_lines' device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id='488d459b-20ed-44c0-8997-40f01e162621'; no verified response contract configured
+2026-10-22 11:48:11 | activity-log device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query query='schedule' request_id='2c0150e1-41ee-471d-8c60-f32d26d72dbd'
+2026-10-22 11:48:11 | answering schedule query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id=2c0150e1-41ee-471d-8c60-f32d26d72dbd puppet=False
+2026-10-22 11:48:11 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/query_result (271 bytes)
+2026-10-22 11:48:11 | Rx remote-chat from d_d05e3c66-dd29-4fe2-9758-7223e31511dc backend='data' command=None module=/ event_id='2bcb642a-43be-4a1d-842b-b6fb15b8ae30' speech='' keys=['timestamp', 'event_id', 'backend', 'api_version', 'user_id', 'settings', 'query', 'family', 'timezone_id', 'nickname', 'software_version', 'module_name']
+2026-10-22 11:48:11 | answering modules query for d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=2bcb642a-43be-4a1d-842b-b6fb15b8ae30 (1 modules)
+2026-10-22 11:48:11 | publishing JSON command to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/remote_chat (302 bytes)
+2026-10-22 11:48:11 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_SLEEPING
+2026-10-22 11:48:11 | robot-log [I] Unity: [WAKEUP_ANDROID_EVENT] [LizardErrorEvent] eventID: TOUCH_WAKEUP
+2026-10-22 11:48:11 | inbound CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc on /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/events/zmq (2067 bytes)
+2026-10-22 11:48:11 | CloudTTSRequest fields device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id='00130eaa-71c9-4880-80b3-a221e2260646' chunk_num=0 timestamp=1792651693203 markup[:80]='<mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,' speakable=''
+2026-10-22 11:48:11 | CloudTTSRequest from d_d05e3c66-dd29-4fe2-9758-7223e31511dc has no speakable text (event_id='00130eaa-71c9-4880-80b3-a221e2260646' markup='<mark name="cmd:behaviour-tree,data:{+transition+:0.5,+duration+:1.0,+repeat+:1,'); publishing silence
+2026-10-22 11:48:11 | publishing embodied.unity.CloudTTSResponse to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq (event_id=00130eaa-71c9-4880-80b3-a221e2260646 chunk=0, 9600 audio bytes)
+2026-10-22 11:48:11 | published SILENT fallback to d_d05e3c66-dd29-4fe2-9758-7223e31511dc event_id=00130eaa-71c9-4880-80b3-a221e2260646 chunk=0 (9600 bytes)
+2026-10-22 11:48:12 | robot-log [I] XMOS: Audio startup, wake word previously detected: NO
+2026-10-22 11:48:14 | robot-log [I] EBUploader: Upload work cycle 8.  Processed 17 files (uploaded 0 bytes) since last report.
+2026-10-22 11:48:17 | received puppet mode request: enabled=True
+2026-10-22 11:48:17 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-10-22 11:48:17 | puppet mode=True pushed to ['d_d05e3c66-dd29-4fe2-9758-7223e31511dc']
+2026-10-22 11:48:17 | robot-log [W] Unity: [MISSING_PII] [RobotCloudConfigBehavior] WARNING Child PII has not been filled in by the user. Ignoring PII volume preference checks.
+2026-10-22 11:48:17 | activity-log device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=telehealth query=None request_id=None
+2026-10-22 11:48:17 | telehealth state d_d05e3c66-dd29-4fe2-9758-7223e31511dc: None -> READY
+2026-10-22 11:48:18 | robot-log [I] Unity: [POWER_STATE_CHANGE] [LizardInfoEvent] Setting robot power state to: POWER_STATE_ACTIVE
+2026-10-22 11:48:20 | robot-log [I] Unity: [MOTOR_FAIL_BOOT] [LizardErrorEvent] Fixed 
+2026-10-22 11:48:25 | robot-log [I] EBUploader: Work cycle 9 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 11:48:35 | robot-log [I] EBUploader: Work cycle 10 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:48:45 | robot-log [I] EBUploader: Work cycle 11 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:48:56 | robot-log [I] EBUploader: Work cycle 12 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:49:06 | robot-log [I] EBUploader: Work cycle 13 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:49:13 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.66, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:49:17 | robot-log [I] EBUploader: Work cycle 14 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:49:17 | robot-log [I] EBUploader: Upload work cycle 14.  Processed 25 files (uploaded 0 bytes) since last report.
+2026-10-22 11:49:27 | robot-log [I] EBUploader: Work cycle 15 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 11:49:37 | robot-log [I] EBUploader: Work cycle 16 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 11:49:48 | robot-log [I] EBUploader: Work cycle 17 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:49:58 | robot-log [I] EBUploader: Work cycle 18 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:50:08 | robot-log [I] EBUploader: Work cycle 19 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:50:19 | robot-log [I] EBUploader: Work cycle 20 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:50:19 | robot-log [I] EBUploader: Upload work cycle 20.  Processed 26 files (uploaded 0 bytes) since last report.
+2026-10-22 11:50:29 | robot-log [I] EBUploader: Work cycle 21 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:50:40 | robot-log [I] EBUploader: Work cycle 22 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 11:50:50 | robot-log [I] EBUploader: Work cycle 23 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:51:01 | robot-log [I] EBUploader: Work cycle 24 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:51:03 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.67, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:51:05 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6e3fd6c0-65a4-4ef0-88ca-f853ae7e5a41 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:51:05 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6e3fd6c0-65a4-4ef0-88ca-f853ae7e5a41 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:51:05 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6e3fd6c0-65a4-4ef0-88ca-f853ae7e5a41 vad=SPEECH frame_bytes=69120 total_bytes=69120 frames=2
+2026-10-22 11:51:05 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6e3fd6c0-65a4-4ef0-88ca-f853ae7e5a41 vad=END_OF_SPEECH frame_bytes=69120 total_bytes=138240 frames=3
+2026-10-22 11:51:05 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6e3fd6c0-65a4-4ef0-88ca-f853ae7e5a41 phase=wake-gate frames=3 audio_bytes=138240 audio_ms=4320
+2026-10-22 11:51:05 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6e3fd6c0-65a4-4ef0-88ca-f853ae7e5a41 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:51:05 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6e3fd6c0-65a4-4ef0-88ca-f853ae7e5a41 phase=wake-gate audio_bytes=138240 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:51:11 | robot-log [I] EBUploader: Work cycle 25 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 11:51:12 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=db16cdf4-458a-4d15-9270-14f3d0bf024d phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:51:12 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=db16cdf4-458a-4d15-9270-14f3d0bf024d vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:51:12 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=db16cdf4-458a-4d15-9270-14f3d0bf024d vad=SPEECH frame_bytes=65280 total_bytes=65280 frames=2
+2026-10-22 11:51:12 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=db16cdf4-458a-4d15-9270-14f3d0bf024d vad=END_OF_SPEECH frame_bytes=65280 total_bytes=130560 frames=3
+2026-10-22 11:51:12 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=db16cdf4-458a-4d15-9270-14f3d0bf024d phase=wake-gate frames=3 audio_bytes=130560 audio_ms=4080
+2026-10-22 11:51:12 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=db16cdf4-458a-4d15-9270-14f3d0bf024d phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:51:12 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=db16cdf4-458a-4d15-9270-14f3d0bf024d phase=wake-gate audio_bytes=130560 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:51:17 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=061df42c-4671-40ee-b80a-64a602d07fbb phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:51:17 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=061df42c-4671-40ee-b80a-64a602d07fbb vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:51:17 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=061df42c-4671-40ee-b80a-64a602d07fbb vad=SPEECH frame_bytes=134400 total_bytes=134400 frames=2
+2026-10-22 11:51:17 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=061df42c-4671-40ee-b80a-64a602d07fbb vad=END_OF_SPEECH frame_bytes=134400 total_bytes=268800 frames=3
+2026-10-22 11:51:17 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=061df42c-4671-40ee-b80a-64a602d07fbb phase=wake-gate frames=3 audio_bytes=268800 audio_ms=8400
+2026-10-22 11:51:17 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=061df42c-4671-40ee-b80a-64a602d07fbb phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:51:17 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=061df42c-4671-40ee-b80a-64a602d07fbb phase=wake-gate audio_bytes=268800 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:51:21 | robot-log [I] EBUploader: Work cycle 26 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:51:21 | robot-log [I] EBUploader: Upload work cycle 26.  Processed 17 files (uploaded 0 bytes) since last report.
+2026-10-22 11:51:32 | robot-log [I] EBUploader: Work cycle 27 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:51:42 | robot-log [I] EBUploader: Work cycle 28 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 11:51:53 | robot-log [I] EBUploader: Work cycle 29 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:52:03 | robot-log [I] EBUploader: Work cycle 30 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:52:14 | robot-log [I] EBUploader: Work cycle 31 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:52:24 | robot-log [I] EBUploader: Work cycle 32 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:52:24 | robot-log [I] EBUploader: Upload work cycle 32.  Processed 22 files (uploaded 0 bytes) since last report.
+2026-10-22 11:52:35 | robot-log [I] EBUploader: Work cycle 33 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:52:39 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=00ee68b7-0d49-4b4e-a378-b40de5b2ae22 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:52:39 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=00ee68b7-0d49-4b4e-a378-b40de5b2ae22 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:52:39 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=00ee68b7-0d49-4b4e-a378-b40de5b2ae22 vad=SPEECH frame_bytes=69120 total_bytes=69120 frames=2
+2026-10-22 11:52:39 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=00ee68b7-0d49-4b4e-a378-b40de5b2ae22 vad=END_OF_SPEECH frame_bytes=69120 total_bytes=138240 frames=3
+2026-10-22 11:52:39 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=00ee68b7-0d49-4b4e-a378-b40de5b2ae22 phase=wake-gate frames=3 audio_bytes=138240 audio_ms=4320
+2026-10-22 11:52:39 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=00ee68b7-0d49-4b4e-a378-b40de5b2ae22 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:52:39 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=00ee68b7-0d49-4b4e-a378-b40de5b2ae22 phase=wake-gate audio_bytes=138240 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:52:45 | robot-log [I] EBUploader: Work cycle 34 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:52:53 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.68, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:52:55 | robot-log [I] EBUploader: Work cycle 35 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 11:53:06 | robot-log [I] EBUploader: Work cycle 36 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 11:53:16 | robot-log [I] EBUploader: Work cycle 37 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 11:53:27 | robot-log [I] EBUploader: Work cycle 38 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:53:27 | robot-log [I] EBUploader: Upload work cycle 38.  Processed 20 files (uploaded 0 bytes) since last report.
+2026-10-22 11:53:47 | robot-log [I] EBUploader: Work cycle 39 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:53:51 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e459001-cd17-49df-b8df-4277b49c97f5 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:53:51 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e459001-cd17-49df-b8df-4277b49c97f5 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:53:51 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e459001-cd17-49df-b8df-4277b49c97f5 vad=SPEECH frame_bytes=80640 total_bytes=80640 frames=2
+2026-10-22 11:53:51 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e459001-cd17-49df-b8df-4277b49c97f5 vad=END_OF_SPEECH frame_bytes=80640 total_bytes=161280 frames=3
+2026-10-22 11:53:51 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e459001-cd17-49df-b8df-4277b49c97f5 phase=wake-gate frames=3 audio_bytes=161280 audio_ms=5040
+2026-10-22 11:53:51 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e459001-cd17-49df-b8df-4277b49c97f5 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:53:51 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e459001-cd17-49df-b8df-4277b49c97f5 phase=wake-gate audio_bytes=161280 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:53:58 | robot-log [I] EBUploader: Work cycle 40 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 11:54:08 | robot-log [I] EBUploader: Work cycle 41 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:54:19 | robot-log [I] EBUploader: Work cycle 42 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:54:29 | robot-log [I] EBUploader: Upload work cycle 42.  Processed 12 files (uploaded 0 bytes) since last report.
+2026-10-22 11:54:32 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8cc8eedc-51c2-4688-a042-c70563228c6a phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:54:32 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8cc8eedc-51c2-4688-a042-c70563228c6a vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:54:32 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8cc8eedc-51c2-4688-a042-c70563228c6a vad=SPEECH frame_bytes=57600 total_bytes=57600 frames=2
+2026-10-22 11:54:32 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8cc8eedc-51c2-4688-a042-c70563228c6a vad=END_OF_SPEECH frame_bytes=57600 total_bytes=115200 frames=3
+2026-10-22 11:54:32 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8cc8eedc-51c2-4688-a042-c70563228c6a phase=wake-gate frames=3 audio_bytes=115200 audio_ms=3600
+2026-10-22 11:54:32 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8cc8eedc-51c2-4688-a042-c70563228c6a phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:54:32 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8cc8eedc-51c2-4688-a042-c70563228c6a phase=wake-gate audio_bytes=115200 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:54:43 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.69, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:54:49 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=06e00129-d4d2-4d02-b03a-62ba9dcd0130 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:54:49 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=06e00129-d4d2-4d02-b03a-62ba9dcd0130 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:54:49 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=06e00129-d4d2-4d02-b03a-62ba9dcd0130 vad=SPEECH frame_bytes=84480 total_bytes=84480 frames=2
+2026-10-22 11:54:50 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=06e00129-d4d2-4d02-b03a-62ba9dcd0130 vad=END_OF_SPEECH frame_bytes=84480 total_bytes=168960 frames=3
+2026-10-22 11:54:50 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=06e00129-d4d2-4d02-b03a-62ba9dcd0130 phase=wake-gate frames=3 audio_bytes=168960 audio_ms=5280
+2026-10-22 11:54:50 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=06e00129-d4d2-4d02-b03a-62ba9dcd0130 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:54:50 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=06e00129-d4d2-4d02-b03a-62ba9dcd0130 phase=wake-gate audio_bytes=168960 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:55:00 | robot-log [I] EBUploader: Work cycle 43 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:55:08 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=f0a19b8e-8656-4082-be1e-b301c7dc65f6 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:55:08 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=f0a19b8e-8656-4082-be1e-b301c7dc65f6 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:55:08 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=f0a19b8e-8656-4082-be1e-b301c7dc65f6 vad=SPEECH frame_bytes=88320 total_bytes=88320 frames=2
+2026-10-22 11:55:08 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=f0a19b8e-8656-4082-be1e-b301c7dc65f6 vad=END_OF_SPEECH frame_bytes=88320 total_bytes=176640 frames=3
+2026-10-22 11:55:08 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=f0a19b8e-8656-4082-be1e-b301c7dc65f6 phase=wake-gate frames=3 audio_bytes=176640 audio_ms=5520
+2026-10-22 11:55:08 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=f0a19b8e-8656-4082-be1e-b301c7dc65f6 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:55:08 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=f0a19b8e-8656-4082-be1e-b301c7dc65f6 phase=wake-gate audio_bytes=176640 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:55:21 | robot-log [I] EBUploader: Work cycle 44 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:55:29 | robot-log [I] Unity: [MPU_EVENT] [LizardErrorEvent] ReceivedEvent: PICKED_UP, RawValue:00000002
+2026-10-22 11:55:29 | robot-log [I] Unity: [MPU_IS_NOISY] [LizardErrorEvent] unstableEvent:PICKED_UP, count:1, dt:0
+2026-10-22 11:55:31 | robot-log [I] EBUploader: Work cycle 45 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:55:31 | robot-log [I] EBUploader: Upload work cycle 45.  Processed 11 files (uploaded 0 bytes) since last report.
+2026-10-22 11:55:32 | robot-log [I] Unity: [MPU_EVENT] [LizardErrorEvent] ReceivedEvent: PUT_DOWN, RawValue:00000003
+2026-10-22 11:55:37 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=aa4659f2-afd6-4d55-8465-abc578a6365c phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:55:37 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=aa4659f2-afd6-4d55-8465-abc578a6365c vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:55:37 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=aa4659f2-afd6-4d55-8465-abc578a6365c vad=SPEECH frame_bytes=69120 total_bytes=69120 frames=2
+2026-10-22 11:55:37 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=aa4659f2-afd6-4d55-8465-abc578a6365c vad=END_OF_SPEECH frame_bytes=69120 total_bytes=138240 frames=3
+2026-10-22 11:55:37 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=aa4659f2-afd6-4d55-8465-abc578a6365c phase=wake-gate frames=3 audio_bytes=138240 audio_ms=4320
+2026-10-22 11:55:37 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=aa4659f2-afd6-4d55-8465-abc578a6365c phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:55:37 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=aa4659f2-afd6-4d55-8465-abc578a6365c phase=wake-gate audio_bytes=138240 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:55:42 | robot-log [I] EBUploader: Work cycle 46 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 11:55:52 | robot-log [I] EBUploader: Work cycle 47 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 11:56:03 | robot-log [I] EBUploader: Work cycle 48 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 11:56:13 | robot-log [I] EBUploader: Work cycle 49 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 11:56:20 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=64d342e9-3d69-4158-a9b8-6b3b7fd622f5 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:56:20 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=64d342e9-3d69-4158-a9b8-6b3b7fd622f5 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:56:20 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=64d342e9-3d69-4158-a9b8-6b3b7fd622f5 vad=SPEECH frame_bytes=80640 total_bytes=80640 frames=2
+2026-10-22 11:56:20 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=64d342e9-3d69-4158-a9b8-6b3b7fd622f5 vad=END_OF_SPEECH frame_bytes=80640 total_bytes=161280 frames=3
+2026-10-22 11:56:20 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=64d342e9-3d69-4158-a9b8-6b3b7fd622f5 phase=wake-gate frames=3 audio_bytes=161280 audio_ms=5040
+2026-10-22 11:56:20 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=64d342e9-3d69-4158-a9b8-6b3b7fd622f5 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:56:20 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=64d342e9-3d69-4158-a9b8-6b3b7fd622f5 phase=wake-gate audio_bytes=161280 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:56:23 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6576d071-0494-4e3f-a4cd-4d6edcdd315a phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:56:23 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6576d071-0494-4e3f-a4cd-4d6edcdd315a vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:56:23 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6576d071-0494-4e3f-a4cd-4d6edcdd315a vad=SPEECH frame_bytes=115200 total_bytes=115200 frames=2
+2026-10-22 11:56:23 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6576d071-0494-4e3f-a4cd-4d6edcdd315a vad=END_OF_SPEECH frame_bytes=115200 total_bytes=230400 frames=3
+2026-10-22 11:56:23 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6576d071-0494-4e3f-a4cd-4d6edcdd315a phase=wake-gate frames=3 audio_bytes=230400 audio_ms=7200
+2026-10-22 11:56:23 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6576d071-0494-4e3f-a4cd-4d6edcdd315a phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:56:23 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=6576d071-0494-4e3f-a4cd-4d6edcdd315a phase=wake-gate audio_bytes=230400 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:56:24 | robot-log [I] EBUploader: Work cycle 50 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:56:25 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7fc72bfa-073c-492e-9131-0fe6f3cc516c phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:56:25 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7fc72bfa-073c-492e-9131-0fe6f3cc516c vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:56:25 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7fc72bfa-073c-492e-9131-0fe6f3cc516c vad=SPEECH frame_bytes=49920 total_bytes=49920 frames=2
+2026-10-22 11:56:25 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7fc72bfa-073c-492e-9131-0fe6f3cc516c vad=END_OF_SPEECH frame_bytes=49920 total_bytes=99840 frames=3
+2026-10-22 11:56:25 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7fc72bfa-073c-492e-9131-0fe6f3cc516c phase=wake-gate frames=3 audio_bytes=99840 audio_ms=3120
+2026-10-22 11:56:25 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7fc72bfa-073c-492e-9131-0fe6f3cc516c phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:56:25 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7fc72bfa-073c-492e-9131-0fe6f3cc516c phase=wake-gate audio_bytes=99840 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:56:34 | robot-log [I] EBUploader: Work cycle 51 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 11:56:34 | robot-log [I] EBUploader: Upload work cycle 51.  Processed 18 files (uploaded 0 bytes) since last report.
+2026-10-22 11:56:36 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.7, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:56:44 | robot-log [I] EBUploader: Work cycle 52 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:56:54 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=18a7d2bb-7285-4847-802d-fbfefa7a8af2 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:56:54 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=18a7d2bb-7285-4847-802d-fbfefa7a8af2 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:56:54 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=18a7d2bb-7285-4847-802d-fbfefa7a8af2 vad=SPEECH frame_bytes=92160 total_bytes=92160 frames=2
+2026-10-22 11:56:54 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=18a7d2bb-7285-4847-802d-fbfefa7a8af2 vad=END_OF_SPEECH frame_bytes=92160 total_bytes=184320 frames=3
+2026-10-22 11:56:54 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=18a7d2bb-7285-4847-802d-fbfefa7a8af2 phase=wake-gate frames=3 audio_bytes=184320 audio_ms=5760
+2026-10-22 11:56:54 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=18a7d2bb-7285-4847-802d-fbfefa7a8af2 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:56:54 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=18a7d2bb-7285-4847-802d-fbfefa7a8af2 phase=wake-gate audio_bytes=184320 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:56:55 | robot-log [I] EBUploader: Work cycle 53 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:57:05 | robot-log [I] EBUploader: Work cycle 54 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:57:15 | robot-log [I] EBUploader: Work cycle 55 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:58:22 | robot-log [I] EBUploader: Work cycle 56 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:58:22 | robot-log [I] EBUploader: Work cycle 57 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:58:22 | robot-log [I] EBUploader: Upload work cycle 57.  Processed 24 files (uploaded 0 bytes) since last report.
+2026-10-22 11:58:22 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=0bd224c3-0032-4d35-ac92-48498c9ce13f phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 11:58:22 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=0bd224c3-0032-4d35-ac92-48498c9ce13f vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 11:58:22 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=0bd224c3-0032-4d35-ac92-48498c9ce13f vad=SPEECH frame_bytes=80640 total_bytes=80640 frames=2
+2026-10-22 11:58:23 | robot-log [I] EBUploader: Work cycle 58 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:58:23 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=0bd224c3-0032-4d35-ac92-48498c9ce13f vad=END_OF_SPEECH frame_bytes=80640 total_bytes=161280 frames=3
+2026-10-22 11:58:23 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=0bd224c3-0032-4d35-ac92-48498c9ce13f phase=wake-gate frames=3 audio_bytes=161280 audio_ms=5040
+2026-10-22 11:58:23 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=0bd224c3-0032-4d35-ac92-48498c9ce13f phase=wake-gate speech="Moxie, let's go"
+2026-10-22 11:58:23 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=0bd224c3-0032-4d35-ac92-48498c9ce13f phase=wake-gate audio_bytes=161280 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 11:58:23 | robot-log [I] EBUploader: Work cycle 59 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:58:23 | robot-log [I] EBUploader: Work cycle 60 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:58:23 | robot-log [I] EBUploader: Work cycle 61 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:58:23 | robot-log [I] EBUploader: Work cycle 62 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 11:58:23 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 38600 ms. UUID: 9266c552-4929-4c23-8ff8-0bbb8bfbfad6
+2026-10-22 11:58:27 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.71, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 11:58:28 | robot-log [I] EBUploader: Work cycle 63 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:58:39 | robot-log [I] EBUploader: Work cycle 64 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 11:58:39 | robot-log [I] EBUploader: Upload work cycle 64.  Processed 24 files (uploaded 0 bytes) since last report.
+2026-10-22 11:58:49 | robot-log [I] EBUploader: Work cycle 65 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:59:00 | robot-log [I] EBUploader: Work cycle 66 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 11:59:10 | robot-log [I] EBUploader: Work cycle 67 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 11:59:21 | robot-log [I] EBUploader: Work cycle 68 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:59:31 | robot-log [I] EBUploader: Work cycle 69 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 11:59:41 | robot-log [I] EBUploader: Work cycle 70 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 11:59:41 | robot-log [I] EBUploader: Upload work cycle 70.  Processed 24 files (uploaded 0 bytes) since last report.
+2026-10-22 11:59:52 | robot-log [I] EBUploader: Work cycle 71 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 12:00:02 | robot-log [I] EBUploader: Work cycle 72 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 12:00:13 | robot-log [I] EBUploader: Work cycle 73 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 12:00:23 | robot-log [I] EBUploader: Work cycle 74 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 12:00:34 | robot-log [I] EBUploader: Work cycle 75 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 12:00:37 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e25bcf78-c56c-4111-9310-fe0f74b48191 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 12:00:37 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e25bcf78-c56c-4111-9310-fe0f74b48191 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 12:00:37 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e25bcf78-c56c-4111-9310-fe0f74b48191 vad=SPEECH frame_bytes=92160 total_bytes=92160 frames=2
+2026-10-22 12:00:37 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e25bcf78-c56c-4111-9310-fe0f74b48191 vad=END_OF_SPEECH frame_bytes=92160 total_bytes=184320 frames=3
+2026-10-22 12:00:37 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e25bcf78-c56c-4111-9310-fe0f74b48191 phase=wake-gate frames=3 audio_bytes=184320 audio_ms=5760
+2026-10-22 12:00:37 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e25bcf78-c56c-4111-9310-fe0f74b48191 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 12:00:37 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e25bcf78-c56c-4111-9310-fe0f74b48191 phase=wake-gate audio_bytes=184320 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 12:00:44 | robot-log [I] EBUploader: Work cycle 76 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 12:00:44 | robot-log [I] EBUploader: Upload work cycle 76.  Processed 14 files (uploaded 0 bytes) since last report.
+2026-10-22 12:00:54 | robot-log [I] EBUploader: Work cycle 77 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 12:00:56 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8dea2b8b-3635-48f5-a62e-7e548dbb43ff phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 12:00:56 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8dea2b8b-3635-48f5-a62e-7e548dbb43ff vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 12:00:56 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8dea2b8b-3635-48f5-a62e-7e548dbb43ff vad=SPEECH frame_bytes=126720 total_bytes=126720 frames=2
+2026-10-22 12:00:56 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8dea2b8b-3635-48f5-a62e-7e548dbb43ff vad=END_OF_SPEECH frame_bytes=126720 total_bytes=253440 frames=3
+2026-10-22 12:00:56 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8dea2b8b-3635-48f5-a62e-7e548dbb43ff phase=wake-gate frames=3 audio_bytes=253440 audio_ms=7920
+2026-10-22 12:00:56 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8dea2b8b-3635-48f5-a62e-7e548dbb43ff phase=wake-gate speech="Moxie, let's go"
+2026-10-22 12:00:56 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=8dea2b8b-3635-48f5-a62e-7e548dbb43ff phase=wake-gate audio_bytes=253440 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 12:04:17 | mqtt connected (reason_code=Success)
+2026-10-22 12:04:18 | robot d_d05e3c66-dd29-4fe2-9758-7223e31511dc connected to broker
+2026-10-22 12:04:19 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-10-22 12:04:19 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.73, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 12:04:19 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-10-22 12:04:19 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest', 'embodied.perception.audio.zmqSTTRequest']
+2026-10-22 12:04:19 | activity-log device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query query='license' request_id='LicenseUpdate'
+2026-10-22 12:04:19 | protocol compatibility gap query='license' device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id='LicenseUpdate'; no verified response contract configured
+2026-10-22 12:04:20 | robot-log [I] EBUploader: Work cycle 91 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 12:04:20 | robot-log [I] EBUploader: Work cycle 92 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 12:04:20 | robot-log [I] bo-system-monitor: Attempting to recover network.  Restarting wifi.
+2026-10-22 12:04:20 | robot-log [I] EBUploader: Work cycle 93 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 12:04:20 | robot-log [I] EBUploader: Work cycle 94 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 12:04:20 | robot-log [I] EBUploader: Upload work cycle 94.  Processed 22 files (uploaded 0 bytes) since last report.
+2026-10-22 12:04:20 | robot-log [I] EBUploader: Work cycle 95 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 12:04:20 | robot-log [I] EBUploader: Work cycle 96 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 12:04:23 | robot-log [I] EBUploader: Work cycle 97 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:42 | mqtt connected (reason_code=Success)
+2026-10-22 13:04:47 | robot d_d05e3c66-dd29-4fe2-9758-7223e31511dc connected to broker
+2026-10-22 13:04:48 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-10-22 13:04:48 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.99, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 13:04:48 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-10-22 13:04:48 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest', 'embodied.perception.audio.zmqSTTRequest']
+2026-10-22 13:04:48 | activity-log device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query query='license' request_id='LicenseUpdate'
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 109 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] bo-system-monitor: Attempting to recover network.  Restarting wifi.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 110 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 111 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 111.  Processed 14 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 112 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 113 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 114 starting.  Attempting to process 7 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 115 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 116 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 117 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 117.  Processed 26 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 118 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 119 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 120 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 121 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 122 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 123 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 123.  Processed 20 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 124 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 125 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 126 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 127 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 128 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 129 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 129.  Processed 20 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 130 starting.  Attempting to process 7 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 131 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 132 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 133 starting.  Attempting to process 7 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 134 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 135 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 135.  Processed 27 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 136 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 137 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 138 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 139 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 140 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 141 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 141.  Processed 20 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 142 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 143 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 144 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 145 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 146 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 146.  Processed 15 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 147 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 148 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 149 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 150 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 151 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 152 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 152.  Processed 23 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 153 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 154 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 155 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 156 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 157 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 158 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 158.  Processed 20 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 159 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 160 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 161 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 162 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 163 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 164 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 164.  Processed 29 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 165 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 166 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 167 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 168 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 169 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 170 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 170.  Processed 21 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 171 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [W] Unity: [BATTERY_OVER_TEMP] [LizardErrorEvent]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 172 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 173 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 174 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 175 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 176 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 176.  Processed 19 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 177 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 178 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 179 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 180 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 181 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 181.  Processed 13 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 182 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 183 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 184 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 185 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 186 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 187 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 187.  Processed 26 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 188 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 189 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 190 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 191 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 192 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 193 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 193.  Processed 14 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 194 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 195 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 196 starting.  Attempting to process 7 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 197 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 198 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 199 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 199.  Processed 31 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 200 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 201 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 202 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 203 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 204 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 205 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 205.  Processed 27 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 206 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 207 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 208 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 209 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 210 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 211 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 211.  Processed 28 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 212 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 213 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 214 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 215 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 216 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 217 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 218 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 218.  Processed 25 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 219 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 220 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 221 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 222 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 223 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 224 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 224.  Processed 26 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 225 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 226 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 227 starting.  Attempting to process 7 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 228 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 229 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 230 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 230.  Processed 23 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 231 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 232 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 232.  Processed 3 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 233 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 234 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 234.  Processed 3 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 235 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 236 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 237 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 238 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 239 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 239.  Processed 11 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 240 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 241 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 242 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 242.  Processed 3 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 243 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 244 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 245 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 246 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 247 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 247.  Processed 11 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 248 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 249 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 250 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 250.  Processed 6 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 251 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 252 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 253 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 254 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 254.  Processed 11 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 255 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 256 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 257 starting.  Attempting to process 7 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 258 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 258.  Processed 20 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 259 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 260 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 261 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 262 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 263 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 264 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 264.  Processed 23 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 265 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 266 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 267 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 268 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 269 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 270 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 271 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 271.  Processed 24 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 272 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 273 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 274 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 275 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 276 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 276.  Processed 16 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 277 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 278 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 279 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 280 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 281 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 282 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 282.  Processed 20 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 283 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 284 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 285 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 286 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 287 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 288 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 288.  Processed 24 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 289 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 290 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 291 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 292 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 293 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 294 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 294.  Processed 29 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 295 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 296 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 297 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 298 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 299 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 300 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 300.  Processed 26 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 301 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 302 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 303 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 304 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 305 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 306 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 306.  Processed 28 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 307 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 308 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 309 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 310 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 311 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 312 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 312.  Processed 24 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 313 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 314 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 315 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 316 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 317 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 318 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 318.  Processed 26 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 319 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 320 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 321 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 322 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 323 starting.  Attempting to process 8 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 324 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 324.  Processed 23 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 325 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 326 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 327 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 328 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 329 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 329.  Processed 16 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 330 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 331 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 332 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 333 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 334 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 335 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 335.  Processed 11 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 336 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 337 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 338 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 339 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 339.  Processed 5 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 340 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 341 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 342 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 343 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 344 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 344.  Processed 17 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 345 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 346 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 347 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 348 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 349 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 350 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 350.  Processed 24 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 351 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 352 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 353 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 354 starting.  Attempting to process 6 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 355 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 356 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 356.  Processed 27 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 357 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 358 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 359 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 360 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 361 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 362 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 362.  Processed 21 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 363 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] Unity: [CHARGING_EVENT] [LizardInfoEvent] New battery level: 99% (BATTERY_FULL), and charging.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 364 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 365 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 366 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 367 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 368 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 368.  Processed 18 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 369 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 370 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 371 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 372 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 373 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 374 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 374.  Processed 13 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 375 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 376 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 377 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 378 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 378.  Processed 8 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 379 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 379.  Processed 1 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 380 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 381 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 382 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 382.  Processed 4 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 383 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 384 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 385 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 386 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 387 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 388 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 388.  Processed 10 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 389 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 389.  Processed 1 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 390 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 391 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 392 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [W] FacePipeline: Face pipeline latency can't support 5fps
+2026-10-22 13:04:48 | robot-log [W] FacePipeline: Face pipeline latency can't support 5fps
+2026-10-22 13:04:48 | robot-log [W] FacePipeline: Face pipeline latency can't support 5fps
+2026-10-22 13:04:48 | robot-log [W] FacePipeline: Face pipeline latency can't support 5fps
+2026-10-22 13:04:48 | robot-log [W] FacePipeline: Face pipeline latency can't support 5fps
+2026-10-22 13:04:48 | robot-log [W] FacePipeline: Face pipeline latency can't support 5fps
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 393 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 393.  Processed 6 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 394 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 395 starting.  Attempting to process 5 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 396 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 397 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 398 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Upload work cycle 398.  Processed 9 files (uploaded 0 bytes) since last report.
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 399 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:04:48 | robot-log [I] EBUploader: Work cycle 400 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:05:19 | robot-log [W] FacePipeline: Face pipeline latency can't support 5fps
+2026-10-22 13:05:19 | robot-log [I] EBUploader: Work cycle 401 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:05:19 | robot-log [I] EBUploader: Upload work cycle 401.  Processed 3 files (uploaded 0 bytes) since last report.
+2026-10-22 13:05:28 | robot-log [I] EBUploader: Work cycle 402 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:05:39 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=21d96e9f-d2e0-43cc-97ed-371eef6f8ee7 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 13:05:39 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=21d96e9f-d2e0-43cc-97ed-371eef6f8ee7 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 13:05:39 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=21d96e9f-d2e0-43cc-97ed-371eef6f8ee7 vad=SPEECH frame_bytes=138240 total_bytes=138240 frames=2
+2026-10-22 13:05:39 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=21d96e9f-d2e0-43cc-97ed-371eef6f8ee7 vad=END_OF_SPEECH frame_bytes=138240 total_bytes=276480 frames=3
+2026-10-22 13:05:39 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=21d96e9f-d2e0-43cc-97ed-371eef6f8ee7 phase=wake-gate frames=3 audio_bytes=276480 audio_ms=8640
+2026-10-22 13:05:39 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=21d96e9f-d2e0-43cc-97ed-371eef6f8ee7 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 13:05:39 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=21d96e9f-d2e0-43cc-97ed-371eef6f8ee7 phase=wake-gate audio_bytes=276480 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 13:05:39 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2254868 ms. UUID: 7f8466e8-ead9-4050-8519-665cd05f888c
+2026-10-22 13:05:39 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 269950 ms. UUID: e0b7721c-1b58-44a3-b51b-5b30ff941ac8
+2026-10-22 13:05:39 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 86951 ms. UUID: 62aaf0ca-ed3c-4ed4-9b72-cd5175ceb7a6
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 175280 ms. UUID: ec3e226b-4743-4b13-b0da-7a3c6d4e53aa
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 373042 ms. UUID: 3fd4ff30-dfe5-49fd-8a90-ed1fbfe5e3f5
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 1872443 ms. UUID: 9e0fe4bf-7a0e-4b48-8ef2-196aaa8a0778
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 68252 ms. UUID: 652d3ef7-013f-4c1d-9db6-35cba7ed684c
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 3393097 ms. UUID: 6da18c71-3ca0-4a5e-bc64-bb5f451a4fe5
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 3256419 ms. UUID: 6111571b-b47f-4646-bfb8-30f67caf3a57
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 541667 ms. UUID: 51027365-6c9e-417c-8ede-d673fe37bb5a
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2059072 ms. UUID: 054c9b76-18e3-47ad-8591-59b640048e23
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 440894 ms. UUID: 39f439a4-93f2-4c74-a5c5-1f8dc1d473b1
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 108048 ms. UUID: daef7640-d6a1-4cbf-81eb-a9f47cf34f0e
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 435896 ms. UUID: 39f439a4-93f2-4c74-a5c5-1f8dc1d473b1
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2098738 ms. UUID: 7eb4467f-05d1-485e-81b6-3f2e00565237
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 264199 ms. UUID: e0b7721c-1b58-44a3-b51b-5b30ff941ac8
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2237842 ms. UUID: 7f8466e8-ead9-4050-8519-665cd05f888c
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 1868124 ms. UUID: 9e0fe4bf-7a0e-4b48-8ef2-196aaa8a0778
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 3204457 ms. UUID: 973cc77e-0eb1-4f37-a534-a5315773f666
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 161391 ms. UUID: 805882e0-70bd-4ef5-b835-4e01cfebec3f
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 443634 ms. UUID: 39f439a4-93f2-4c74-a5c5-1f8dc1d473b1
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2169599 ms. UUID: 3240e5c1-be70-4d24-a45d-87095450988a
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2160842 ms. UUID: 3240e5c1-be70-4d24-a45d-87095450988a
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 55446 ms. UUID: 652d3ef7-013f-4c1d-9db6-35cba7ed684c
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 394575 ms. UUID: 8bb6c3a7-008f-4c64-bf17-a6406c6eae93
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 444878 ms. UUID: 39f439a4-93f2-4c74-a5c5-1f8dc1d473b1
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 384166 ms. UUID: 3fd4ff30-dfe5-49fd-8a90-ed1fbfe5e3f5
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2860611 ms. UUID: 8b4f50a0-f378-4cdb-becc-461ea53c6c09
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 1907096 ms. UUID: 19c1c10c-d4a6-4c40-86e4-25823d1c5180
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 205 ms. UUID: e0b7721c-1b58-44a3-b51b-5b30ff941ac8
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 244649 ms. UUID: e0b7721c-1b58-44a3-b51b-5b30ff941ac8
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 208 ms. UUID: 574a0de4-5900-420b-ba8a-3d9c0ab1dfc3
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2785893 ms. UUID: 574a0de4-5900-420b-ba8a-3d9c0ab1dfc3
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 209 ms. UUID: 12a7f54c-9820-4725-b113-856369ef5b39
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 3291335 ms. UUID: 12a7f54c-9820-4725-b113-856369ef5b39
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 214 ms. UUID: 3240e5c1-be70-4d24-a45d-87095450988a
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2157940 ms. UUID: 3240e5c1-be70-4d24-a45d-87095450988a
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 215 ms. UUID: e0b7721c-1b58-44a3-b51b-5b30ff941ac8
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 277662 ms. UUID: e0b7721c-1b58-44a3-b51b-5b30ff941ac8
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 216 ms. UUID: 730b23f5-45c2-420c-9f3e-29c33b74f6b7
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2219504 ms. UUID: 730b23f5-45c2-420c-9f3e-29c33b74f6b7
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 222 ms. UUID: 7282701c-8e11-4855-bbaa-7cc24f5d5d74
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 325671 ms. UUID: 7282701c-8e11-4855-bbaa-7cc24f5d5d74
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 224 ms. UUID: 0573d6e1-1f49-4133-af60-b18bb0dcd654
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2749194 ms. UUID: 0573d6e1-1f49-4133-af60-b18bb0dcd654
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 231 ms. UUID: 2b65b98b-28a3-4e49-a745-0810f68bdeef
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 3778321 ms. UUID: 2b65b98b-28a3-4e49-a745-0810f68bdeef
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 240 ms. UUID: 39f439a4-93f2-4c74-a5c5-1f8dc1d473b1
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 449770 ms. UUID: 39f439a4-93f2-4c74-a5c5-1f8dc1d473b1
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 245 ms. UUID: 4c183c82-d372-4a7a-bb9c-e2157b16ed35
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2799976 ms. UUID: 4c183c82-d372-4a7a-bb9c-e2157b16ed35
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 252 ms. UUID: 0fa411d6-30f2-459a-9b81-a2ab94df2c02
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 1831583 ms. UUID: 0fa411d6-30f2-459a-9b81-a2ab94df2c02
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 260 ms. UUID: e3119668-f29d-4518-9254-6b453af9ccf6
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 181592 ms. UUID: e3119668-f29d-4518-9254-6b453af9ccf6
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 261 ms. UUID: f589ed12-7329-44f8-8077-0f1faa657def
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 1965275 ms. UUID: f589ed12-7329-44f8-8077-0f1faa657def
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 270 ms. UUID: ab5f9cac-6515-47f3-8130-3323d8c91d28
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2275844 ms. UUID: ab5f9cac-6515-47f3-8130-3323d8c91d28
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 275 ms. UUID: 5a0846aa-10da-4093-a324-707a4e87f461
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 98690 ms. UUID: 5a0846aa-10da-4093-a324-707a4e87f461
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 280 ms. UUID: e0b7721c-1b58-44a3-b51b-5b30ff941ac8
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 237175 ms. UUID: e0b7721c-1b58-44a3-b51b-5b30ff941ac8
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 282 ms. UUID: a4461520-f2c3-420b-9042-4360f2c6e28c
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 529739 ms. UUID: a4461520-f2c3-420b-9042-4360f2c6e28c
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 288 ms. UUID: 3979938b-7850-4616-b1ca-a92b4426e5f9
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2657705 ms. UUID: 3979938b-7850-4616-b1ca-a92b4426e5f9
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 293 ms. UUID: e393f547-f636-4727-a400-fded0f01a8cc
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2092391 ms. UUID: e393f547-f636-4727-a400-fded0f01a8cc
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 298 ms. UUID: e3e56186-fcff-4c6b-ba5a-b224325b50a7
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2005516 ms. UUID: e3e56186-fcff-4c6b-ba5a-b224325b50a7
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 304 ms. UUID: e393f547-f636-4727-a400-fded0f01a8cc
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2081362 ms. UUID: e393f547-f636-4727-a400-fded0f01a8cc
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 313 ms. UUID: 0fa411d6-30f2-459a-9b81-a2ab94df2c02
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 1834171 ms. UUID: 0fa411d6-30f2-459a-9b81-a2ab94df2c02
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 314 ms. UUID: 62aaf0ca-ed3c-4ed4-9b72-cd5175ceb7a6
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 83135 ms. UUID: 62aaf0ca-ed3c-4ed4-9b72-cd5175ceb7a6
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 315 ms. UUID: 922356fc-a7b8-4070-a9e7-9ae6a34ccf30
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 3268543 ms. UUID: 922356fc-a7b8-4070-a9e7-9ae6a34ccf30
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 321 ms. UUID: 805882e0-70bd-4ef5-b835-4e01cfebec3f
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 156472 ms. UUID: 805882e0-70bd-4ef5-b835-4e01cfebec3f
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 326 ms. UUID: a4461520-f2c3-420b-9042-4360f2c6e28c
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 531839 ms. UUID: a4461520-f2c3-420b-9042-4360f2c6e28c
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 340 ms. UUID: 13c0484b-1385-47f1-91b0-145edf612983
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 3171134 ms. UUID: 13c0484b-1385-47f1-91b0-145edf612983
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 345 ms. UUID: 74e380b7-20d5-4604-b13e-addd15ecada6
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2764459 ms. UUID: 74e380b7-20d5-4604-b13e-addd15ecada6
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 351 ms. UUID: e3e56186-fcff-4c6b-ba5a-b224325b50a7
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 2006785 ms. UUID: e3e56186-fcff-4c6b-ba5a-b224325b50a7
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 351 ms. UUID: 8f314445-dcf3-4fa2-ac72-39b2b388728d
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 215187 ms. UUID: 8f314445-dcf3-4fa2-ac72-39b2b388728d
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 362 ms. UUID: 08855868-f8b1-442c-8bb2-5114842d8950
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 3196239 ms. UUID: 08855868-f8b1-442c-8bb2-5114842d8950
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 363 ms. UUID: 36d99997-64c4-4c6e-8219-a92a3be9bc5e
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 3382361 ms. UUID: 36d99997-64c4-4c6e-8219-a92a3be9bc5e
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from ZMQ by 362 ms. UUID: e0b7721c-1b58-44a3-b51b-5b30ff941ac8
+2026-10-22 13:05:40 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 274842 ms. UUID: e0b7721c-1b58-44a3-b51b-5b30ff941ac8
+2026-10-22 13:05:42 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e5e6727-e751-446a-b225-216a3856fd4d phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 13:05:42 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e5e6727-e751-446a-b225-216a3856fd4d vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 13:05:42 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e5e6727-e751-446a-b225-216a3856fd4d vad=SPEECH frame_bytes=119040 total_bytes=119040 frames=2
+2026-10-22 13:05:42 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e5e6727-e751-446a-b225-216a3856fd4d vad=END_OF_SPEECH frame_bytes=119040 total_bytes=238080 frames=3
+2026-10-22 13:05:42 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e5e6727-e751-446a-b225-216a3856fd4d phase=wake-gate frames=3 audio_bytes=238080 audio_ms=7440
+2026-10-22 13:05:42 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e5e6727-e751-446a-b225-216a3856fd4d phase=wake-gate speech="Moxie, let's go"
+2026-10-22 13:05:42 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=9e5e6727-e751-446a-b225-216a3856fd4d phase=wake-gate audio_bytes=238080 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 13:05:47 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=bc2204a6-a1d6-4cc5-9c0f-31e01c51a198 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 13:05:47 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=bc2204a6-a1d6-4cc5-9c0f-31e01c51a198 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 13:05:47 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=bc2204a6-a1d6-4cc5-9c0f-31e01c51a198 vad=SPEECH frame_bytes=103680 total_bytes=103680 frames=2
+2026-10-22 13:05:47 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=bc2204a6-a1d6-4cc5-9c0f-31e01c51a198 vad=END_OF_SPEECH frame_bytes=103680 total_bytes=207360 frames=3
+2026-10-22 13:05:47 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=bc2204a6-a1d6-4cc5-9c0f-31e01c51a198 phase=wake-gate frames=3 audio_bytes=207360 audio_ms=6480
+2026-10-22 13:05:47 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=bc2204a6-a1d6-4cc5-9c0f-31e01c51a198 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 13:05:47 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=bc2204a6-a1d6-4cc5-9c0f-31e01c51a198 phase=wake-gate audio_bytes=207360 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 13:05:53 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7eb85c21-bbc7-42a6-aee2-343b4243576f phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 13:05:53 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7eb85c21-bbc7-42a6-aee2-343b4243576f vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 13:05:53 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7eb85c21-bbc7-42a6-aee2-343b4243576f vad=SPEECH frame_bytes=107520 total_bytes=107520 frames=2
+2026-10-22 13:05:53 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7eb85c21-bbc7-42a6-aee2-343b4243576f vad=END_OF_SPEECH frame_bytes=107520 total_bytes=215040 frames=3
+2026-10-22 13:05:53 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7eb85c21-bbc7-42a6-aee2-343b4243576f phase=wake-gate frames=3 audio_bytes=215040 audio_ms=6720
+2026-10-22 13:05:53 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7eb85c21-bbc7-42a6-aee2-343b4243576f phase=wake-gate speech="Moxie, let's go"
+2026-10-22 13:05:53 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=7eb85c21-bbc7-42a6-aee2-343b4243576f phase=wake-gate audio_bytes=215040 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 13:05:55 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=85d25159-263d-4e6b-82fc-8bfe33d64ba7 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 13:05:55 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=85d25159-263d-4e6b-82fc-8bfe33d64ba7 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 13:05:55 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=85d25159-263d-4e6b-82fc-8bfe33d64ba7 vad=SPEECH frame_bytes=80640 total_bytes=80640 frames=2
+2026-10-22 13:05:55 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=85d25159-263d-4e6b-82fc-8bfe33d64ba7 vad=END_OF_SPEECH frame_bytes=80640 total_bytes=161280 frames=3
+2026-10-22 13:05:55 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=85d25159-263d-4e6b-82fc-8bfe33d64ba7 phase=wake-gate frames=3 audio_bytes=161280 audio_ms=5040
+2026-10-22 13:05:55 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=85d25159-263d-4e6b-82fc-8bfe33d64ba7 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 13:05:55 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=85d25159-263d-4e6b-82fc-8bfe33d64ba7 phase=wake-gate audio_bytes=161280 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 13:06:12 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e2f55395-f7e6-4ece-a3de-9db930774af9 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 13:06:12 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e2f55395-f7e6-4ece-a3de-9db930774af9 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 13:06:12 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e2f55395-f7e6-4ece-a3de-9db930774af9 vad=SPEECH frame_bytes=72960 total_bytes=72960 frames=2
+2026-10-22 13:06:12 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e2f55395-f7e6-4ece-a3de-9db930774af9 vad=END_OF_SPEECH frame_bytes=72960 total_bytes=145920 frames=3
+2026-10-22 13:06:12 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e2f55395-f7e6-4ece-a3de-9db930774af9 phase=wake-gate frames=3 audio_bytes=145920 audio_ms=4560
+2026-10-22 13:06:12 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e2f55395-f7e6-4ece-a3de-9db930774af9 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 13:06:12 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=e2f55395-f7e6-4ece-a3de-9db930774af9 phase=wake-gate audio_bytes=145920 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 13:06:20 | robot-log [I] EBUploader: Upload work cycle 402.  Processed 1 files (uploaded 0 bytes) since last report.
+2026-10-22 13:06:21 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=48edfcc5-cf4f-4380-96bd-7970ce5dc7d3 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 13:06:21 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=48edfcc5-cf4f-4380-96bd-7970ce5dc7d3 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 13:06:21 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=48edfcc5-cf4f-4380-96bd-7970ce5dc7d3 vad=SPEECH frame_bytes=130560 total_bytes=130560 frames=2
+2026-10-22 13:06:21 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=48edfcc5-cf4f-4380-96bd-7970ce5dc7d3 vad=END_OF_SPEECH frame_bytes=130560 total_bytes=261120 frames=3
+2026-10-22 13:06:21 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=48edfcc5-cf4f-4380-96bd-7970ce5dc7d3 phase=wake-gate frames=3 audio_bytes=261120 audio_ms=8160
+2026-10-22 13:06:21 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=48edfcc5-cf4f-4380-96bd-7970ce5dc7d3 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 13:06:21 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=48edfcc5-cf4f-4380-96bd-7970ce5dc7d3 phase=wake-gate audio_bytes=261120 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 13:06:33 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=cb33f148-b92b-449c-871d-233235b12d1f phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 13:06:33 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=cb33f148-b92b-449c-871d-233235b12d1f vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 13:06:33 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=cb33f148-b92b-449c-871d-233235b12d1f vad=SPEECH frame_bytes=130560 total_bytes=130560 frames=2
+2026-10-22 13:06:33 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=cb33f148-b92b-449c-871d-233235b12d1f vad=END_OF_SPEECH frame_bytes=130560 total_bytes=261120 frames=3
+2026-10-22 13:06:33 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=cb33f148-b92b-449c-871d-233235b12d1f phase=wake-gate frames=3 audio_bytes=261120 audio_ms=8160
+2026-10-22 13:06:33 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=cb33f148-b92b-449c-871d-233235b12d1f phase=wake-gate speech="Moxie, let's go"
+2026-10-22 13:06:33 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=cb33f148-b92b-449c-871d-233235b12d1f phase=wake-gate audio_bytes=261120 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 13:10:17 | mqtt connected (reason_code=Success)
+2026-10-22 13:10:20 | robot d_d05e3c66-dd29-4fe2-9758-7223e31511dc connected to broker
+2026-10-22 13:10:21 | STT audio started device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=388b97ad-1c98-470c-8d58-18807071b424 phase=wake-gate sample_rate=16000 channels=1 sample_width=2
+2026-10-22 13:10:21 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=388b97ad-1c98-470c-8d58-18807071b424 vad=START_OF_SPEECH frame_bytes=0 total_bytes=0 frames=1
+2026-10-22 13:10:21 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=388b97ad-1c98-470c-8d58-18807071b424 vad=SPEECH frame_bytes=119040 total_bytes=119040 frames=2
+2026-10-22 13:10:21 | STT frame device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=388b97ad-1c98-470c-8d58-18807071b424 vad=END_OF_SPEECH frame_bytes=119040 total_bytes=238080 frames=3
+2026-10-22 13:10:21 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.99, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 13:10:21 | STT END device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=388b97ad-1c98-470c-8d58-18807071b424 phase=wake-gate frames=3 audio_bytes=238080 audio_ms=7440
+2026-10-22 13:10:21 | injecting canned STT line for d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=388b97ad-1c98-470c-8d58-18807071b424 phase=wake-gate speech="Moxie, let's go"
+2026-10-22 13:10:21 | STT FINAL device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc uuid=388b97ad-1c98-470c-8d58-18807071b424 phase=wake-gate audio_bytes=238080 elapsed_ms=0 speech="Moxie, let's go"
+2026-10-22 13:10:21 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-10-22 13:10:21 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-10-22 13:10:21 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest', 'embodied.perception.audio.zmqSTTRequest']
+2026-10-22 13:10:21 | activity-log device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query query='license' request_id='LicenseUpdate'
+2026-10-22 13:10:21 | protocol compatibility gap query='license' device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc request_id='LicenseUpdate'; no verified response contract configured
+2026-10-22 13:10:21 | robot-log [I] EBUploader: Work cycle 403 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:10:21 | robot-log [I] EBUploader: Upload work cycle 403.  Processed 1 files (uploaded 0 bytes) since last report.
+2026-10-22 13:10:21 | robot-log [I] bo-system-monitor: Attempting to recover network.  Restarting wifi.
+2026-10-22 13:10:21 | robot-log [I] EBUploader: Work cycle 404 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:10:21 | robot-log [I] EBUploader: Work cycle 405 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:10:21 | robot-log [I] EBUploader: Work cycle 406 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:10:21 | robot-log [I] EBUploader: Work cycle 407 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:10:21 | robot-log [I] EBUploader: Upload work cycle 407.  Processed 4 files (uploaded 0 bytes) since last report.
+2026-10-22 13:10:21 | robot-log [I] EBUploader: Work cycle 408 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:10:21 | robot-log [I] EBUploader: Work cycle 409 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:10:21 | robot-log [I] EBUploader: Work cycle 410 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:10:21 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 23748 ms. UUID: 324aa1d4-ad6f-4b67-bb42-556c09192947
+2026-10-22 13:10:21 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 181669 ms. UUID: 768cb673-d2f2-4ea6-9a68-af8a04c05202
+2026-10-22 13:10:21 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 140634 ms. UUID: 768cb673-d2f2-4ea6-9a68-af8a04c05202
+2026-10-22 13:10:21 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 152295 ms. UUID: 768cb673-d2f2-4ea6-9a68-af8a04c05202
+2026-10-22 13:10:21 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 185304 ms. UUID: 768cb673-d2f2-4ea6-9a68-af8a04c05202
+2026-10-22 13:10:21 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 85954 ms. UUID: 0a48c3a4-858c-4df0-b7b6-148366b87b8a
+2026-10-22 13:10:21 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 160850 ms. UUID: 768cb673-d2f2-4ea6-9a68-af8a04c05202
+2026-10-22 13:10:21 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 143933 ms. UUID: 768cb673-d2f2-4ea6-9a68-af8a04c05202
+2026-10-22 13:10:21 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 46139 ms. UUID: ca1c269c-715d-4255-b4d4-d5e51ce6e047
+2026-10-22 13:10:21 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 199390 ms. UUID: 768cb673-d2f2-4ea6-9a68-af8a04c05202
+2026-10-22 13:10:21 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 179120 ms. UUID: 768cb673-d2f2-4ea6-9a68-af8a04c05202
+2026-10-22 13:10:21 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 203125 ms. UUID: 768cb673-d2f2-4ea6-9a68-af8a04c05202
+2026-10-22 13:10:21 | robot-log [W] SpeechFuser: STTFinal was delayed from EOS by 33692 ms. UUID: ca1c269c-715d-4255-b4d4-d5e51ce6e047
+2026-10-22 13:17:30 | mqtt connected (reason_code=Success)
+2026-10-22 13:17:35 | robot d_d05e3c66-dd29-4fe2-9758-7223e31511dc connected to broker
+2026-10-22 13:17:35 | bootstrapping device d_d05e3c66-dd29-4fe2-9758-7223e31511dc (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-10-22 13:17:35 | robot-status d_d05e3c66-dd29-4fe2-9758-7223e31511dc: {"app_language_support": "0", "battery_level": 0.99, "cloud_translate": "en", "cloud_tts": "1", "cloud_tts_engine": "polly", "cloud_tts_use_mp3": "0", "local_stt": "on", "mode": "idle", "rchat_api": "10", "remote_transition": "1", "robot_firmware_version": "v3.6.4-24_12_28-18_42-master-a90cfdee72-v24.10.803-rls-robot"}
+2026-10-22 13:17:35 | publishing config to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/config (cloud_tts=1 moxie_mode=TELEHEALTH)
+2026-10-22 13:17:35 | publishing ProtoSubscribe to /devices/d_d05e3c66-dd29-4fe2-9758-7223e31511dc/commands/zmq: ['embodied.unity.CloudTTSRequest', 'embodied.perception.audio.zmqSTTRequest']
+2026-10-22 13:17:36 | activity-log device=d_d05e3c66-dd29-4fe2-9758-7223e31511dc subtopic=query query='license' request_id='LicenseUpdate'
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Upload work cycle 419.  Processed 4 files (uploaded 0 bytes) since last report.
+2026-10-22 13:17:36 | robot-log [I] bo-system-monitor: Attempting to recover network.  Restarting wifi.
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Work cycle 420 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Work cycle 421 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Work cycle 422 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Work cycle 423 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Upload work cycle 423.  Processed 5 files (uploaded 0 bytes) since last report.
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Work cycle 424 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Upload work cycle 424.  Processed 1 files (uploaded 0 bytes) since last report.
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Work cycle 425 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Work cycle 426 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Upload work cycle 426.  Processed 3 files (uploaded 0 bytes) since last report.
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Work cycle 427 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Work cycle 428 starting.  Attempting to process 1 files. [NO UPLOAD]
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Upload work cycle 428.  Processed 2 files (uploaded 0 bytes) since last report.
+2026-10-22 13:17:36 | robot-log [I] EBUploader: Work cycle 429 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:17:37 | robot-log [I] EBUploader: Work cycle 430 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:17:37 | robot-log [I] EBUploader: Work cycle 431 starting.  Attempting to process 2 files. [NO UPLOAD]
+2026-10-22 13:17:37 | robot-log [I] EBUploader: Work cycle 432 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:17:47 | robot-log [I] EBUploader: Work cycle 433 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:17:47 | robot-log [I] EBUploader: Upload work cycle 433.  Processed 13 files (uploaded 0 bytes) since last report.
+2026-10-22 13:17:57 | robot-log [I] EBUploader: Work cycle 434 starting.  Attempting to process 4 files. [NO UPLOAD]
+2026-10-22 13:18:07 | robot-log [I] EBUploader: Work cycle 435 starting.  Attempting to process 3 files. [NO UPLOAD]
+2026-10-22 13:19:11 | mqtt connected (reason_code=Success)
+2026-10-22 13:53:34 | mqtt connected (reason_code=Success)
+2026-10-22 13:55:05 | mqtt connected (reason_code=Success)
+2026-10-22 14:11:30 | mqtt connected (reason_code=Success)
+2026-10-22 14:41:56 | mqtt connected (reason_code=Success)
+2026-10-22 14:57:21 | mqtt connected (reason_code=Success)
+2026-10-22 14:59:22 | mqtt connected (reason_code=Success)
+2026-10-22 15:12:31 | mqtt connected (reason_code=Success)
+2026-10-22 15:57:43 | mqtt connected (reason_code=Success)
+2026-10-22 16:12:02 | mqtt connected (reason_code=Success)
+2026-10-22 16:12:14 | Shutting down
+2026-10-22 16:12:14 | Waiting for application shutdown.
+2026-10-22 16:12:14 | Application shutdown complete.
+2026-10-22 16:12:14 | Finished server process [47013]
+2026-10-22 16:12:15 | Stopping reloader process [47009]

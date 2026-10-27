@@ -66,3 +66,26 @@ async def test_exit_reentry_and_delayed_notify_keep_brain_and_stt_in_sync(
     await route("prompt", "OPENMOXIE_CHAT")
     assert brain.output_language(DEVICE) == "kk"
     assert (await listen(DEVICE, "second-chat", captured_publish)).speech == ""
+
+
+async def test_session_dismount_answer_is_transcribed(brain, fake_openai, captured_publish):
+    """SESSIONDISMOUNT asks "keep playing?"; its answer must reach the robot."""
+    await brain.handle_router_request(DEVICE, {
+        "backend": "router", "command": "prompt", "module_id": "OPENMOXIE_CHAT",
+        "content_id": "default", "event_id": "chat-prompt",
+    })
+    await brain.handle_router_request(DEVICE, {
+        "backend": "router", "command": "start", "module_id": "SESSIONDISMOUNT",
+        "event_id": "dismount-start",
+    })
+    assert brain.output_language(DEVICE) is None
+    fake_openai.audio.transcriptions._text = "Yes"
+    captured_publish.clear()
+    await stt_request.handle_stt_request(DEVICE, zmqSTTRequest(
+        uuid="dismount-answer", vad=zmqSTTRequest.VADState.END_OF_SPEECH,
+        audio_content=b"\x01\x02" * 1600,
+    ))
+    prefix = zmqSTTResponse.DESCRIPTOR.full_name.encode() + b":"
+    response = zmqSTTResponse.FromString(captured_publish[-1][1][len(prefix):])
+    assert (response.uuid, response.speech, response.error_code) == ("dismount-answer", "Yes", 0)
+    assert len(fake_openai.audio.transcriptions.calls) == 1

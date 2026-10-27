@@ -74,12 +74,12 @@ class Settings(BaseSettings):
     # — never hardcoded, never logged.
     OPENAI_API_KEY: str = ""
 
-    OPENAI_STT_MODEL: str = "gpt-4o-transcribe"
-    # Chat, output translation and input translation. gpt-4.1-nano is newer and
-    # cheaper than gpt-4o-mini and stays inside the 2 s/4 s stage deadlines.
+    OPENAI_STT_MODEL: str = "gpt-4o-mini-transcribe"
+    # Chat, output translation and input translation. gpt-4.1-nano was retired
+    # (404 model_not_found); gpt-4o-mini answered in 0.84-0.91 s on October 27.
     # Do not use reasoning models (e.g. gpt-5-nano): their hidden reasoning
     # times out every translation and truncates replies at the token limit.
-    OPENAI_CHAT_MODEL: str = "gpt-4.1-nano"
+    OPENAI_CHAT_MODEL: str = "gpt-4o-mini"
     # Pinned snapshot. The bare "gpt-4o-mini-tts" alias moved to the 2025-12-15
     # snapshot, which on October 16 timed out on every call (15 s+) while this
     # one answered in 1.2–3.6 s (tts-1: 1.3–4.2 s, tts-1-hd: 2.8–4.3 s).
@@ -197,6 +197,12 @@ class Settings(BaseSettings):
     # verbose value that set lists. "debug"/"verbose" are not documented and
     # may be ignored by the firmware.
     ROBOT_LOG_LEVEL: str = "info"
+
+    # --- Face customization ---------------------------------------------------
+    # Saved `POST /tts/face` choice (child_pii.face_options), sent to the robot
+    # with the bootstrap config on its next broker connect. /local/work/ is
+    # gitignored.
+    MOXIE_FACE_FILE: str = "local/work/moxie_face.json"
 
 
 settings = Settings()

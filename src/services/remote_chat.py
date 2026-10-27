@@ -61,6 +61,9 @@ _MAX_HISTORY = 20
 # Translate English speech only in its live CloudTTSRequest.
 _ENTRANCE_MODULES = frozenset({"WAKEUP", "ENROLLCONVO"})
 _SESSION_BOUNDARIES = _ENTRANCE_MODULES | {"WELCOME", "SESSIONDISMOUNT", "SLEEP", "TELEHEALTH"}
+# Boundaries that still ask the child a question ("Do you want to keep
+# playing?"). October 27: onboard STT rejected every answer with code 66.
+_ANSWERED_BOUNDARIES = frozenset({"SESSIONDISMOUNT"})
 _NON_SPEECH_NOTIFY = re.compile(r"(?:\[(?:animation|silent):[^\]]*\]\s*)+", re.IGNORECASE)
 
 
@@ -472,6 +475,8 @@ class RemoteChatBrain:
             elif current:
                 self._clear_session(device_id)
                 note_onboard_module(device_id, wake_gate=module in _ENTRANCE_MODULES)
+                if module in _ANSWERED_BOUNDARIES:
+                    note_native_activity(device_id)
 
     def output_language(self, device_id: str) -> str | None:
         """Language of an entered chat module; notify alone is not entry."""
@@ -797,6 +802,8 @@ class RemoteChatBrain:
         if module_id in _SESSION_BOUNDARIES or not module_id:
             localization_context.clear(device_id)
             note_onboard_module(device_id, wake_gate=module_id in _ENTRANCE_MODULES)
+            if module_id in _ANSWERED_BOUNDARIES:
+                note_native_activity(device_id)
         else:
             note_native_activity(device_id)
             localization_context.select(device_id, module_id, content_id)

@@ -353,6 +353,7 @@ with a newer turn or selected native speech. Puppet sequencing remains separate.
 | `POST /tts/wakeup` | Wake a sleeping robot |
 | `POST /tts/sleep` | Queue sleep; sent with the reply to the robot's next chat turn (speech or silence reprompt) |
 | `GET /tts/devices` | Robots seen on the broker |
+| `GET/POST/DELETE /tts/face` | Save Moxie's face customization; applied on the robot's next connect. See [docs/FACE_COMMANDS.md](docs/FACE_COMMANDS.md) |
 
 ## Configuration
 
@@ -366,10 +367,11 @@ Everything is environment variables or `.env`; see `src/config.py`.
 | `DEFAULT_TTS_LANGUAGE` | `ru` | Autonomous chat output language; `kk` or `ru`. Input language does not change it. |
 | `CLOUD_TTS_TRANSLATION_ENABLED` | `true` | Translate every English/Latin autonomous speech request; puppet bypasses this. |
 | `REMOTE_SELECTION_GRACE_S` | `0.15` | Brief window for immediate native selection before remote synthesis. It never requires a remote notification, which can arrive after audio. Native takeover is checked throughout synthesis. |
-| `OPENAI_CHAT_MODEL` | `gpt-4.1-nano` | Model used for translation as well as remote chat, with separate prompts. Must be a fast non-reasoning model: reasoning models such as `gpt-5-nano` exceed the stage deadlines. |
+| `OPENAI_CHAT_MODEL` | `gpt-4o-mini` | Model used for translation as well as remote chat, with separate prompts. Must be a fast non-reasoning model: reasoning models such as `gpt-5-nano` exceed the stage deadlines. |
 | `OPENAI_TRANSLATION_TIMEOUT_S` | `4.0` | Translation deadline, including worker wait; SDK retries disabled for this stage. |
 | `CLOUD_TTS_AUDIO_RAW_PCM` | `true` | `true` sends raw PCM16 (what `AudioBuffer` is); `false` wraps WAV. |
 | `DEVICE_ID` | — | Optional override. Normally the device is auto-discovered. |
+| `MOXIE_FACE_FILE` | `local/work/moxie_face.json` | Where `POST /tts/face` saves the face (gitignored); restored at startup. |
 | `MQTT_HOST` / `MQTT_PORT` | `localhost` / `8883` | Broker address. |
 | `MQTT_PUBLIC_HOST` | auto-detected LAN IPv4 | Host encoded in `/tts/endpoint-qr`; set it if this Mac has multiple network adapters. |
 | `MQTT_PUBLIC_PORT` | `8883` | MQTT port encoded in `/tts/endpoint-qr`. |

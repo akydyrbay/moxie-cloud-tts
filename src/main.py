@@ -30,6 +30,7 @@ from fastapi.concurrency import run_in_threadpool
 from src.config import settings
 from src.logging_conf import configure_logging
 from src.router.tts import router as tts_router
+from src.services import face
 from src.services.cloud_tts_request import (
     CLOUD_TTS_REQUEST_PREFIX,
     handle_payload,
@@ -112,6 +113,12 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
             await run_in_threadpool(get_client)
         except Exception:
             logger.exception("could not pre-warm the OpenAI client")
+
+    # 3c. Restore the saved face so the robot's bootstrap config carries it.
+    saved_face = face.load()
+    if saved_face:
+        await device_state.set_face(saved_face["face_options"], saved_face["child_id"])
+        logger.info("restored Moxie face options %s", saved_face["face_options"])
 
     if settings.PUPPET_MODE_AUTO_ENABLE:
         await device_state.set_puppet_mode(True)
