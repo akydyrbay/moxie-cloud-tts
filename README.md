@@ -265,40 +265,55 @@ a module transition or run GPT over an active story. See the complete
 [robot acceptance checklist](docs/NATIVE_CONTENT_POLICY.md) and
 [module/process guide](docs/AGENTS.md).
 
-## Puppet speech (separate operator tool)
+## Live speech, scripts, and movement
 
-The first puppet line is proven; subsequent lines in the same session remain
-unreliable. This is not used for the wake-up milestone. To test puppet separately:
-
-```bash
-curl -X POST localhost:8000/tts/puppet \
-  -H 'content-type: application/json' -d '{"enabled": true}'
-```
-
-Then make it talk:
+`/tts/speak` now queues text for a genuine live-chat turn. Keep puppet **off**
+and cloud TTS/marks enabled. HTTP **202** means queued, not played. Default
+delivery replaces the next eligible turn's GPT reply; `silence_only` waits
+for a turn without child speech. Delivery timing depends on the robot.
 
 ```bash
 curl -X POST localhost:8000/tts/speak \
   -H 'content-type: application/json' \
-  -d '{"text": "Привет! Как у тебя дела сегодня?"}'
+  -d '{"text":"Сәлем! Қалайсың?","language":"kk","ttl_s":120}'
 
 curl -X POST localhost:8000/tts/speak \
   -H 'content-type: application/json' \
-  -d '{"text": "Сәлем! Бүгін көңіл-күйің қалай?"}'
+  -d '{"text":"Молодец!","language":"ru","behavior":"bht_arms_out"}'
+
+curl -X POST localhost:8000/tts/activities \
+  -H 'content-type: application/json' \
+  -d '{"language":"ru","questions":[{"text":"Сколько будет пять плюс пять?","answers":["10"]},{"text":"Сколько будет два плюс три?","answers":["5"]}]}'
 ```
+
+Use the returned `id` with `GET /tts/operations/{id}` to inspect progress, or
+`DELETE /tts/operations/{id}` to cancel. Scripted activities ask questions,
+accept short answers without a wake word, give localized feedback, and return
+to normal chat when finished. Movement can accompany speech or be queued alone
+through `POST /tts/behavior`.
+
+See [the complete API guide](docs/LIVE_ACTIONS.md) for queue limits, native
+handoffs, expiration, answer matching and examples. Legacy puppet mode remains
+available for diagnostics, but `/tts/speak` rejects it. Physical playback and
+movement require the [robot acceptance checks](docs/LIVE_ACTION_PLAN.md).
 
 ## No robot handy?
 
-`scripts/simulate_robot.py` impersonates the robot side of the protocol and
-writes the audio it receives to `local/work/*.wav`, so the whole loop can be
-verified (and the audio played back) on the laptop alone:
+The tests exercise live speech/scripts with mocked MQTT and providers:
 
 ```bash
-mise start     # terminal 1
-mise sim       # terminal 2
-curl -X POST localhost:8000/tts/speak \
-  -H 'content-type: application/json' -d '{"text": "Привет!"}'
+DEFAULT_TTS_LANGUAGE=kk mise test
 ```
+
+For the separate native CloudTTSRequest/audio path, the existing simulator can
+request a line and save the received PCM/WAV under `local/work/`:
+
+```bash
+mise start  # terminal 1
+uv run python scripts/simulate_robot.py --say 'Привет!'  # terminal 2
+```
+
+This simulator does not emulate live chat turns or firmware playback state.
 
 ## How speaking works
 
@@ -309,6 +324,7 @@ Microphone PCM → STT → English input bridge → robot routing
                     └ original kk/ru text retained by UUID for GPT
 
 OPENMOXIE_CHAT → GPT → RemoteChatResponse + REMOTECHAT audio
+              └ queued operator line / scripted Q&A uses the same live turn
 Native activity → CloudTTSRequest → localized text → ROBOT audio
 ```
 
@@ -322,20 +338,18 @@ uses this context to preserve the child's choices. Actual OPENMOXIE_CHAT reentry
 restores free conversation.
 
 Audio must match a live event and chunk; unsolicited audio is not a speech API.
-In the separate puppet path, `/tts/speak` asks the robot to speak and answers
-the CloudTTSRequest that the robot raises in return:
+`/tts/speak` stores work until an eligible OPENMOXIE_CHAT request arrives:
 
 ```
 POST /tts/speak {"text": "Привет!"}
    │
-   ├─ telehealth PLAY_OUTPUT ─────────────────► Moxie
-   │                                              │  cloud_tts=1, so it asks
-   │                                              │  the cloud for the voice
-   ◄── CloudTTSRequest{markup, event_id=E} ───────┘
+   ├─ HTTP 202: queued operation ID
    │
-   ├─ strip markup → OpenAI TTS → raw PCM 24 kHz mono
+   ◄── actual RemoteChatRequest{event_id=E} ─── Moxie
    │
-   └─ CloudTTSResponse{event_id=E, audio} ─────► Moxie plays it
+   ├─ RemoteChatResponse{event_id=E, text, markup}
+   └─ CloudTTSResponse{event_id=E, source=REMOTECHAT, audio, marks}
+                                              → Moxie
 ```
 
 Every native CloudTTSRequest receives correlated audio or failure silence with
@@ -346,10 +360,13 @@ with a newer turn or selected native speech. Puppet sequencing remains separate.
 
 | Endpoint | Purpose |
 | --- | --- |
-| `POST /tts/speak` | Puppet PLAY_OUTPUT for Russian/Kazakh text |
-| `POST /tts/puppet` | Toggle TELEHEALTH mode (awake, no schedule) |
+| `POST /tts/speak` | Queue exact kk/ru text for a live turn (202) |
+| `POST /tts/activities` | Start scripted questions and accepted answers (202) |
+| `GET /tts/behaviors`, `POST /tts/behavior` | List movement labels / queue a movement |
+| `GET/DELETE /tts/operations/{id}` | Inspect or cancel queued speech/activity |
+| `POST /tts/puppet` | Legacy TELEHEALTH toggle; must be off for live actions |
 | `POST /tts/cloud-tts` | Toggle cloud TTS on the robot |
-| `POST /tts/interrupt` | Stop current playback |
+| `POST /tts/interrupt` | Legacy TELEHEALTH interrupt; use operation DELETE for queued live work |
 | `POST /tts/wakeup` | Wake a sleeping robot |
 | `POST /tts/sleep` | Queue sleep; sent with the reply to the robot's next chat turn (speech or silence reprompt) |
 | `GET /tts/devices` | Robots seen on the broker |
@@ -412,4 +429,5 @@ authored directly in kk/ru remain separate milestones.
 - [Native content policy](docs/NATIVE_CONTENT_POLICY.md) — ownership, localization, log evidence and robot checklist.
 - [Development guide](docs/AGENTS.md) — current architecture, module lifecycle, MQTT topics and implementation rules.
 - [Speak Live Plan](docs/SPEAK_LIVE_PLAN.md) — autonomous (non-puppet) conversation path.
-- [Speak Puppet Analysis](docs/SPEAK_PUPPET_ANALYSIS.md) — why TELEHEALTH only plays the first `/tts/speak` line.
+- [Live Actions](docs/LIVE_ACTIONS.md) — queued speech, scripted Q&A and behavior API.
+- [Speak Puppet Analysis](docs/SPEAK_PUPPET_ANALYSIS.md) — historical TELEHEALTH first-line-only failure.

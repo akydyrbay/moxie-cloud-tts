@@ -124,7 +124,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         await device_state.set_puppet_mode(True)
         logger.info(
             "PUPPET_MODE_AUTO_ENABLE: moxie_mode=TELEHEALTH "
-            "(robot stays awake and speaks only via POST /tts/speak)",
+            "(legacy diagnostic mode; live /tts/speak is unavailable)",
         )
 
     # 4. Connect MQTT and start paho's background network loop

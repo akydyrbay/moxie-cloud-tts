@@ -34,6 +34,8 @@ from src.config import (
 from src.protos.embodied.unity.CloudTTS_pb2 import REMOTECHAT_TTS_REQUEST
 from src.services import localization_context, speak_service, translation
 from src.services.device_state import device_state
+from src.services.behaviors import output_markup
+from src.services.live_actions import live_actions
 from src.services.devices import device_registry
 from src.services.language import fallback_language, matches_output_language
 from src.services.llm import openai_chat
@@ -188,6 +190,7 @@ class _ChatSession:
         self.records: OrderedDict[str, dict] = OrderedDict()
         self._seen_notify: OrderedDict[tuple, None] = OrderedDict()
         self.empty_reprompts = 0
+        self.scripted_output = False
         self.turn: object | None = None
 
     @property
@@ -225,6 +228,8 @@ class _ChatSession:
             record.update(output=text, status=status)
 
     def reprompt(self) -> str:
+        if self.scripted_output:
+            return ""  # Finished/cancelled scripts must not restart through chat history.
         self.empty_reprompts += 1
         if self.empty_reprompts > 2:
             return ""  # Complete the live turn silently; no endless monologue.
@@ -273,6 +278,7 @@ class _ChatSession:
         self.records.clear()
         self._seen_notify.clear()
         self.empty_reprompts = 0
+        self.scripted_output = False
 
 
 class RemoteChatBrain:
@@ -408,6 +414,7 @@ class RemoteChatBrain:
     def reset_device(self, device_id: str) -> None:
         """Invalidate microphone work and remote output at a session boundary."""
         self._clear_session(device_id)
+        live_actions.reset(device_id)
         self._pending_sleep.discard(device_id)
         self._native_turns.pop(device_id, None)
         for key in list(self._selections):
@@ -433,6 +440,7 @@ class RemoteChatBrain:
         """A real ROBOT audio waiter proves native selection, even before notify."""
         if not event_id:
             return
+        live_actions.native_selected(device_id, event_id)
         selection = self._selection_for(device_id, event_id)
         selection.owner = "native"
         selection.ready.set()
@@ -623,7 +631,12 @@ class RemoteChatBrain:
 
         event_id = request.get("event_id") or ""
         wire_speech = (request.get("speech") or "").strip()
+        if live_actions.used_turn(device_id, event_id):
+            logger.info("live action ignored reused turn device=%s event_id=%s", device_id, event_id)
+            return
         original = transcripts.find(device_id, event_id) if wire_speech else None
+        stale_answer = bool(original and original.activity_key is not None
+                            and original.activity_key != live_actions.answer_key(device_id))
         selection = self._selection_for(device_id, event_id)
         if selection.owner == "native":
             self._send_remote_chat(device_id, _build_response(request, text="", output_type="FALLBACK"))
@@ -646,12 +659,13 @@ class RemoteChatBrain:
             prior = session.records.get(event_id)
             if prior and (prior["command"], prior["wire"]) == (cmd, wire_speech):
                 return
+            live_actions.leave_chat(device_id, boundary=False)
             session.reset()
         localization_context.clear(device_id)
         self._native_turns.pop(device_id, None)
         note_conversation_active(device_id)
 
-        speech = original.original if original else wire_speech
+        speech = "" if stale_answer else (original.original if original else wire_speech)
         if not session.begin(event_id, cmd, wire_speech, speech):
             logger.info("remote-chat ignored duplicate turn device=%s event_id=%s", device_id, event_id)
             return
@@ -665,12 +679,17 @@ class RemoteChatBrain:
         turn = object()
         session.turn = turn
         revision = device_state.speech_revision
+        scripted = None
+        live_actions.supersede(device_id, event_id)
 
-        def is_current() -> bool:
+        def turn_current() -> bool:
             return (self._sessions.get(device_id) is session
                     and session.turn is turn
                     and device_state.speech_revision == revision
                     and selection.owner != "native")
+
+        def is_current() -> bool:
+            return turn_current() and (scripted is None or live_actions.current(scripted))
 
         language = session.language
         started = time.monotonic()
@@ -678,13 +697,26 @@ class RemoteChatBrain:
         voiced = await self._remote_audio_enabled()
         actions = []
         failed_translation = False
+        if voiced and device_id not in self._pending_sleep:
+            scripted = live_actions.claim(
+                device_id, event_id, speech,
+                ignored=stale_answer or transcripts.was_ignored(device_id, event_id),
+            )
         if device_id in self._pending_sleep:
+            live_actions.reset(device_id, "sleep_requested")
             self._pending_sleep.discard(device_id)
             logger.info("remote-chat sleep device=%s event_id=%s command=%s",
                         device_id, event_id, cmd)
             text = sleep_line(language)
             actions = [{"action": "sleep", "output_type": "GLOBAL_RESPONSE"}]
+        elif scripted is not None:
+            text, language = scripted.text, scripted.language
+            session.empty_reprompts = 0
+            session.scripted_output = True
+        elif stale_answer:
+            text = ""  # A delayed answer belongs to its original scripted question.
         elif cmd in {"start", "prompt"}:
+            session.scripted_output = False
             text = self._opener_for(content_id or "default")
             if voiced and settings.CLOUD_TTS_TRANSLATION_ENABLED and translation.needs_translation(text):
                 try:
@@ -704,6 +736,7 @@ class RemoteChatBrain:
             text = session.reprompt()
         else:
             session.empty_reprompts = 0
+            session.scripted_output = False
             try:
                 chat = await provider_pool.run(
                     openai_chat.respond, speech, language, session.context(exclude=event_id),
@@ -735,22 +768,38 @@ class RemoteChatBrain:
                 )
                 text, actions = generation_error_line(language), []
 
-        markup = _speech_markup(text)
+        markup = output_markup(text, scripted.behavior) if scripted is not None else _speech_markup(text)
         response = _build_response(request, text=text, markup=markup, actions=actions or None)
         if not self._send_remote_chat(device_id, response, is_current=is_current):
             if selection.owner == "native" and device_state.speech_revision == revision:
                 # The router may still be awaiting our side of arbitration.
                 self._send_remote_chat(device_id, _build_response(request, text="", output_type="FALLBACK"))
             session.finish(event_id, text, "discarded", owner=record)
+            if scripted is not None:
+                live_actions.finish(scripted, "discarded")
             return
         session.finish(event_id, text, "pending", owner=record)
-        if voiced:
-            status = await self._voice_remote_output(
-                device_id, request, None if failed_translation else text, language, markup,
-                is_current=is_current, deadline=deadline, selection=selection,
-            )
-        else:
-            status = "text_only"
+        try:
+            if voiced:
+                status = await self._voice_remote_output(
+                    device_id, request, None if failed_translation else text, language, markup,
+                    is_current=is_current, deadline=deadline, selection=selection,
+                )
+            else:
+                status = "text_only"
+        except BaseException:
+            if scripted is not None:
+                live_actions.finish(scripted, "failed")
+            raise
+        if scripted is not None:
+            if status == "discarded" and turn_current():
+                # HTTP cancellation/expiry does not create a newer robot turn.
+                # Release this live waiter without playing cancelled text or
+                # movement; otherwise the robot can remain stuck in MarkingUp.
+                speak_service.publish_silence(device_id, event_id, 0, REMOTECHAT_TTS_REQUEST)
+            # A behavior-only line intentionally uses silent audio with marks.
+            outcome = "published" if not text and scripted.behavior and status == "published_silence" else status
+            live_actions.finish(scripted, outcome)
         session.finish(event_id, text, status, owner=record)
         logger.info(
             "remote-chat completed device=%s event_id=%s audio_status=%s elapsed_ms=%d",
@@ -799,6 +848,7 @@ class RemoteChatBrain:
             )
         self._clear_session(device_id)
         self._native_turns.pop(device_id, None)
+        live_actions.leave_chat(device_id, boundary=module_id in {"SLEEP", "SESSIONDISMOUNT", "TELEHEALTH"})
         if module_id in _SESSION_BOUNDARIES or not module_id:
             localization_context.clear(device_id)
             note_onboard_module(device_id, wake_gate=module_id in _ENTRANCE_MODULES)

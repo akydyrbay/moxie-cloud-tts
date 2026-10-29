@@ -2,6 +2,10 @@
 
 Updated: **2026-10-13**.
 
+The 2026-10-29 [live actions extension](LIVE_ACTIONS.md) implements queued speech,
+scripted Q&A and behavior markup inside OPENMOXIE_CHAT. The earlier later-work
+items below are historical; the new implementation does not add a firmware module.
+
 ## Goal
 
 Moxie should wake and speak in the configured Kazakh (`kk`) or Russian (`ru`),

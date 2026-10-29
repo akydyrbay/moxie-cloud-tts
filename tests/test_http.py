@@ -16,7 +16,8 @@ from src.protos.embodied.logging.Cloud2_pb2 import ServiceConfiguration2
 from src.protos.embodied.wifiapp.QRCommands_pb2 import StartPairingQR
 from src.router.tts import router
 from src.services.pairing_qr import EndpointQrConfig, endpoint_qr_payload, wifi_qr_payload
-from src.services.telehealth import note_puppet_state
+from src.services.device_state import device_state
+from src.services.devices import device_registry
 
 DEVICE = "test-device-1"
 
@@ -28,42 +29,26 @@ def client() -> TestClient:
     return TestClient(app)
 
 
-def _telehealth_actions(captured_publish: list) -> list[dict]:
-    actions = []
-    for topic, payload in captured_publish:
-        if not topic.endswith("/commands/telehealth"):
-            continue
-        actions.append(json.loads(payload)["message"])
-    return actions
-
-
-def test_speak_sends_play_output(client, known_device, captured_publish) -> None:
-    """OpenMoxie's puppet speak path is PLAY_OUTPUT, not INTERRUPT+PLAY."""
+def test_speak_queues_live_output(client, known_device, captured_publish) -> None:
+    device_state._config["settings"]["props"]["cloud_tts"] = "1"
+    device_registry.mark_bootstrapped(DEVICE)
     resp = client.post("/tts/speak", json={"text": "Привет, как дела?"})
-    assert resp.status_code == 200
+    assert resp.status_code == 202
     body = resp.json()
-    assert body["status"] == "requested"
+    assert body["status"] == "queued"
     assert body["device_id"] == DEVICE
-
-    actions = _telehealth_actions(captured_publish)
-    assert [a["action"] for a in actions] == ["PLAY_OUTPUT"]
-    output = actions[0]["output"]
-    assert output["text"] == "Привет, как дела?"
-    # OpenMoxie always sends markup; text alone is the fallback path.
-    assert output["markup"] == "Привет, как дела?"
+    assert captured_publish == []
+    assert client.get(f'/tts/operations/{body["id"]}').json()["status"] == "queued"
 
 
-def test_second_speak_is_also_just_play_output(client, known_device, captured_publish) -> None:
-    """The Nth speak must not INTERRUPT — that cancelled the cloud output path."""
-    note_puppet_state(DEVICE, "READY")
-    client.post("/tts/speak", json={"text": "один"})
-    note_puppet_state(DEVICE, "READY")
-    client.post("/tts/speak", json={"text": "два"})
-
-    actions = _telehealth_actions(captured_publish)
-    assert [a["action"] for a in actions] == ["PLAY_OUTPUT", "PLAY_OUTPUT"]
-    assert actions[0]["output"]["text"] == "один"
-    assert actions[1]["output"]["text"] == "два"
+def test_second_speak_is_a_separate_queued_operation(client, known_device, captured_publish) -> None:
+    device_state._config["settings"]["props"]["cloud_tts"] = "1"
+    device_registry.mark_bootstrapped(DEVICE)
+    first = client.post("/tts/speak", json={"text": "один"}).json()
+    second = client.post("/tts/speak", json={"text": "два"}).json()
+    assert first["id"] != second["id"]
+    assert first["status"] == second["status"] == "queued"
+    assert captured_publish == []
 
 
 def test_speak_without_a_robot_is_a_clear_error(client, captured_publish) -> None:

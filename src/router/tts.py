@@ -3,7 +3,11 @@
 Robot-facing:
     GET/POST /tts/cloud-tts   toggle cloud TTS on the device
     GET/POST /tts/puppet      toggle TELEHEALTH (puppet) mode
-    POST     /tts/speak       make Moxie speak ru/kk text
+    POST     /tts/speak       queue ru/kk text on a live chat turn
+    POST     /tts/activities  start scripted questions
+    GET      /tts/behaviors   list built-in movement labels
+    POST     /tts/behavior    queue movement on a live turn
+    GET/DELETE /tts/operations/{id}  inspect/cancel queued work
     POST     /tts/interrupt   stop current playback
     POST     /tts/wakeup      wake a sleeping robot
     POST     /tts/sleep       put an awake robot to sleep
@@ -20,12 +24,15 @@ import logging
 
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import Response
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 
 from src.config import settings
 from src.services import face, telehealth, tts_service
 from src.services.device_state import device_state
 from src.services.devices import device_registry
+from src.services.behaviors import Behavior
+from src.services.language import detect_language
+from src.services.live_actions import ActionConflict, Delivery, Language, Question, QueueFull, live_actions
 from src.services.pairing_qr import (
     endpoint_qr_config,
     endpoint_qr_payload,
@@ -48,15 +55,17 @@ class PuppetToggleRequest(BaseModel):
         ...,
         description=(
             "True puts Moxie in TELEHEALTH (puppet) mode: awake, no schedule, "
-            "speaks only what you push with /tts/speak."
+            "Legacy diagnostic mode; /tts/speak requires this to be False."
         ),
     )
 
 
 class SpeakRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     text: str = Field(
         ...,
         min_length=1,
+        max_length=1000,
         description="Text for Moxie to speak (Russian or Kazakh).",
         examples=["Привет! Как дела?", "Сәлем! Қалайсың?"],
     )
@@ -64,6 +73,35 @@ class SpeakRequest(BaseModel):
         default=None,
         description="Target robot. Defaults to the most recently seen device.",
     )
+    language: Language | None = None
+    behavior: Behavior | None = None
+    delivery: Delivery = "next_turn"
+    ttl_s: float = Field(default=120, ge=1, le=600)
+
+    @field_validator("text")
+    @classmethod
+    def speakable_text(cls, text: str) -> str:
+        if not any(c.isalnum() for c in text):
+            raise ValueError("text must contain words or numbers; use /tts/behavior for movement only")
+        return text
+
+
+class BehaviorRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    behavior: Behavior
+    device_id: str | None = None
+    delivery: Delivery = "next_turn"
+    ttl_s: float = Field(default=120, ge=1, le=600)
+
+
+class ActivityRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    device_id: str | None = None
+    language: Language | None = None
+    questions: list[Question] = Field(min_length=1, max_length=20)
+    max_attempts: int = Field(default=3, ge=1, le=5)
+    ttl_s: float = Field(default=900, ge=10, le=3600)
+    correct_behavior: Behavior | None = None
 
 
 class WifiQrRequest(BaseModel):
@@ -236,29 +274,83 @@ async def get_puppet_status() -> dict:
 async def set_puppet_status(body: PuppetToggleRequest) -> dict:
     """Enable/disable TELEHEALTH mode and push the config to the robot.
 
-    Puppet mode keeps Moxie awake and stops the schedule from interrupting, so
-    `/tts/speak` plays reliably. Disable it to run normal conversation.
+    Legacy diagnostic mode. Disable it for live speech, scripts, and chat.
     """
     logger.info("received puppet mode request: enabled=%s", body.enabled)
     return await tts_service.set_puppet_mode(body.enabled)
 
 
-@router.post("/speak")
+async def _require_live_device(device_id: str | None) -> str:
+    target = _require_device(device_id)
+    if await device_state.get_puppet_mode() or not await device_state.get_cloud_tts():
+        raise HTTPException(status_code=409, detail="Live output requires puppet mode off and cloud TTS on")
+    if not device_registry.is_bootstrapped(target):
+        raise HTTPException(status_code=409, detail="Wait for this robot to connect and finish bootstrap")
+    if not settings.CLOUD_TTS_EMIT_MARKS:
+        raise HTTPException(status_code=409, detail="Live output requires CLOUD_TTS_EMIT_MARKS=true")
+    return target
+
+
+def _queue_result(call, *args, **kwargs) -> dict:
+    try:
+        return call(*args, **kwargs)
+    except ActionConflict as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except QueueFull as exc:
+        raise HTTPException(status_code=429, detail=str(exc)) from exc
+
+
+@router.post("/speak", status_code=202)
 async def speak(body: SpeakRequest) -> dict:
-    """Make Moxie speak `text` out loud (Russian or Kazakh).
+    """Queue exact kk/ru text for a real live-chat turn; never push puppet output.
 
-    Waits until the robot has reported telehealth READY (or a short settle),
-    then sends PLAY_OUTPUT. The robot emits a CloudTTSRequest; this service
-    answers with OpenAI audio. Matches OpenMoxie's puppet speak path — do not
-    INTERRUPT before every line; that is `POST /tts/interrupt`.
-
-    Calls for the same device are serialized. Prefer leaving puppet mode
-    enabled for the whole session — flipping it mid-session can crash the
-    native stack.
+    next_turn replaces that turn's GPT reply. silence_only waits for a turn
+    without user speech. HTTP 202 means queued, not played. Queued speech and
+    scripted activities are mutually exclusive on each robot.
     """
-    target = _require_device(body.device_id)
-    logger.info("received /tts/speak for %s: chars=%d", target, len(body.text))
-    return await telehealth.speak_line(target, body.text)
+    target = await _require_live_device(body.device_id)
+    return _queue_result(live_actions.enqueue, target, body.text, body.language or detect_language(body.text),
+                         behavior=body.behavior, delivery=body.delivery, ttl_s=body.ttl_s)
+
+
+@router.get("/behaviors")
+async def list_behaviors() -> dict:
+    """Built-in behavior labels; physical execution requires robot verification."""
+    return {"behaviors": [b.value for b in Behavior]}
+
+
+@router.post("/behavior", status_code=202)
+async def queue_behavior(body: BehaviorRequest) -> dict:
+    """Queue a movement without spoken text, on the next eligible live turn."""
+    target = await _require_live_device(body.device_id)
+    return _queue_result(live_actions.enqueue, target, "", settings.DEFAULT_TTS_LANGUAGE,
+                         behavior=body.behavior, delivery=body.delivery, ttl_s=body.ttl_s)
+
+
+@router.post("/activities", status_code=202)
+async def start_activity(body: ActivityRequest) -> dict:
+    """Start scripted questions on live turns; short answers need no wake word."""
+    target = await _require_live_device(body.device_id)
+    return _queue_result(live_actions.start, target, body.questions, body.language or settings.DEFAULT_TTS_LANGUAGE,
+                         ttl_s=body.ttl_s, max_attempts=body.max_attempts, behavior=body.correct_behavior)
+
+
+@router.get("/operations/{operation_id}")
+async def operation_status(operation_id: str) -> dict:
+    """audio_sent/completed means published, not confirmed robot playback."""
+    try:
+        return live_actions.get(operation_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Operation not found or history expired") from exc
+
+
+@router.delete("/operations/{operation_id}")
+async def cancel_operation(operation_id: str) -> dict:
+    """Cancel pending work; cannot retract audio already sent to the robot."""
+    try:
+        return live_actions.cancel(operation_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Operation not found or history expired") from exc
 
 
 @router.post("/interrupt")

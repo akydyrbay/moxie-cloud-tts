@@ -19,6 +19,7 @@ from src.protos.embodied.perception.audio.zmqSTT_pb2 import zmqSTTRequest, zmqST
 from src.services import localization_context
 from src.services.audio import pcm_to_wav
 from src.services.device_state import device_state
+from src.services.live_actions import live_actions
 from src.services.mqtt_service import mqtt_service
 from src.services.provider_work import provider_pool
 from src.services.stt import input_translation, openai_stt, transcripts
@@ -152,6 +153,7 @@ def _finish(
     key: SessionKey, session: _Listen, *, speech: str = "", error: str = "",
     elapsed_ms: int = 0,
     original: str = "", original_language: str = "", wire_language: str = "",
+    activity_key: tuple[str, int] | None = None,
 ) -> dict | None:
     # Reset/exit may have invalidated the utterance while OpenAI was running.
     if _sessions.get(key) is not session:
@@ -186,7 +188,8 @@ def _finish(
         if phase in {"chat", "native"}:
             # No await between remembering and publication: an immediate router
             # turn can recover the original text using exactly this UUID.
-            transcripts.remember(device_id, uuid, original, speech, original_language)
+            transcripts.remember(device_id, uuid, original, speech, original_language,
+                                 activity_key=activity_key)
             if settings.STT_BRIDGE_METADATA_ENABLED:
                 response.language = wire_language
                 response.original_speech = original
@@ -321,6 +324,7 @@ async def handle_stt_request(device_id: str, request: zmqSTTRequest) -> dict | N
         return _finish(key, session, error="Microphone transcription received near-silent audio")
 
     speech, error, original, original_language = "", "", "", ""
+    answer_key = live_actions.answer_key(device_id) if phase == "chat" else None
     try:
         # Deliberately independent of the 24 kHz TTS configuration.
         wav = pcm_to_wav(bytes(session.audio), sample_rate=STT_SAMPLE_RATE_HZ,
@@ -330,12 +334,15 @@ async def handle_stt_request(device_id: str, request: zmqSTTRequest) -> dict | N
         # A running sync HTTP call cannot be killed; it cannot publish either.
         lock = _recognition_locks.setdefault(device_id, asyncio.Lock())
         context = localization_context.snapshot(device_id) if phase == "native" else ""
+        scripted_answer = answer_key is not None
+        if scripted_answer:
+            context = live_actions.answer_context(device_id)
 
         async def recognize():
             async with lock:
                 return await _recognize_and_bridge(
                     wav, audio_ms, started + settings.OPENAI_STT_TIMEOUT_S,
-                    require_wake_word=phase != "native",
+                    require_wake_word=phase != "native" and not scripted_answer,
                     context=context,
                 )
 
@@ -343,6 +350,8 @@ async def handle_stt_request(device_id: str, request: zmqSTTRequest) -> dict | N
         original, speech, original_language = await asyncio.wait_for(
             session.worker, timeout=max(0.0, started + settings.OPENAI_STT_TIMEOUT_S - time.monotonic()),
         )
+        if scripted_answer and live_actions.answer_key(device_id) != answer_key:
+            raise InvalidTranscript("Scripted question changed during recognition")
         logger.info(
             "STT validated/bridge device=%s uuid=%s revision=%d original_language=%s "
             "wire_language=%s original_chars=%d wire_chars=%d translated=%s original=%.160r wire=%.160r",
@@ -375,6 +384,7 @@ async def handle_stt_request(device_id: str, request: zmqSTTRequest) -> dict | N
             _recognition_locks.pop(device_id, None)
     return _finish(key, session, speech="" if error else speech, error=error,
                    original=original, original_language=original_language,
+                   activity_key=answer_key,
                    wire_language="en" if settings.STT_ENGLISH_BRIDGE_ENABLED else original_language,
                    elapsed_ms=int((time.monotonic() - started) * 1000))
 

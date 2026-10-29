@@ -1,5 +1,10 @@
 # Speak Puppet Analysis
 
+Historical investigation. As of 2026-10-29, `/tts/speak` has been replaced with
+the live-turn queue documented in [LIVE_ACTIONS.md](LIVE_ACTIONS.md). The
+TELEHEALTH failure below is not claimed fixed; its legacy transport remains
+separate from the new API.
+
 Why TELEHEALTH / puppet mode (`POST /tts/speak`) could not be the conversation
 path. This is the investigation log, rewritten so the **conclusion is first**,
 the two bugs are separated, and later on-robot retries are folded in.

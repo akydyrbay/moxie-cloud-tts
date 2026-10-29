@@ -17,6 +17,7 @@ class Transcript:
     language: str
     revision: int
     expires: float
+    activity_key: tuple[str, int] | None = None
 
 
 _entries: OrderedDict[tuple[str, str], Transcript] = OrderedDict()
@@ -35,10 +36,11 @@ def _prune() -> None:
             del _entries[key]
 
 
-def remember(device_id: str, uuid: str, original: str, wire: str, language: str) -> None:
+def remember(device_id: str, uuid: str, original: str, wire: str, language: str,
+             *, activity_key: tuple[str, int] | None = None) -> None:
     _prune()
     _entries[device_id, uuid] = Transcript(
-        original, wire, language, device_state.speech_revision, time.monotonic() + TTL_S,
+        original, wire, language, device_state.speech_revision, time.monotonic() + TTL_S, activity_key,
     )
     _entries.move_to_end((device_id, uuid))
     while len(_entries) > MAX_ENTRIES:

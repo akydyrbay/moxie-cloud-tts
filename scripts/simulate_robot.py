@@ -6,12 +6,13 @@ config push, honours ProtoSubscribe, and — when told to speak via telehealth �
 emits a real `CloudTTSRequest` and waits for the matching `CloudTTSResponse`.
 
     Terminal 1:  mise start
-    Terminal 2:  uv run python scripts/simulate_robot.py
-    Terminal 3:  curl -X POST localhost:8000/tts/speak \
-                   -H 'content-type: application/json' \
-                   -d '{"text": "Привет! Как дела?"}'
+    Terminal 2:  uv run python scripts/simulate_robot.py --say 'Привет! Как дела?'
 
-The received audio is written to `local/work/moxie_sim_<event_id>.wav` so it can
+This simulates native CloudTTSRequest and legacy telehealth, not live chat
+turns. The live /tts/speak queue is covered by tests/test_live_actions.py.
+
+The received audio is written to `local/work/moxie_sim_<event_id>.pcm` (or `.wav`
+when the response contains a WAV container) so it can
 be played back on the laptop, which answers the one question a log line cannot:
 does the service produce audio a player actually accepts?
 
@@ -225,11 +226,7 @@ def main() -> int:
             return 1
         return 0
 
-    logger.info(
-        "waiting for telehealth PLAY_OUTPUT — now run: "
-        "curl -X POST localhost:8000/tts/speak -H 'content-type: application/json' "
-        "-d '{\"text\": \"Привет!\"}'",
-    )
+    logger.info("waiting for legacy telehealth PLAY_OUTPUT; use --say to test native TTS")
     try:
         while True:
             time.sleep(1)

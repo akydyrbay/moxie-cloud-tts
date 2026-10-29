@@ -4,6 +4,11 @@ Updated: **2026-10-13**. This document describes the current implementation.
 Use [NATIVE_CONTENT_POLICY.md](NATIVE_CONTENT_POLICY.md) for the log evidence and
 [SPEAK_LIVE_PLAN.md](SPEAK_LIVE_PLAN.md) for acceptance criteria and remaining work.
 
+**2026-10-29 live actions:** `/tts/speak` now queues operator text on real
+OPENMOXIE_CHAT turns. Scripted Q&A and allowlisted behavior commands use that
+same transport; see [LIVE_ACTIONS.md](LIVE_ACTIONS.md). These additions supersede
+the previous instruction to retain `/tts/speak` as a puppet-only endpoint.
+
 ## Scope and ownership
 
 This is a replacement cloud backend using Moxie's MQTT/protobuf protocol.
@@ -19,8 +24,9 @@ There are two autonomous dialogue owners:
 | EXIT / JOKES / STORY and other non-boundary onboard modules | Native activity controls questions, choices, animations and progression; server returns FALLBACK without conversational GPT | `native`: real recognition and English bridge; short answers need no wake word |
 | WELCOME / SESSIONDISMOUNT / SLEEP / TELEHEALTH, or missing module | Session boundary/unknown state; no GPT conversation | `onboard`: recognition disabled; no fabricated transcript |
 
-Puppet/TELEHEALTH is a separate operator path. It is not used to implement
-conversation or native activities. Custom kk/ru modules have not been added.
+Puppet/TELEHEALTH remains a legacy diagnostic path. It is not used by
+`/tts/speak`, scripts, conversation or native activities. Scripted questions
+run inside OPENMOXIE_CHAT; no new firmware module is advertised.
 
 ## End-to-end flow
 
@@ -174,13 +180,15 @@ Frames use `fully.qualified.TypeName:` followed by protobuf serialization.
 | src/services/speak_service.py | Shared TTS, stale remote-output guard, correlated failure silence |
 | src/services/marks.py | Estimated word/viseme timing and native command marks |
 | src/services/provider_work.py | Bounded synchronous provider work |
-| src/services/telehealth.py | Separate puppet protocol; leave unchanged for this task |
+| src/services/telehealth.py | Legacy puppet protocol and wake/sleep commands |
+| src/services/live_actions.py | Bounded live queue, transactional scripted Q&A, status and cancellation |
+| src/services/behaviors.py | Allowlisted behavior labels and escaped output markup |
 | src/config.py | Settings, module advertisement, schedule, source openers |
 
 ## Hard rules
 
-1. Keep puppet sequencing and `/tts/speak` separate. Do not add an HTTP speak or
-   transcription endpoint for autonomous conversation.
+1. `/tts/speak` queues text; it must never fabricate robot turns or push puppet
+   output. Scripted answers use genuine microphone STT. No HTTP transcript injection.
 2. Keep PUPPET_MODE_AUTO_ENABLE false for autonomous testing. Never set
    brain_entrances_available to zero to suppress native content.
 3. Preserve native actions and command marks. Localization changes speech, not

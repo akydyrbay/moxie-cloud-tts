@@ -179,9 +179,14 @@ def clean_stt_state():
     stt_request._completed.clear()
     transcripts.clear()
     from src.services import localization_context, remote_chat
+    from src.services.live_actions import live_actions
+    live_actions._operations.clear()
+    live_actions._used_turns.clear()
     localization_context._activities.clear()
     remote_chat.remote_chat_brain._selections.clear()
     yield
+    live_actions._operations.clear()
+    live_actions._used_turns.clear()
     for device, _ in list(stt_request._sessions):
         stt_request.reset_conversation_state(device)
     stt_request._conversation_phase.clear()
