@@ -9,17 +9,26 @@ field `child_pii.face_options`.
 
 1. You send a face command below. The service checks it and saves it to
    `local/work/moxie_face.json`. The saved face survives a server restart.
-2. **Nothing is sent to the robot yet.** Face options live in `child_pii`, and
-   re-sending `child_pii` to a running Moxie crashes its brain (SIGABRT in
-   `SetMentorName`, see [SPEAK_PUPPET_ANALYSIS.md](SPEAK_PUPPET_ANALYSIS.md)
-   Bug A). The service only sends it at bootstrap.
-3. **Reboot Moxie** (or let it drop and rejoin Wi-Fi). When it reconnects to the
-   broker, the log shows `bootstrapping device ...` and Moxie receives the new
-   face with its config.
+2. By default the service immediately publishes a **face-only config update**
+   to each bootstrapped robot: `{"child_pii":{"face_options":[...]}}`.
+   It does not send nickname, child ID, pairing, mode or speech settings, or
+   issue wake/sleep commands. Moxie can be awake and in a conversation.
+3. The saved face also goes into the normal bootstrap config when Moxie next
+   connects. Devices whose bootstrap is pending (including observed
+   disconnects) receive no live push. The face selection is global, like the
+   existing config toggles; it applies to all eligible discovered robots.
 
-Rebooting Moxie is the safe way to apply a face. Do not restart this server
-while Moxie stays connected just to apply a face: it would re-bootstrap a live
-session.
+The old restriction came from a **full identity** push that crashed the native
+brain in `SetMentorName`; see [SPEAK_PUPPET_ANALYSIS.md](SPEAK_PUPPET_ANALYSIS.md),
+Bug A. Toggle identity stripping remains in place. The dedicated face publisher
+allows only `face_options` through. This narrower payload needs hardware
+verification: a successful MQTT publish does not prove Unity accepted it or
+that the firmware preserves its current activity. See the implementation
+[plan and hardware checklist](FACE_LIVE_PLAN.md).
+
+With `OPENMOXIE_ENABLED=true`, this service saves locally but does not publish
+live config. The response says `OpenMoxie managed`; use OpenMoxie's face editor
+to apply there. The local saved face is not synchronized into OpenMoxie's DB.
 
 The server runs on `http://127.0.0.1:8000`. Every command is also available
 in Swagger at `http://127.0.0.1:8000/docs`.
@@ -44,7 +53,50 @@ curl -s -X POST localhost:8000/tts/face \
 ```
 
 The response lists the saved assets in `face_options`. Any asset from a layer
-that OpenMoxie has not tested is listed in `untested`.
+that OpenMoxie has not tested is listed in `untested`. For example:
+
+```json
+{
+  "saved": true,
+  "face_options": ["MX_010_Eyes_Purple"],
+  "child_id_reset": false,
+  "untested": [],
+  "applies": "live update requested",
+  "live": {
+    "status": "published",
+    "devices": ["d_your_robot"],
+    "failed_devices": [],
+    "deferred_devices": [],
+    "reason": null
+  },
+  "note": "Saved and face-only update accepted for publication; robot display is not acknowledged. Failed/deferred devices receive the saved face on their next bootstrap."
+}
+```
+
+`live.status` is `published`, `partial`, `failed` or `deferred`. `devices` lists
+local MQTT publish acceptances, not robot acknowledgements. `failed_devices`
+lists publish errors; `deferred_devices` lists known targets awaiting bootstrap.
+With no eligible target, `reason` is `no_bootstrapped_devices`. Other deferred
+reasons are `save_only`, `child_id_reset` and `openmoxie_owns_config`.
+`GET /tts/face` returns the saved selection/catalog, not the robot's current
+rendered face or a delivery receipt.
+
+HTTP 200 means persistence succeeded, even if live publication failed. Check
+`live.status`; you can repeat the same request to retry publication. A retry
+is intentionally sent again even if the saved selection is unchanged.
+
+### Save for the next robot connect only
+
+```bash
+curl -s -X POST localhost:8000/tts/face \
+  -H 'Content-Type: application/json' \
+  -d '{"face_options": ["MX_010_Eyes_Purple"], "apply_live": false}'
+```
+
+Then reboot Moxie to apply. Do not restart the server with Moxie connected
+solely to apply a deferred face: that re-bootstraps a live session with full
+identity. `apply_live=false` is also the fallback if firmware rejects live
+face-only updates.
 
 ### Back to the default face
 
@@ -52,8 +104,9 @@ that OpenMoxie has not tested is listed in `untested`.
 curl -s -X DELETE localhost:8000/tts/face
 ```
 
-This saves an empty face list. On the next connect, Moxie drops any face
-customization it had.
+This saves an empty face list and requests a live reset. It also clears the
+saved customization for the next connect. To defer the reset, use
+`DELETE /tts/face?apply_live=false`.
 
 ### Emergency recovery
 
@@ -68,7 +121,10 @@ curl -s -X POST localhost:8000/tts/face \
   -d '{"face_options": [], "reset_child_id": true}'
 ```
 
-Then reboot Moxie. The new ID is saved and reused, so you only need this once.
+Then reboot Moxie. `reset_child_id=true` always defers this whole request,
+even when `apply_live=true`: a new identity is never sent live. The ID is saved
+and reused. Later ordinary face commands still send only face options live;
+the pending ID takes effect on the next bootstrap.
 
 ### Errors
 

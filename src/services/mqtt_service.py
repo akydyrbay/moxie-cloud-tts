@@ -546,8 +546,8 @@ class MqttService:
         logger.info("publishing JSON command to %s (%d bytes)", topic, len(body))
         self.client.publish(topic, body)
 
-    def publish_settings_update(self, device_id: str, config: dict) -> None:
-        """Push a live device config update (plain JSON, no reboot required)."""
+    def publish_settings_update(self, device_id: str, config: dict) -> bool:
+        """Publish config JSON; return local MQTT acceptance, not robot ACK."""
         topic = settings.CONFIG_TOPIC_TEMPLATE.format(device=device_id)
         props = config.get("settings", {}).get("props", {})
         logger.info(
@@ -556,7 +556,12 @@ class MqttService:
             props.get("cloud_tts"),
             config.get("moxie_mode"),
         )
-        self.client.publish(topic, json.dumps(config))
+        info = self.client.publish(topic, json.dumps(config))
+        rc = getattr(info, "rc", 0)
+        if rc not in (0, None):
+            logger.error("mqtt config publish failed rc=%s topic=%s", rc, topic)
+            return False
+        return True
 
 
 mqtt_service = MqttService()

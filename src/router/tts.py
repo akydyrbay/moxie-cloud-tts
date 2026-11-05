@@ -15,8 +15,8 @@ Robot-facing:
     GET      /tts/endpoint-qr OpenMoxie endpoint QR for Moxie's camera
     POST     /tts/wifi-qr     Wi-Fi credentials QR for Moxie's camera
     GET      /tts/face        saved face customization + asset catalog
-    POST     /tts/face        save face assets (applied on next robot connect)
-    DELETE   /tts/face        back to the default face (on next robot connect)
+    POST     /tts/face        save face assets and request a live refresh
+    DELETE   /tts/face        save and request the default face live
 """
 
 import asyncio
@@ -124,22 +124,19 @@ class FaceRequest(BaseModel):
         default=False,
         description=(
             "OpenMoxie's emergency recovery: a new child_pii.id makes Moxie drop "
-            "its cached face textures. Use only if a face change leaves Moxie broken."
+            "its cached face textures. Defers this request until the next robot connect."
         ),
+    )
+    apply_live: bool = Field(
+        default=True,
+        description="Publish a face-only update now; false saves for the next robot connect.",
     )
 
 
-# Serializes save-to-file + in-memory update so they cannot disagree.
+# Serializes persistence, in-memory state and publication in request order.
 _face_lock = asyncio.Lock()
 
-_FACE_APPLY_NOTE = (
-    "Saved. Moxie receives it with its config the next time it connects to the "
-    "broker (reboot Moxie). It is never pushed mid-session: face options live "
-    "in child_pii, whose live re-push crashes Moxie's brain."
-)
-
-
-async def _store_face(options: list[str], reset_child_id: bool) -> dict:
+async def _store_face(options: list[str], reset_child_id: bool, apply_live: bool = True) -> dict:
     async with _face_lock:
         child_id = (await device_state.get_face())["child_id"]
         if reset_child_id:
@@ -153,14 +150,33 @@ async def _store_face(options: list[str], reset_child_id: bool) -> dict:
                 detail="could not save the face; nothing was changed",
             ) from exc
         await device_state.set_face(options, child_id)
-    logger.info("saved Moxie face options %s (reset_child_id=%s); applies on next robot connect",
-                options, reset_child_id)
+        if apply_live and not reset_child_id:
+            live = face.push_live(options)
+        else:
+            live = {"status": "deferred", "devices": [], "failed_devices": [],
+                    "deferred_devices": [],
+                    "reason": "child_id_reset" if reset_child_id else "save_only"}
+    applies = "live update requested" if live["devices"] else "next robot connect"
+    if live["reason"] == "openmoxie_owns_config":
+        applies = "OpenMoxie managed"
+        note = "Saved locally only. OpenMoxie owns live config; use its face editor to apply there."
+    elif live["devices"]:
+        note = ("Saved and face-only update accepted for publication; robot display is not acknowledged. "
+                "Failed/deferred devices receive the saved face on their next bootstrap.")
+    elif live["status"] == "failed":
+        note = "Saved, but live publication failed. Retry the request or reboot Moxie to apply."
+    else:
+        note = "Saved for the next robot connect. No live update was sent."
+    logger.info("saved Moxie face options %s (reset_child_id=%s); live=%s",
+                options, reset_child_id, live)
     return {
+        "saved": True,
         "face_options": options,
         "child_id_reset": reset_child_id,
         "untested": face.untested(options),
-        "applies": "next robot connect",
-        "note": _FACE_APPLY_NOTE,
+        "applies": applies,
+        "live": live,
+        "note": note,
     }
 
 
@@ -390,14 +406,14 @@ async def get_face() -> dict:
     saved = await device_state.get_face()
     return {
         "face_options": saved["face_options"],
-        "applies": "next robot connect",
+        "applies": "live by default; saved for next robot connect",
         "layers": face.catalog(),
     }
 
 
 @router.post("/face")
 async def set_face(body: FaceRequest) -> dict:
-    """Save Moxie's face; it is applied the next time Moxie connects.
+    """Save Moxie's face and request a live refresh of bootstrapped robots.
 
     Replaces the whole face: layers you leave out return to default. Only Eyes
     and Face_Colors are well tested (OpenMoxie); other layers are returned in
@@ -407,10 +423,10 @@ async def set_face(body: FaceRequest) -> dict:
         options = face.normalize(body.face_options)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
-    return await _store_face(options, body.reset_child_id)
+    return await _store_face(options, body.reset_child_id, body.apply_live)
 
 
 @router.delete("/face")
-async def reset_face() -> dict:
-    """Return to the default face on the next robot connect."""
-    return await _store_face([], reset_child_id=False)
+async def reset_face(apply_live: bool = True) -> dict:
+    """Save the default face and request it live; apply_live=false defers it."""
+    return await _store_face([], reset_child_id=False, apply_live=apply_live)

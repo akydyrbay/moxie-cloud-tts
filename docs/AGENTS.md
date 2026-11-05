@@ -202,7 +202,11 @@ Frames use `fully.qualified.TypeName:` followed by protobuf serialization.
 7. Keep response actions speak-first: launch/sleep as a primary action can skip
    the audio. Preserve WAKEUP/ENROLLCONVO FALLBACK entrance handling.
 8. Never re-push child_pii/pairing_status on live config toggles. Full identity
-   belongs only in bootstrap.
+   belongs only in bootstrap. The dedicated face endpoint may publish exactly
+   `child_pii.face_options` live, without nickname, ID or other config fields;
+   see [FACE_LIVE_PLAN.md](FACE_LIVE_PLAN.md). Child-ID recovery remains
+   bootstrap-only. Firmware acceptance of face-only updates needs hardware
+   testing; do not describe MQTT acceptance as confirmed display.
 9. Never request OpenAI WAV output; use PCM and truthful format metadata.
    Word/viseme/command timing is estimated, not forced phoneme alignment.
 10. Do not hand-edit generated files in src/protos. Do not log credentials.

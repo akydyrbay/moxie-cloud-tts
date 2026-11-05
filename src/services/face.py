@@ -5,10 +5,10 @@ OpenMoxie (site/hive/content/data.py, MOXIE_CUSTOMIZATIONS) is the source of
 the catalog; its face page warns that only Eyes and Face_Colors are well
 tested, and that other layers may make Moxie unstable or crash Unity.
 
-Face options live inside `child_pii`, which must never be re-pushed mid-session
-(docs/SPEAK_PUPPET_ANALYSIS.md Bug A). A change is therefore only stored here
-and in `device_state`; the robot receives it with the full bootstrap config
-the next time it connects to the broker.
+Live updates send only `child_pii.face_options`. Full child identity must not
+be re-pushed mid-session (docs/SPEAK_PUPPET_ANALYSIS.md Bug A). Saved options
+also travel in the normal bootstrap config on the next connection. Firmware
+acceptance of the face-only payload needs hardware verification.
 """
 
 import json
@@ -17,6 +17,8 @@ import uuid
 from pathlib import Path
 
 from src.config import settings
+from src.services.devices import device_registry
+from src.services.mqtt_service import mqtt_service
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +123,44 @@ def untested(options: list[str]) -> list[str]:
 def new_child_id() -> str:
     """OpenMoxie's recovery: Moxie caches face textures keyed by child_pii.id."""
     return str(uuid.uuid4())
+
+
+def push_live(options: list[str]) -> dict:
+    """Request a face refresh without replaying identity or session settings.
+
+    `published` means the MQTT client accepted the publish, not that Unity
+    displayed it. Failed/deferred updates remain saved for normal bootstrap.
+    """
+    result = {"status": "deferred", "devices": [], "failed_devices": [],
+              "deferred_devices": [], "reason": None}
+    if settings.OPENMOXIE_ENABLED:
+        result["reason"] = "openmoxie_owns_config"
+        return result
+
+    # Construct an allowlisted payload from scratch. Never copy child_pii:
+    # even a saved recovery ID belongs only in bootstrap, as does nickname.
+    payload = {"child_pii": {"face_options": list(options)}}
+    for device_id in device_registry.targets():
+        if not device_registry.is_bootstrapped(device_id):
+            result["deferred_devices"].append(device_id)
+            continue
+        try:
+            published = mqtt_service.publish_settings_update(device_id, payload)
+        except (OSError, RuntimeError, ValueError):
+            logger.exception("live face publish failed for %s", device_id)
+            published = False
+        result["devices" if published else "failed_devices"].append(device_id)
+
+    if result["devices"]:
+        result["status"] = (
+            "partial" if result["failed_devices"] or result["deferred_devices"] else "published"
+        )
+    elif result["failed_devices"]:
+        result["status"] = "failed"
+    else:
+        result["reason"] = "no_bootstrapped_devices"
+    logger.info("live face options %s: %s", options, result)
+    return result
 
 
 def load() -> dict | None:

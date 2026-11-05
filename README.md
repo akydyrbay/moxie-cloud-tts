@@ -370,7 +370,7 @@ with a newer turn or selected native speech. Puppet sequencing remains separate.
 | `POST /tts/wakeup` | Wake a sleeping robot |
 | `POST /tts/sleep` | Queue sleep; sent with the reply to the robot's next chat turn (speech or silence reprompt) |
 | `GET /tts/devices` | Robots seen on the broker |
-| `GET/POST/DELETE /tts/face` | Save Moxie's face customization; applied on the robot's next connect. See [docs/FACE_COMMANDS.md](docs/FACE_COMMANDS.md) |
+| `GET/POST/DELETE /tts/face` | Save Moxie's face and request a live face-only update; `apply_live=false` defers until reconnect. See [docs/FACE_COMMANDS.md](docs/FACE_COMMANDS.md) |
 
 ## Configuration
 

@@ -199,8 +199,8 @@ class Settings(BaseSettings):
     ROBOT_LOG_LEVEL: str = "info"
 
     # --- Face customization ---------------------------------------------------
-    # Saved `POST /tts/face` choice (child_pii.face_options), sent to the robot
-    # with the bootstrap config on its next broker connect. /local/work/ is
+    # Saved `POST /tts/face` choice, requested live via a face-only config and
+    # restored with bootstrap on the next broker connect. /local/work/ is
     # gitignored.
     MOXIE_FACE_FILE: str = "local/work/moxie_face.json"
 
