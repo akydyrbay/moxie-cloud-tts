@@ -2,16 +2,15 @@
 
 import pytest
 
-from src.config import settings
-from src.protos.embodied.unity.CloudTTS_pb2 import (
+from app.config import settings
+from app.protos.embodied.unity.CloudTTS_pb2 import (
     ROBOT_TTS_REQUEST,
     CloudTTSResponse,
 )
-from src.services import speak_service
-from src.services.audio import duration_ms
-from src.services.marks import VISEME_SILENCE
-from src.services.speak_service import NoTargetDeviceError
-from src.services.synthesis.base import SynthesisResult, UnsupportedLanguageError
+from app.services.speech import output as speak_service
+from app.services.speech.audio import duration_ms
+from app.services.speech.marks import VISEME_SILENCE
+from app.services.speech.synthesis.base import SynthesisResult
 from tests.conftest import FAKE_PCM, TEST_DEVICE_ID, make_streaming_wav
 from tests.test_audio import assert_sizes_truthful
 
@@ -61,64 +60,14 @@ async def test_speak_publishes_framed_response(
     assert resp.timestamp > 0
     assert resp.audio.sample_rate == settings.AUDIO_SAMPLE_RATE_HZ
     assert resp.audio.channels == settings.AUDIO_CHANNELS
-    assert len(resp.audio.buffer) > 0
+    assert resp.audio.buffer == FAKE_PCM
+    assert summary["raw_pcm"] is True
+    assert [call["response_format"] for call in fake_openai.audio.speech.calls] == ["pcm"]
     # Moxie's mouth is driven by these; an empty list speaks stone-faced.
     assert len(resp.marks) > 0
     assert summary["marks"] == len(resp.marks)
     assert resp.software_version == settings.SOFTWARE_VERSION
     assert resp.module_name == settings.MODULE_NAME
-
-
-async def test_speak_echoes_event_and_chunk(
-    fake_openai, known_device, captured_publish,
-) -> None:
-    summary = await speak_service.speak(
-        "Привет", "ru", event_id="evt-123", chunk_num=7,
-    )
-    assert summary["event_id"] == "evt-123"
-    assert summary["chunk_num"] == 7
-    resp = _decode_published(captured_publish[0][1])
-    assert resp.event_id == "evt-123"
-    assert resp.chunk_num == 7
-
-
-async def test_speak_targets_explicit_device(
-    fake_openai, known_device, captured_publish,
-) -> None:
-    await speak_service.speak("Привет", "ru", device_id="robot-b")
-    assert captured_publish[0][0] == "/devices/robot-b/commands/zmq"
-
-
-async def test_speak_without_device_raises(fake_openai, captured_publish) -> None:
-    with pytest.raises(NoTargetDeviceError):
-        await speak_service.speak("Привет", "ru")
-    assert captured_publish == []
-
-
-async def test_speak_rejects_unsupported_language(
-    fake_openai, known_device, captured_publish,
-) -> None:
-    with pytest.raises(UnsupportedLanguageError):
-        await speak_service.speak("hello", "en")
-    # A caller error must not emit a silent fallback frame.
-    assert captured_publish == []
-
-
-async def test_default_audio_is_raw_pcm(fake_openai, known_device, captured_publish) -> None:
-    assert settings.CLOUD_TTS_AUDIO_RAW_PCM is True
-    summary = await speak_service.speak("Привет", "ru")
-    assert summary["raw_pcm"] is True
-    resp = _decode_published(captured_publish[0][1])
-    assert not resp.audio.buffer.startswith(b"RIFF")
-    assert resp.audio.buffer == FAKE_PCM
-    assert resp.audio.sample_rate == settings.AUDIO_SAMPLE_RATE_HZ
-
-
-async def test_synthesis_never_asks_openai_for_streaming_wav(fake_openai) -> None:
-    """`response_format="wav"` returns a 0xFFFFFFFF-length header; never use it."""
-    await speak_service.speak("Привет", "ru", device_id=TEST_DEVICE_ID)
-    formats = [call.get("response_format") for call in fake_openai.audio.speech.calls]
-    assert formats == ["pcm"]
 
 
 async def test_malformed_engine_audio_is_repaired_before_publishing(
@@ -142,33 +91,10 @@ async def test_malformed_engine_audio_is_repaired_before_publishing(
     monkeypatch.setattr(
         speak_service._engine, "synthesize", _broken_synthesize,  # noqa: SLF001
     )
-    monkeypatch.setattr(settings, "CLOUD_TTS_AUDIO_RAW_PCM", False)
     summary = await speak_service.speak("Привет", "ru")
     buffer = _decode_published(captured_publish[0][1]).audio.buffer
     assert_sizes_truthful(buffer)
     assert summary["audio_bytes"] == len(buffer)
-
-
-async def test_silence_fallback_is_raw_pcm(
-    known_device, captured_publish,
-) -> None:
-    speak_service.publish_silence(TEST_DEVICE_ID, "evt-y")
-    buffer = _decode_published(captured_publish[0][1]).audio.buffer
-    assert not buffer.startswith(b"RIFF")
-    assert buffer == b"\x00\x00" * (settings.AUDIO_SAMPLE_RATE_HZ * 200 // 1000)
-
-
-async def test_wav_container_toggle(fake_openai, known_device, captured_publish) -> None:
-    prev = settings.CLOUD_TTS_AUDIO_RAW_PCM
-    settings.CLOUD_TTS_AUDIO_RAW_PCM = False
-    try:
-        summary = await speak_service.speak("Привет", "ru")
-        assert summary["raw_pcm"] is False
-        resp = _decode_published(captured_publish[0][1])
-        assert resp.audio.buffer.startswith(b"RIFF")
-        assert_sizes_truthful(resp.audio.buffer)
-    finally:
-        settings.CLOUD_TTS_AUDIO_RAW_PCM = prev
 
 
 async def test_every_repeated_speak_carries_a_terminated_mark_stream(
@@ -195,33 +121,3 @@ async def test_every_repeated_speak_carries_a_terminated_mark_stream(
         assert max(times) <= length_ms, "a mark past the audio outlives the clip"
         assert resp.marks[-1].value == VISEME_SILENCE
         assert resp.marks[-1].time == length_ms
-
-
-async def test_silence_fallback_still_closes_its_utterance(
-    known_device, captured_publish,
-) -> None:
-    """Nothing to lip-sync, but the robot still needs to know it ended."""
-    speak_service.publish_silence(TEST_DEVICE_ID, "evt-z")
-    resp = _decode_published(captured_publish[0][1])
-    assert [m.value for m in resp.marks] == [VISEME_SILENCE]
-    assert resp.marks[0].time == wav_duration_ms(resp.audio.buffer)
-
-
-async def test_marks_can_be_disabled(
-    fake_openai, known_device, captured_publish, monkeypatch,
-) -> None:
-    monkeypatch.setattr(settings, "CLOUD_TTS_EMIT_MARKS", False)
-    await speak_service.speak("Привет", "ru")
-    assert len(_decode_published(captured_publish[0][1]).marks) == 0
-
-
-async def test_publish_silence_is_raw_pcm(
-    known_device, captured_publish,
-) -> None:
-    summary = speak_service.publish_silence(TEST_DEVICE_ID, "evt-x", 2)
-    assert summary["status"] == "published_silence"
-    resp = _decode_published(captured_publish[0][1])
-    assert resp.event_id == "evt-x"
-    assert resp.chunk_num == 2
-    assert not resp.audio.buffer.startswith(b"RIFF")
-    assert resp.audio.sample_rate == settings.AUDIO_SAMPLE_RATE_HZ

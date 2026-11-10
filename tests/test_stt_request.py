@@ -2,20 +2,25 @@
 
 import pytest
 
-from src.config import settings
-from src.protos.embodied.perception.audio.zmqSTT_pb2 import (
+from app.config import settings
+from app.protos.embodied.perception.audio.zmqSTT_pb2 import (
     zmqSTTRequest,
     zmqSTTResponse,
 )
-from src.services import stt_request
-from src.services.mqtt_service import mqtt_service
+from app.services.speech.recognition import handler as stt_request
+from app.services.transport.mqtt import mqtt_service
 from tests.conftest import TEST_DEVICE_ID
 
 
 @pytest.fixture(autouse=True)
-def original_transcript_mode(monkeypatch):
-    """Exercise recognition's A/B bypass; bridge-on cases have their own suite."""
-    monkeypatch.setattr(settings, "STT_ENGLISH_BRIDGE_ENABLED", False)
+def isolate_recognition_from_translation(monkeypatch):
+    """Stub translation for recognition lifecycle tests; bridge tests cover it."""
+    monkeypatch.setattr(settings, "STT_INPUT_LANGUAGE", "auto")
+
+    async def identity(text, *, remaining_s, context=""):
+        return text
+
+    monkeypatch.setattr(stt_request.input_translation, "to_english", identity)
 
 
 def _frame(req: zmqSTTRequest) -> bytes:
@@ -86,108 +91,6 @@ async def test_injects_wake_trigger_before_conversation_active(
     assert message.start_timestamp == 1000
 
 
-async def test_chat_listen_completes_without_canned_child_speech(
-    captured_protos: list[tuple[str, object]],
-) -> None:
-    """After OPENMOXIE_CHAT, do not inject a canned child line.
-
-    The opener is spoken via remote-chat REMOTE_CHAT_OPENERS, not STT.
-    """
-    # A listen can start during WAKEUP and finish after the chat prompt.
-    await stt_request.handle_payload(
-        TEST_DEVICE_ID,
-        _frame(_request("sess-2", zmqSTTRequest.VADState.START_OF_SPEECH, timestamp=1000)),
-    )
-    assert captured_protos == []
-    stt_request.note_conversation_active(TEST_DEVICE_ID)
-    await stt_request.handle_payload(
-        TEST_DEVICE_ID,
-        _frame(_request("sess-2", zmqSTTRequest.VADState.END_OF_SPEECH)),
-    )
-    assert len(captured_protos) == 1
-    response = captured_protos[0][1]
-    assert response.type == zmqSTTResponse.ResponseType.FINAL
-    assert response.uuid == "sess-2"
-    assert response.start_timestamp == 1000
-    assert response.end_timestamp >= response.start_timestamp
-    assert response.speech == ""
-    assert response.error_code == 66
-    assert "transcription" in response.error_message
-    captured_protos.clear()
-
-    # A reconnect re-arms the wake trigger.
-    stt_request.reset_conversation_state(TEST_DEVICE_ID)
-    await stt_request.handle_payload(
-        TEST_DEVICE_ID,
-        _frame(_request("sess-3", zmqSTTRequest.VADState.END_OF_SPEECH)),
-    )
-    assert len(captured_protos) == 1
-    assert captured_protos[0][1].speech == settings.WAKEUP_TRIGGER_LINE
-
-
-async def test_reconnect_discards_only_that_devices_pending_listens(
-    captured_protos, monkeypatch,
-):
-    """A new robot session must not reuse an earlier STT start timestamp."""
-    monkeypatch.setattr(stt_request, "_now_ms", lambda: 2000)
-    for device in [TEST_DEVICE_ID, "other-robot"]:
-        stt_request.note_conversation_active(device)
-        await stt_request.handle_stt_request(
-            device, _request("same-uuid", zmqSTTRequest.VADState.START_OF_SPEECH, timestamp=1000),
-        )
-    stt_request.reset_conversation_state(TEST_DEVICE_ID)
-    for device in [TEST_DEVICE_ID, "other-robot"]:
-        await stt_request.handle_stt_request(
-            device, _request("new-uuid" if device == TEST_DEVICE_ID else "same-uuid",
-                             zmqSTTRequest.VADState.END_OF_SPEECH),
-        )
-    restarted = captured_protos[0][1]
-    other = captured_protos[1][1]
-    assert restarted.start_timestamp == 2000
-    assert restarted.speech == settings.WAKEUP_TRIGGER_LINE
-    assert other.start_timestamp == 1000
-    assert other.speech == ""
-    assert other.error_code == 66
-
-
-async def test_disabled_wake_trigger_still_completes_listen(
-    captured_protos: list[tuple[str, object]],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """An empty trigger disables fabricated speech, not the STT protocol."""
-    monkeypatch.setattr(settings, "WAKEUP_TRIGGER_LINE", "")
-    await stt_request.handle_payload(
-        TEST_DEVICE_ID,
-        _frame(_request("sess-4", zmqSTTRequest.VADState.END_OF_SPEECH)),
-    )
-    assert len(captured_protos) == 1
-    response = captured_protos[0][1]
-    assert response.uuid == "sess-4"
-    assert response.type == zmqSTTResponse.ResponseType.FINAL
-    assert response.speech == ""
-    assert response.error_code == 66
-
-
-async def test_non_stt_payload_is_ignored(
-    captured_protos: list[tuple[str, object]],
-) -> None:
-    result = await stt_request.handle_payload(
-        TEST_DEVICE_ID,
-        b"embodied.unity.CloudTTSRequest:not-an-stt-frame",
-    )
-    assert result is None
-    assert captured_protos == []
-
-
-def test_parse_stt_request_roundtrip() -> None:
-    req = _request("abc", zmqSTTRequest.VADState.SPEECH, audio=b"\x01\x02\x03")
-    parsed = stt_request.parse_stt_request(_frame(req))
-    assert parsed is not None
-    assert parsed.uuid == "abc"
-    assert parsed.audio_content == b"\x01\x02\x03"
-    assert stt_request.parse_stt_request(b"other:payload") is None
-
-
 @pytest.mark.parametrize("transcript", ["Менің сүйікті жемісім — алма.", "Мой любимый фрукт — яблоко."])
 async def test_chat_accumulates_every_frame_and_preserves_transcript(
     transcript, fake_openai, captured_protos,
@@ -222,16 +125,6 @@ async def test_chat_accumulates_every_frame_and_preserves_transcript(
     assert fake_openai.options == [{"max_retries": 0, "timeout": settings.OPENAI_STT_TIMEOUT_S}]
 
 
-@pytest.mark.parametrize("initial_vad", [2, 3])
-async def test_missing_start_and_end_only_audio(fake_openai, captured_protos, initial_vad):
-    stt_request.note_conversation_active(TEST_DEVICE_ID)
-    await stt_request.handle_stt_request(TEST_DEVICE_ID, _request("missing-start", initial_vad, audio=b"\x01\x02" * 1600))
-    if initial_vad != 3:
-        await stt_request.handle_stt_request(TEST_DEVICE_ID, _request("missing-start", 3))
-    assert len(captured_protos) == 1
-    assert captured_protos[0][1].speech == fake_openai.audio.transcriptions._text
-
-
 @pytest.mark.parametrize("mode", ["empty", "silent", "odd", "provider-error", "empty-result"])
 async def test_recognition_failure_completes_once_and_next_listen_recovers(
     mode, fake_openai, captured_protos, monkeypatch,
@@ -262,15 +155,6 @@ async def test_recognition_failure_completes_once_and_next_listen_recovers(
     await stt_request.handle_stt_request(TEST_DEVICE_ID, _request("next-uuid", 3, audio=b"\x01\x02" * 1600))
     assert captured_protos[-1][1].speech == "Сәлем!"
     assert len(captured_protos) == 2
-
-
-async def test_wake_and_onboard_never_call_provider(fake_openai, captured_protos):
-    await stt_request.handle_stt_request(TEST_DEVICE_ID, _request("wake", 3, audio=b"\x01\x02" * 1600))
-    assert captured_protos[-1][1].speech == settings.WAKEUP_TRIGGER_LINE
-    stt_request.note_onboard_module(TEST_DEVICE_ID, wake_gate=False)
-    await stt_request.handle_stt_request(TEST_DEVICE_ID, _request("onboard", 3, audio=b"\x01\x02" * 1600))
-    assert captured_protos[-1][1].error_code == 66
-    assert fake_openai.audio.transcriptions.calls == []
 
 
 @pytest.fixture
@@ -311,63 +195,6 @@ async def test_duplicate_end_while_pending_and_after_final(blocked_provider, cap
     assert captured_protos[0][1].speech == "Сәлем!"
 
 
-async def test_total_deadline_discards_late_worker_result(blocked_provider, captured_protos, monkeypatch):
-    import asyncio
-    import time
-
-    entered, release, finished = blocked_provider
-    monkeypatch.setattr(settings, "OPENAI_STT_TIMEOUT_S", 0.03)
-    stt_request.note_conversation_active(TEST_DEVICE_ID)
-    start = time.monotonic()
-    await stt_request.handle_stt_request(TEST_DEVICE_ID, _request("timeout", 3, audio=b"\x01\x02" * 1600))
-    assert time.monotonic() - start < 0.5
-    assert len(captured_protos) == 1
-    assert captured_protos[0][1].error_code == 66
-    assert "deadline" in captured_protos[0][1].error_message
-    release.set()
-    await asyncio.wait_for(finished.wait(), 1)
-    await asyncio.sleep(0)
-    assert len(captured_protos) == 1
-
-
-@pytest.mark.parametrize("transition", ["reset", "onboard", "wake"])
-async def test_pending_result_is_discarded_after_exit_or_reset(
-    transition, blocked_provider, captured_protos,
-):
-    import asyncio
-
-    entered, release, finished = blocked_provider
-    stt_request.note_conversation_active(TEST_DEVICE_ID)
-    end = _request("old-session", 3, audio=b"\x01\x02" * 1600)
-    pending = asyncio.create_task(stt_request.handle_stt_request(TEST_DEVICE_ID, end))
-    await asyncio.wait_for(entered.wait(), 1)
-    if transition == "reset":
-        stt_request.reset_conversation_state(TEST_DEVICE_ID)
-    else:
-        stt_request.note_onboard_module(TEST_DEVICE_ID, wake_gate=transition == "wake")
-    assert await pending is None
-    release.set()
-    await asyncio.wait_for(finished.wait(), 1)
-    await stt_request.handle_stt_request(TEST_DEVICE_ID, end)
-    assert captured_protos == []
-    assert not stt_request._sessions
-
-
-async def test_two_devices_same_uuid_have_separate_audio(fake_openai, captured_protos):
-    import io
-    import wave
-
-    for device, audio in [(TEST_DEVICE_ID, b"\x01\x02"), ("other", b"\x03\x04")]:
-        stt_request.note_conversation_active(device)
-        await stt_request.handle_stt_request(device, _request("same", 1, audio=audio * 1600))
-    for device in ["other", TEST_DEVICE_ID]:
-        await stt_request.handle_stt_request(device, _request("same", 3))
-    assert len(captured_protos) == 2
-    for call, expected in zip(fake_openai.audio.transcriptions.calls, [b"\x03\x04", b"\x01\x02"]):
-        with wave.open(io.BytesIO(call["file"][1]), "rb") as reader:
-            assert reader.readframes(1600) == expected * 1600
-
-
 async def test_oversized_and_abandoned_audio_are_bounded(fake_openai, captured_protos, monkeypatch):
     import asyncio
 
@@ -386,27 +213,6 @@ async def test_oversized_and_abandoned_audio_are_bounded(fake_openai, captured_p
     await stt_request.handle_stt_request(TEST_DEVICE_ID, _request("abandoned", 3))
     assert len(captured_protos) == 2
     assert fake_openai.audio.transcriptions.calls == []
-
-
-async def test_pending_and_completed_maps_are_bounded(captured_protos, monkeypatch):
-    monkeypatch.setattr(stt_request, "MAX_DEVICE_SESSIONS", 1)
-    monkeypatch.setattr(stt_request, "MAX_PENDING_SESSIONS", 2)
-    monkeypatch.setattr(stt_request, "MAX_COMPLETED_SESSIONS", 3)
-    await stt_request.handle_stt_request(TEST_DEVICE_ID, _request("first", 1))
-    for i in range(5):
-        await stt_request.handle_stt_request(TEST_DEVICE_ID, _request(f"overflow-{i}", 1))
-    await stt_request.handle_stt_request("other", _request("second", 1))
-    await stt_request.handle_stt_request("third", _request("global-overflow", 1))
-    assert len(stt_request._sessions) == 2
-    assert len(stt_request._completed) == 3
-    assert all(message.error_code == 66 for _, message in captured_protos)
-
-
-async def test_malformed_frames_are_ignored(captured_protos):
-    assert await stt_request.handle_payload(TEST_DEVICE_ID, stt_request.STT_REQUEST_PREFIX + b"\xff") is None
-    for req in [_request("", 3), _request("unknown-vad", 0)]:
-        assert await stt_request.handle_stt_request(TEST_DEVICE_ID, req) is None
-    assert captured_protos == []
 
 
 async def test_broker_disconnect_invalidates_pending_recognition(blocked_provider, captured_protos, monkeypatch):

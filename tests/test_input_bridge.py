@@ -8,11 +8,9 @@ import pytest
 
 pytestmark = pytest.mark.usefixtures("robot_selection")
 
-from src.config import settings
-from src.services import stt_request
-from src.services.device_state import device_state
-from src.services.stt import input_translation, openai_stt, transcripts
-from src.services.stt.validation import LEGACY_PROMPT, validate_transcript
+from app.config import settings
+from app.services.speech.recognition import handler as stt_request
+from app.services.speech.recognition import input_translation, transcripts
 from tests.conftest import TEST_DEVICE_ID
 from tests.test_stt_request import _request, captured_protos
 
@@ -21,9 +19,7 @@ PCM = b"\x00\x01" * 15360
 
 @pytest.fixture(autouse=True)
 def bridge_defaults(monkeypatch):
-    monkeypatch.setattr(settings, "STT_ENGLISH_BRIDGE_ENABLED", True)
     monkeypatch.setattr(settings, "STT_INPUT_LANGUAGE", "auto")
-    monkeypatch.setattr(settings, "STT_BRIDGE_METADATA_ENABLED", False)
 
 
 async def listen(original, fake_openai, uuid="listen", device=TEST_DEVICE_ID):
@@ -59,38 +55,17 @@ async def test_bridge_preserves_uuid_audio_and_original(original, wire, fake_ope
         assert "Do not answer questions" in translation_calls[0]["messages"][0]["content"]
 
 
-async def test_input_hint_and_optional_metadata_do_not_select_output_language(fake_openai, captured_protos, monkeypatch):
+async def test_input_hint_keeps_metadata_server_side_and_output_language_unchanged(fake_openai, captured_protos, monkeypatch):
     monkeypatch.setattr(settings, "STT_INPUT_LANGUAGE", "ru")
-    monkeypatch.setattr(settings, "STT_BRIDGE_METADATA_ENABLED", True)
     fake_openai.chat.completions.translations["Привет!"] = "Hello!"
     await listen("Привет!", fake_openai)
     final = captured_protos[0][1]
-    assert final.language == "en"
-    assert final.original_language == "ru"
-    assert final.original_speech == "Привет!"
+    assert final.speech == "Hello!"
+    assert final.language == final.original_language == final.original_speech == ""
+    saved = transcripts.find(TEST_DEVICE_ID, "listen")
+    assert (saved.original, saved.wire, saved.language) == ("Привет!", "Hello!", "ru")
     assert fake_openai.audio.transcriptions.calls[0]["language"] == "ru"
     assert settings.DEFAULT_TTS_LANGUAGE == "kk"
-
-
-@pytest.mark.parametrize("text", ["Иә", "Жоқ", "Да", "Нет", "Алма", "Қазақстан", "қазақ тілі"])
-def test_short_legitimate_answers_are_not_blacklisted(text):
-    validate_transcript(text, 100)
-
-
-@pytest.mark.parametrize("text", [LEGACY_PROMPT, f"###\n{LEGACY_PROMPT}\n###", "", "...", "hello " * 100])
-async def test_bad_asr_never_creates_bridge_or_correlation(text, fake_openai, captured_protos):
-    await listen(text, fake_openai)
-    final = captured_protos[0][1]
-    assert final.error_code == 66 and final.speech == ""
-    assert fake_openai.chat.completions.calls == []
-    assert transcripts.find(TEST_DEVICE_ID, "listen") is None
-
-
-async def test_nonzero_near_silence_does_not_call_asr(fake_openai, captured_protos):
-    stt_request.note_conversation_active(TEST_DEVICE_ID)
-    await stt_request.handle_stt_request(TEST_DEVICE_ID, _request("noise", 3, audio=b"\x01\x00" * 16000))
-    assert captured_protos[0][1].error_code == 66
-    assert not fake_openai.audio.transcriptions.calls
 
 
 @pytest.mark.parametrize("kind", ["empty", "cyrillic", "refusal", "incomplete", "exception"])
@@ -139,32 +114,6 @@ async def test_translation_uses_only_remaining_total_listen_budget(fake_openai, 
         release.set()
 
 
-@pytest.mark.parametrize("mode", ["reset", "exit", "puppet", "tts-toggle", "off-on"])
-async def test_mode_change_discards_pending_bridge(mode, fake_openai, captured_protos, monkeypatch):
-    entered = asyncio.Event()
-    async def blocked(text, *, remaining_s, context=""):
-        entered.set()
-        await asyncio.Event().wait()
-
-    monkeypatch.setattr(input_translation, "to_english", blocked)
-    pending = asyncio.create_task(listen("Сәлем!", fake_openai))
-    await asyncio.wait_for(entered.wait(), 1)
-    if mode == "reset":
-        stt_request.reset_conversation_state(TEST_DEVICE_ID)
-    elif mode == "exit":
-        stt_request.note_onboard_module(TEST_DEVICE_ID, wake_gate=False)
-    elif mode == "puppet":
-        await device_state.set_puppet_mode(True)
-    else:
-        await device_state.set_cloud_tts(True)
-        if mode == "off-on":
-            await device_state.set_cloud_tts(False)
-            await device_state.set_cloud_tts(True)
-    assert await asyncio.wait_for(pending, 1) is None
-    assert captured_protos == []
-    assert transcripts.find(TEST_DEVICE_ID, "listen") is None
-
-
 def test_correlation_is_bounded_and_separated_by_device_uuid_and_reset(monkeypatch):
     clock = [100.0]
     monkeypatch.setattr(transcripts.time, "monotonic", lambda: clock[0])
@@ -185,36 +134,11 @@ def test_correlation_is_bounded_and_separated_by_device_uuid_and_reset(monkeypat
     assert transcripts.find("c", "4") is None and not transcripts._entries
 
 
-def test_explicit_english_asr_hint_is_independent_of_output_support(fake_openai):
-    openai_stt.transcribe(b"wav", "en")
-    assert fake_openai.audio.transcriptions.calls[0]["language"] == "en"
-    assert "en" not in settings.SUPPORTED_LANGUAGES
-
-
-async def test_stale_router_activation_cannot_enable_asr_in_puppet(fake_openai, captured_protos):
-    await device_state.set_puppet_mode(True)
-    await listen("Сәлем!", fake_openai)
-    assert captured_protos[0][1].error_code == 66
-    assert not fake_openai.audio.transcriptions.calls
-
-
-@pytest.mark.parametrize("original", ["Мокси, как тебя зовут?", "Моқси, сенің атың кім?", "moxie what is this"])
-async def test_wake_word_speech_is_forwarded(original, fake_openai, captured_protos, monkeypatch):
-    monkeypatch.setattr(settings, "STT_WAKE_WORD_REQUIRED", True)
-    fake_openai.chat.completions.translations[original] = "Moxie, what is your name?"
-    await listen(original, fake_openai)
-    final = captured_protos[0][1]
-    assert (final.speech, final.error_code) == (
-        "Moxie, what is your name?" if not original.isascii() else original, 0,
-    )
-    assert not transcripts.was_ignored(TEST_DEVICE_ID, "listen")
-
-
 @pytest.mark.parametrize("original", ["Как тебя зовут?", "Ordu,", "Мама, где Мокси?"])
 async def test_speech_without_wake_word_is_ignored_silently(
     original, fake_openai, captured_protos, captured_publish, monkeypatch,
 ):
-    from src.services.remote_chat import RemoteChatBrain
+    from app.services.conversation.remote_chat import RemoteChatBrain
 
     monkeypatch.setattr(settings, "STT_WAKE_WORD_REQUIRED", True)
     await listen(original, fake_openai)

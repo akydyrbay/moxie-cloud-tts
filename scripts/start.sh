@@ -33,5 +33,4 @@ echo "==> broker is up"
 
 echo "==> starting FastAPI service (cloud_tts auto-enables when a key is set)"
 echo "    Swagger:   http://localhost:8000/docs"
-echo "    No robot?  run 'mise sim' in another terminal to fake one"
-exec uv run fastapi dev src/main.py --reload-dir src
+exec uv run fastapi dev app/main.py --reload-dir app

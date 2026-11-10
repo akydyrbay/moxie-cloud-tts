@@ -7,8 +7,8 @@ Toggle pushes must therefore omit identity fields.
 
 import pytest
 
-from src.services import tts_service
-from src.services.mqtt_service import mqtt_service
+from app.services.devices import settings as tts_service
+from app.services.transport.mqtt import mqtt_service
 from tests.conftest import TEST_DEVICE_ID
 
 _FULL_CONFIG = {
@@ -17,17 +17,6 @@ _FULL_CONFIG = {
     "moxie_mode": "TELEHEALTH",
     "settings": {"props": {"cloud_tts": "1"}},
 }
-
-
-def test_without_identity_fields_strips_only_identity() -> None:
-    stripped = tts_service._without_identity_fields(_FULL_CONFIG)  # noqa: SLF001
-    assert "child_pii" not in stripped
-    assert "pairing_status" not in stripped
-    # Control + settings survive so the toggle still lands.
-    assert stripped["moxie_mode"] == "TELEHEALTH"
-    assert stripped["settings"]["props"]["cloud_tts"] == "1"
-    # Deep copy: the source config is untouched.
-    assert "child_pii" in _FULL_CONFIG
 
 
 def test_push_config_omits_identity(

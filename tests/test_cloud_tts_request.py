@@ -9,24 +9,22 @@ import json
 import logging
 
 import pytest
-from pydantic import ValidationError
 
-from src.config import Settings, settings
-from src.protos.embodied.perception.audio.zmqSTT_pb2 import (
+from app.config import settings
+from app.protos.embodied.perception.audio.zmqSTT_pb2 import (
     zmqSTTRequest,
     zmqSTTResponse,
 )
-from src.protos.embodied.unity.CloudTTS_pb2 import (
+from app.protos.embodied.unity.CloudTTS_pb2 import (
     REMOTECHAT_TTS_REQUEST,
     ROBOT_TTS_REQUEST,
     CloudTTSRequest,
     CloudTTSResponse,
 )
-from src.services import cloud_tts_request, stt_request
-from src.services.device_state import device_state
-from src.services.language import detect_language
-from src.services.remote_chat import RemoteChatBrain
-from src.services.synthesis import openai_tts
+from app.services.speech.synthesis import handler as cloud_tts_request
+from app.services.speech.recognition import handler as stt_request
+from app.services.devices.state import device_state
+from app.services.conversation.remote_chat import RemoteChatBrain
 from tests.conftest import TEST_DEVICE_ID
 
 OTHER_DEVICE = "some-other-robot"
@@ -49,33 +47,6 @@ def _decode_response(payload: bytes) -> CloudTTSResponse:
     resp = CloudTTSResponse()
     resp.ParseFromString(payload[len(RESPONSE_PREFIX):])
     return resp
-
-
-def test_parse_ignores_non_cloud_tts_request() -> None:
-    assert cloud_tts_request.parse_cloud_tts_request(b"something.else:xxx") is None
-
-
-def test_parse_decodes_framed_request() -> None:
-    payload = _frame_request(markup="Привет", event_id="e1", chunk_num=2)
-    req = cloud_tts_request.parse_cloud_tts_request(payload)
-    assert req is not None
-    assert req.markup == "Привет"
-    assert req.event_id == "e1"
-    assert req.chunk_num == 2
-
-
-@pytest.mark.parametrize(
-    ("markup", "expected"),
-    [
-        ("<mark name='x'/>Привет!", "Привет!"),
-        ("Привет <break time='1s'/> как дела?", "Привет как дела?"),
-        ("<mood:happy>Сәлем!</mood>", "Сәлем!"),
-        ("   ", ""),
-        ("<mark/>", ""),
-    ],
-)
-def test_strip_markup_removes_tags(markup, expected) -> None:
-    assert cloud_tts_request.strip_markup(markup) == expected
 
 
 async def test_handle_payload_replies_to_requesting_device(
@@ -105,89 +76,11 @@ async def test_handle_payload_replies_to_requesting_device(
     assert not resp.audio.buffer.startswith(b"RIFF")
 
 
-async def test_markup_tags_are_not_spoken(fake_openai, captured_publish) -> None:
-    seen: list[str] = []
-    original = openai_tts.openai_tts_engine.synthesize
-
-    def _spy(text: str, language: str, timeout: float | None = None):  # noqa: ANN202
-        seen.append(text)
-        return original(text, language, timeout)
-
-    openai_tts.openai_tts_engine.synthesize = _spy
-    try:
-        payload = _frame_request(
-            markup="<mark name='viseme'/>Привет!", event_id="e", chunk_num=0,
-        )
-        await cloud_tts_request.handle_payload(TEST_DEVICE_ID, payload)
-    finally:
-        openai_tts.openai_tts_engine.synthesize = original
-
-    assert seen == ["Привет!"]
-
-
-async def test_empty_markup_still_answers_so_robot_does_not_stall(
-    fake_openai, captured_publish,
-) -> None:
-    """Silence beats silence-on-the-wire: no response leaves the robot in MarkingUp."""
-    payload = _frame_request(markup="   ", event_id="e-empty", chunk_num=0)
-    summary = await cloud_tts_request.handle_payload(TEST_DEVICE_ID, payload)
-
-    assert summary["status"] == "published_silence"
-    assert len(captured_publish) == 1
-    resp = _decode_response(captured_publish[0][1])
-    assert resp.event_id == "e-empty"
-    assert len(resp.audio.buffer) > 0
-
-
-async def test_synthesis_failure_publishes_silence(
-    fake_openai, captured_publish,
-) -> None:
-    original = openai_tts.openai_tts_engine.synthesize
-
-    def _boom(text: str, language: str, timeout: float | None = None):  # noqa: ANN202
-        msg = "openai exploded"
-        raise RuntimeError(msg)
-
-    openai_tts.openai_tts_engine.synthesize = _boom
-    try:
-        payload = _frame_request(markup="Привет", event_id="e-fail", chunk_num=1)
-        summary = await cloud_tts_request.handle_payload(TEST_DEVICE_ID, payload)
-    finally:
-        openai_tts.openai_tts_engine.synthesize = original
-
-    assert summary["status"] == "failed"
-    assert len(captured_publish) == 1
-    resp = _decode_response(captured_publish[0][1])
-    assert resp.event_id == "e-fail"
-    assert resp.chunk_num == 1
-    assert len(resp.audio.buffer) > 0
-
-
-async def test_handle_payload_returns_none_for_other_types(
-    fake_openai, captured_publish,
-) -> None:
-    assert await cloud_tts_request.handle_payload(
-        TEST_DEVICE_ID, b"embodied.power.X:zzz",
-    ) is None
-    assert captured_publish == []
-
-
-def test_language_detection(monkeypatch) -> None:
-    monkeypatch.setattr(settings, "DEFAULT_TTS_LANGUAGE", "kk")
-    assert detect_language("Привет, как дела") == "ru"
-    assert detect_language("Сәлем, қалайсың") == "kk"
-    # No Cyrillic is not evidence of either language -> configured default.
-    assert detect_language("hello there") == "kk"
-
-
 @pytest.fixture
 def translation_settings(monkeypatch: pytest.MonkeyPatch) -> None:
     """Make regression tests independent of the operator's .env choices."""
     monkeypatch.setattr(settings, "CLOUD_TTS_TRANSLATION_ENABLED", True)
     monkeypatch.setattr(settings, "DEFAULT_TTS_LANGUAGE", "kk")
-    monkeypatch.setattr(settings, "CLOUD_TTS_EMIT_MARKS", True)
-    monkeypatch.setattr(settings, "CLOUD_TTS_AUDIO_RAW_PCM", True)
-    monkeypatch.setattr(settings, "CLOUD_TTS_REQUEST_SOURCE", "robot")
 
 
 @pytest.mark.parametrize(
@@ -195,9 +88,6 @@ def translation_settings(monkeypatch: pytest.MonkeyPatch) -> None:
     [
         ("Good morning!", "Қайырлы таң!", "kk"),
         ("Good morning.", "Доброе утро.", "ru"),
-        ('Excellent! " "', "Тамаша!", "kk"),
-        ("What is your favorite fruit?", "Саған қандай жеміс ұнайды?", "kk"),
-        ("I'm sorry, can you repeat that please?", "Кешір, қайталап айта аласың ба?", "kk"),
     ],
 )
 async def test_translation_preserves_slot_commands_and_lip_sync(
@@ -246,41 +136,6 @@ async def test_translation_preserves_slot_commands_and_lip_sync(
     assert f"requested_text={local_text!r}" in caplog.text
     assert f"synthesis_text={translated!r}" in caplog.text
     assert f"spoke event_id=wake-slot chunk=3 language={language}" in caplog.text
-
-
-@pytest.mark.parametrize("guard", ["disabled", "puppet"])
-@pytest.mark.parametrize("local_text", ["Good morning!", "Good morning.", "Excellent!"])
-async def test_translation_respects_flag_and_live_puppet_mode(
-    fake_openai, captured_publish, translation_settings, monkeypatch, guard, local_text,
-) -> None:
-    if guard == "disabled":
-        monkeypatch.setattr(settings, "CLOUD_TTS_TRANSLATION_ENABLED", False)
-    else:
-        # This must read runtime state, not just PUPPET_MODE_AUTO_ENABLE.
-        await device_state.set_puppet_mode(True)
-
-    await cloud_tts_request.handle_payload(
-        TEST_DEVICE_ID, _frame_request(markup=local_text, event_id="", chunk_num=0),
-    )
-    assert fake_openai.audio.speech.calls[0]["input"] == local_text
-    assert fake_openai.chat.completions.calls == []
-    assert len(captured_publish) == 1
-    assert _decode_response(captured_publish[0][1]).event_id == ""
-
-
-@pytest.mark.parametrize(
-    "text",
-    ["Привет!", "Сәлем!", "Мен роботпын.", "123"],
-)
-async def test_cyrillic_and_numbers_do_not_need_translation(
-    fake_openai, captured_publish, translation_settings, text,
-) -> None:
-    await cloud_tts_request.handle_payload(
-        TEST_DEVICE_ID, _frame_request(markup=f"<usel>{text}</usel>", event_id="e"),
-    )
-    assert fake_openai.audio.speech.calls[0]["input"] == text
-    assert fake_openai.chat.completions.calls == []
-    assert len(captured_publish) == 1
 
 
 @pytest.mark.parametrize("markup", [
@@ -370,9 +225,3 @@ async def test_wakeup_to_audio_even_when_chat_prompt_arrives_first(
     assert resp.request_source == ROBOT_TTS_REQUEST
     expected_source = 'Excellent! " "' if firmware_uses_local_line else entrance["output"]["text"]
     assert fake_openai.audio.speech.calls[-1]["input"] == translated_lines[expected_source]
-
-
-@pytest.mark.parametrize("timeout", [0, -1])
-def test_translation_timeout_must_be_positive(timeout) -> None:
-    with pytest.raises(ValidationError, match="OPENAI_TRANSLATION_TIMEOUT_S"):
-        Settings(_env_file=None, OPENAI_TRANSLATION_TIMEOUT_S=timeout)

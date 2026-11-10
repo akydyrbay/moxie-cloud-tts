@@ -1,9 +1,9 @@
 [project]
-name = "moxie-tts-service"
+name = "april-robots-agent-moxie"
 version = "0.1.0"
-description = "Live cloud_tts toggle service for Moxie/OpenMoxie"
+description = "APRIL Moxie agent and migrated robot protocol engine"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi[standard]>=0.138.0",
     "paho-mqtt>=2.1.0",
@@ -27,7 +27,7 @@ testpaths = ["tests"]
 [tool.ruff]
 exclude = [
     ".venv",
-    "src/protos",  # vendored, protoc-generated ("DO NOT EDIT") — not our code to lint
+    "app/protos",  # vendored, protoc-generated ("DO NOT EDIT") — not our code to lint
 ]
 
 [tool.ruff.lint]

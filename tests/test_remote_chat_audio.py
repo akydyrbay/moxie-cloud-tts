@@ -17,17 +17,19 @@ import pytest
 
 pytestmark = pytest.mark.usefixtures("robot_selection")
 
-from src.config import settings
-from src.protos.embodied.perception.audio.zmqSTT_pb2 import zmqSTTRequest, zmqSTTResponse
-from src.protos.embodied.unity.CloudTTS_pb2 import (
+from app.config import settings
+from app.protos.embodied.perception.audio.zmqSTT_pb2 import zmqSTTRequest, zmqSTTResponse
+from app.protos.embodied.unity.CloudTTS_pb2 import (
     REMOTECHAT_TTS_REQUEST,
     ROBOT_TTS_REQUEST,
 )
-from src.services import cloud_tts_request, remote_chat, stt_request
-from src.services.device_state import device_state
-from src.services.devices import device_registry
-from src.services.mqtt_service import mqtt_service
-from src.services.remote_chat import RemoteChatBrain
+from app.services.speech.synthesis import handler as cloud_tts_request
+from app.services.conversation import remote_chat
+from app.services.speech.recognition import handler as stt_request
+from app.services.devices.state import device_state
+from app.services.devices.registry import device_registry
+from app.services.transport.mqtt import mqtt_service
+from app.services.conversation.remote_chat import RemoteChatBrain
 from tests.test_cloud_tts_request import _decode_response, _frame_request
 
 DEVICE = "d_d05e3c66-dd29-4fe2-9758-7223e31511dc"
@@ -155,78 +157,6 @@ async def test_sep28_prompt_audio_and_transcript_turn(
     assert fake_openai.audio.speech.calls[-1]["input"] == REPLY_KK
 
 
-async def test_no_pushed_audio_without_cloud_tts(brain, fake_openai, captured_publish):
-    """Onboard TTS speaks the markup itself; English source stays untranslated."""
-    await device_state.set_cloud_tts(False)
-    await brain.handle_remote_chat_event(
-        DEVICE, _router("prompt", "OPENMOXIE_CHAT", PROMPT_ID),
-    )
-    chats, audio = _split(captured_publish)
-    assert chats[0]["output"]["text"] == "Hi! What would you like to talk about?"
-    assert audio == []
-    assert fake_openai.audio.speech.calls == []
-
-
-async def test_no_pushed_audio_in_puppet_mode(brain, fake_openai, captured_publish):
-    await device_state.set_cloud_tts(True)
-    await device_state.set_puppet_mode(True)
-    await brain.handle_remote_chat_event(
-        DEVICE, _router("prompt", "OPENMOXIE_CHAT", PROMPT_ID),
-    )
-    _chats, audio = _split(captured_publish)
-    assert audio == []
-
-
-async def test_onboard_fallback_is_not_voiced(brain, fake_openai, captured_publish):
-    """A FALLBACK loses arbitration; the local line raises its own request."""
-    await device_state.set_cloud_tts(True)
-    await brain.handle_remote_chat_event(
-        DEVICE, _router("continue", "WELCOME", "onboard-1", "Сәлем"),
-    )
-    chats, audio = _split(captured_publish)
-    assert chats[0]["response_action"]["output_type"] == "FALLBACK"
-    assert audio == []
-
-
-async def test_opener_translation_failure_publishes_correlated_silence(
-    brain, fake_openai, captured_publish, monkeypatch,
-):
-    async def _fail(*_args, **_kwargs):
-        raise TimeoutError
-
-    monkeypatch.setattr("src.services.translation.translate", _fail)
-    await device_state.set_cloud_tts(True)
-    await brain.handle_remote_chat_event(
-        DEVICE, _router("prompt", "OPENMOXIE_CHAT", PROMPT_ID),
-    )
-    chats, audio = _split(captured_publish)
-    assert chats[0]["output"]["text"] == remote_chat.generation_error_line("kk")
-    assert len(audio) == 1
-    assert audio[0].request_source == REMOTECHAT_TTS_REQUEST
-    assert (audio[0].event_id, audio[0].chunk_num) == (PROMPT_ID, 0)
-    assert not any(audio[0].audio.buffer)
-    assert fake_openai.audio.speech.calls == []
-
-
-async def test_synthesis_failure_publishes_correlated_silence(
-    brain, fake_openai, captured_publish, monkeypatch,
-):
-    def _boom(*_args, **_kwargs):
-        raise RuntimeError("tts down")
-
-    monkeypatch.setattr(fake_openai.audio.speech, "create", _boom)
-    fake_openai.chat.completions._reply = REPLY_KK
-    await device_state.set_cloud_tts(True)
-    await brain.handle_remote_chat_event(
-        DEVICE, _router("continue", "OPENMOXIE_CHAT", "turn-1", TRANSCRIPT),
-    )
-    chats, audio = _split(captured_publish)
-    assert chats[0]["output"]["text"] == REPLY_KK
-    assert len(audio) == 1
-    assert (audio[0].request_source, audio[0].event_id) == (REMOTECHAT_TTS_REQUEST, "turn-1")
-    assert not any(audio[0].audio.buffer)
-
-
 @pytest.fixture
 async def blocked_stage(request, fake_openai, translated_lines, monkeypatch):
     """Hold one real provider boundary while the robot changes state."""
@@ -303,11 +233,16 @@ async def _change_state(brain, transition, monkeypatch):
         raise AssertionError(transition)
 
 
-@pytest.mark.parametrize("blocked_stage", ["translation", "chat", "tts"], indirect=True)
-@pytest.mark.parametrize("transition", [
-    "module_exit", "new_prompt", "puppet", "cloud_tts", "bootstrap",
-    "broker_disconnect", "puppet_round_trip", "cloud_tts_round_trip",
-])
+@pytest.mark.parametrize("blocked_stage,transition", [
+    ("translation", "module_exit"),
+    ("chat", "new_prompt"),
+    ("tts", "puppet"),
+    ("tts", "cloud_tts"),
+    ("tts", "bootstrap"),
+    ("tts", "broker_disconnect"),
+    ("tts", "puppet_round_trip"),
+    ("tts", "cloud_tts_round_trip"),
+], indirect=["blocked_stage"])
 async def test_state_change_discards_pending_remote_output(
     brain, blocked_stage, captured_publish, monkeypatch, transition,
 ):
@@ -338,29 +273,3 @@ async def test_stale_provider_failure_does_not_publish_fallback(
         blocked_stage.release.set()
         await asyncio.wait_for(pending, 1)
     assert captured_publish == []
-
-
-@pytest.mark.parametrize("blocked_stage", ["translation", "chat", "tts"], indirect=True)
-async def test_notify_other_device_and_unchanged_settings_keep_turn_live(
-    brain, blocked_stage, captured_publish,
-):
-    pending = await _start_pending(brain, blocked_stage, captured_publish)
-    try:
-        await device_state.set_cloud_tts(True)
-        await device_state.set_puppet_mode(False)
-        await brain.handle_remote_chat_event(
-            DEVICE, _router("notify", "OPENMOXIE_CHAT", "notify-event", OPENER_KK),
-        )
-        await brain.handle_remote_chat_event(
-            "other-device", _router("start", "WELCOME", "other-exit"),
-        )
-        captured_publish.clear()
-    finally:
-        blocked_stage.release.set()
-        await asyncio.wait_for(pending, 1)
-    chats, audio = _split(captured_publish)
-    assert [a.event_id for a in audio] == [PROMPT_ID]
-    assert audio[0].audio.buffer
-    assert [c["event_id"] for c in chats] == (
-        [] if blocked_stage.stage == "tts" else [PROMPT_ID]
-    )

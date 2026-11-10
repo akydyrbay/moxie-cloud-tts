@@ -14,13 +14,15 @@ import wave
 
 import pytest
 
-from src.config import settings
-from src.services import openai_client, stt_request, translation
-from src.services.device_state import device_state
-from src.services.devices import device_registry
-from src.services.mqtt_service import mqtt_service
-from src.services.telehealth import clear_puppet_state
-from src.services.stt import transcripts
+from app.config import settings
+from app.services.providers import openai_client
+from app.services.speech.recognition import handler as stt_request
+from app.services.speech import translation
+from app.services.devices.state import device_state
+from app.services.devices.registry import device_registry
+from app.services.transport.mqtt import mqtt_service
+from app.services.actions.telehealth import clear_puppet_state
+from app.services.speech.recognition import transcripts
 
 TEST_DEVICE_ID = "test-device-1"
 
@@ -127,7 +129,7 @@ def fake_openai() -> FakeOpenAI:
     )
     prev_key = settings.OPENAI_API_KEY
     settings.OPENAI_API_KEY = "test-key"
-    openai_client._client = client  # noqa: SLF001 (test injection)
+    openai_client.client_state.client = client
     yield client
     openai_client.reset_client()
     settings.OPENAI_API_KEY = prev_key
@@ -178,8 +180,9 @@ def clean_stt_state():
     stt_request._conversation_phase.clear()
     stt_request._completed.clear()
     transcripts.clear()
-    from src.services import localization_context, remote_chat
-    from src.services.live_actions import live_actions
+    from app.services.speech import localization_context
+    from app.services.conversation import remote_chat
+    from app.services.actions.live_actions import live_actions
     live_actions._operations.clear()
     live_actions._used_turns.clear()
     localization_context._activities.clear()
@@ -202,7 +205,7 @@ def robot_selection(monkeypatch):
     A fallback loses to local content; ordinary remote chat is selected.
     """
     import asyncio
-    from src.services.remote_chat import RemoteChatBrain
+    from app.services.conversation.remote_chat import RemoteChatBrain
 
     send = RemoteChatBrain._send_remote_chat
 
@@ -241,17 +244,7 @@ def known_device() -> str:
 def clean_device_state() -> None:
     """Reset shared config / telehealth state so they don't leak across tests."""
     clear_puppet_state()
-    # Keep speak tests fast: no real robot to wait on.
-    prev_pause = settings.SPEAK_INTERRUPT_PAUSE_S
-    prev_settle = settings.SPEAK_SETTLE_S
-    prev_ready = settings.SPEAK_READY_TIMEOUT_S
-    settings.SPEAK_INTERRUPT_PAUSE_S = 0.0
-    settings.SPEAK_SETTLE_S = 0.0
-    settings.SPEAK_READY_TIMEOUT_S = 0.05
     yield
-    settings.SPEAK_INTERRUPT_PAUSE_S = prev_pause
-    settings.SPEAK_SETTLE_S = prev_settle
-    settings.SPEAK_READY_TIMEOUT_S = prev_ready
     clear_puppet_state()
     device_state._config["settings"]["props"]["cloud_tts"] = "0"  # noqa: SLF001
     device_state._config.pop("moxie_mode", None)  # noqa: SLF001

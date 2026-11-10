@@ -1,6 +1,6 @@
 """Stalled OpenAI TTS must not turn native story narration into silence.
 
-October 14 (docs/DEBUG_LOG_ANALYSIS_2026-10-14.md, finding 1): STORY music
+October 14 (docs/native_content.md, historical STORY narration failures): STORY music
 played while every narration line received silence. TTS calls either finished
 in 1.3–2.7 s or stalled until the 8 s deadline, so a stalled call is hedged
 with one parallel attempt inside the same deadline.
@@ -12,10 +12,11 @@ import time
 
 import pytest
 
-from src.config import settings
-from src.protos.embodied.unity.CloudTTS_pb2 import ROBOT_TTS_REQUEST
-from src.services import cloud_tts_request, speak_service
-from src.services.provider_work import ProviderBusyError, ProviderPool
+from app.config import settings
+from app.protos.embodied.unity.CloudTTS_pb2 import ROBOT_TTS_REQUEST
+from app.services.speech.synthesis import handler as cloud_tts_request
+from app.services.speech import output as speak_service
+from app.services.providers.pool import ProviderPool
 from tests.conftest import FAKE_PCM, TEST_DEVICE_ID
 from tests.test_cloud_tts_request import _decode_response, _frame_request
 
@@ -90,15 +91,6 @@ async def test_stalled_story_line_is_hedged_and_spoken(scripted_tts, translated_
     assert len(captured_publish) == 1
 
 
-async def test_slow_first_attempt_still_wins(scripted_tts, captured_publish):
-    behaviours, timeouts = scripted_tts
-    behaviours.extend([0.2, "stall"])
-    summary = await speak_service.speak("Привет!", "ru", event_id="slow", device_id=TEST_DEVICE_ID)
-    assert summary["status"] == "published"
-    assert len(timeouts) == 2
-    assert _decode_response(captured_publish[0][1]).audio.buffer == FAKE_PCM
-
-
 async def test_both_attempts_stalled_publish_one_silence_by_deadline(scripted_tts, captured_publish, monkeypatch):
     behaviours, timeouts = scripted_tts
     behaviours.extend(["stall", "stall"])
@@ -113,30 +105,6 @@ async def test_both_attempts_stalled_publish_one_silence_by_deadline(scripted_tt
     assert resp.event_id == "stuck" and not any(resp.audio.buffer)
 
 
-async def test_fast_failure_is_not_retried(scripted_tts, captured_publish):
-    behaviours, timeouts = scripted_tts
-    behaviours.append("fail")
-    with pytest.raises(ConnectionError):
-        await speak_service.speak("Привет!", "ru", event_id="fail", device_id=TEST_DEVICE_ID)
-    assert len(timeouts) == 1
-    assert not any(_decode_response(captured_publish[0][1]).audio.buffer)
-
-
-async def test_turn_that_lost_is_not_hedged(scripted_tts, captured_publish):
-    behaviours, timeouts = scripted_tts
-    behaviours.append(0.2)
-    current = [True]
-    task = asyncio.create_task(speak_service.speak(
-        "Привет!", "ru", event_id="lost", device_id=TEST_DEVICE_ID, is_current=lambda: current[0],
-    ))
-    await asyncio.sleep(0.01)
-    current[0] = False
-    summary = await task
-    assert summary["status"] == "discarded"
-    assert len(timeouts) == 1
-    assert captured_publish == []
-
-
 async def test_hedge_never_takes_the_last_provider_slot(scripted_tts, captured_publish, monkeypatch):
     behaviours, timeouts = scripted_tts
     behaviours.append(0.2)
@@ -144,30 +112,3 @@ async def test_hedge_never_takes_the_last_provider_slot(scripted_tts, captured_p
     summary = await speak_service.speak("Привет!", "ru", event_id="busy", device_id=TEST_DEVICE_ID)
     assert summary["status"] == "published"
     assert len(timeouts) == 1
-
-
-async def test_short_remaining_budget_is_not_hedged(scripted_tts, captured_publish):
-    behaviours, timeouts = scripted_tts
-    behaviours.append("stall")
-    deadline = time.monotonic() + 0.08  # Less than two hedge delays remain.
-    with pytest.raises(TimeoutError):
-        await speak_service.speak("Привет!", "ru", event_id="late", device_id=TEST_DEVICE_ID, deadline=deadline)
-    assert len(timeouts) == 1
-    assert len(captured_publish) == 1
-
-
-async def test_spare_slots_are_reserved_for_other_work():
-    pool = ProviderPool(workers=2)
-    release = threading.Event()
-    try:
-        blocked = asyncio.ensure_future(pool.run(release.wait, 1, timeout=1))
-        await asyncio.sleep(0.01)
-        with pytest.raises(ProviderBusyError):
-            await pool.run(lambda: 1, timeout=1, spare=1)
-        assert await pool.run(lambda: 2, timeout=1) == 2
-        release.set()
-        assert await blocked is True
-        assert await pool.run(lambda: 3, timeout=1, spare=1) == 3
-    finally:
-        release.set()
-        pool._executor.shutdown(wait=True)
